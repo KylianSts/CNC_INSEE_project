@@ -53,6 +53,8 @@ insee <- fread("Ficdep19.csv")
 
 ## Main codes
 
+### Explanation of the process
+
 ```{r, echo=FALSE, results='hide'}
 metadata <- read_delim("varmod_FICDEP_2019.csv", delim = ";", escape_double = FALSE, trim_ws = TRUE) 
 
@@ -102,11 +104,25 @@ We have two goal to reduce our database
 
 2.  Use the function "group_by" to keep the information of the values contains in the variable "POND" with uniquely the variables that interest us
 
+### Main codes in themselves
+
 ```{r}
 insee <- insee |> 
-  mutate(AGE_GROUP = case_when( AGE_REV < 15 ~ "<15", between(AGE_REV, 15, 29) ~ "15-29", between(AGE_REV, 30, 44) ~ "30-44", between(AGE_REV, 45, 59) ~ "45-59", between(AGE_REV, 60, 74) ~ "60-74", AGE_REV > 75 ~ "75 and more", TRUE ~ NA_character_)) 
+  mutate(AGE_GROUP = case_when( AGE_REV < 15 ~ "<15", 
+                                between(AGE_REV, 15, 29) ~ "15-29", 
+                                between(AGE_REV, 30, 44) ~ "30-44", 
+                                between(AGE_REV, 45, 59) ~ "45-59", 
+                                between(AGE_REV, 60, 74) ~ "60-74", 
+                                AGE_REV > 75 ~ "75 and more")) 
 
-Insee_cleanv3 <- insee |> group_by(AN_RECENS,DEP_RES_21,AGE_GROUP,TYP_ACT,CSP) |> summarize(test = sum(POND, na.rm = TRUE)) rm(insee)
+Insee_cleanv3 <- insee |> 
+  group_by(AN_RECENS,DEP_RES_21,AGE_GROUP,TYP_ACT,CSP) |>
+  summarize(test = sum(POND, na.rm = TRUE)) 
+
 ```
 
-## 
+## Exportation of our result in a CSV
+
+```{r}
+write.csv(Insee_cleanv3, file = "INSEE_cleanv3.csv")
+```
