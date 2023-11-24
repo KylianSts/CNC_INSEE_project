@@ -1,11 +1,14 @@
 ---
-title: "Parallel_code_Insee"
+title: "Parallel_code_Insee : A reduction of a 3 Go Insee's database"
 author: "C. BAZILE & K. SANTOS"
 format: html
 editor: visual
+execute :
+  keep-md: TRUE
+  warning: FALSE
 ---
 
-## Presentation of the documents
+# Presentation of the document
 
 The codes below describeb the stepped we used to reduce the size of the initial Insee's 3 Go database in a smaller - and therefore more workable - database.
 
@@ -21,19 +24,26 @@ The format of the database make it quite memory-consuming.
 
 To permit an easier exploitation, we work on a solution to reduce the size of the aforementioned database. This document reconstruct the steps of our work.
 
-## Code
+# Codes
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-1 + 1
-```
-
-You can add options to executable code like this
+## Setup
 
 ```{r}
-#| echo: false
-2 * 2
+ here::i_am("CNC_INSEE_project.Rproj")
+
+library(data.table) 
+
+# The  "data.table" package will be  one of our keytools. Indeed, its characteristics allows us to exploit easely big database what will be usefull in our situation 
+
+library(here)
+library(dplyr) library(tidyr) library(kableExtra)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## Importation of the data using the data.table pakcage
+To reproduce this step download the database on : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
+
+```{r}
+
+insee <- fread("Ficdep19.csv")
+```
+
