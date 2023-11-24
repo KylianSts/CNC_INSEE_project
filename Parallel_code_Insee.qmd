@@ -1,5 +1,5 @@
 ---
-title: "Parallel_code_Insee : A reduction of a 3 Go Insee's database"
+title: "Parallel_code_Insee : Reducing the 3 Go Insee's database"
 author: "C. BAZILE & K. SANTOS"
 format: html
 editor: visual
@@ -10,13 +10,13 @@ execute :
 
 # Presentation of the document
 
-The codes below describeb the stepped we used to reduce the size of the initial Insee's 3 Go database in a smaller - and therefore more workable - database.
+The codes below describes the steps we used to reduce the size of the initial INSEE's 3 Go database in a smaller - and therefore more workable - database.
 
-The INSEE's database is intitled : "***Données harmonisées des recensements de la population à partir de 1968***".
+The INSEE's database is entitled : "***Données harmonisées des recensements de la population à partir de 1968***".
 
-It was not possible to put the database on Github but it can be donwload on the following link : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
+It was not possible to put the database on Github but it can be download on the following link : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
 
-In English, it can be translate by : "***Harmonized population census data from 1968***"
+In English, it can be translated as: "***Harmonized population census data from 1968***"
 
 It contains socio-demographic information on the french population by department between 1968 and 2019.
 
@@ -28,7 +28,7 @@ To permit an easier exploitation, we work on a solution to reduce the size of th
 
 ## Setup
 
-```{r, results='hide'}
+```{r Opening_the_packages, results='hide'}
  here::i_am("CNC_INSEE_project.Rproj")
 
 library(data.table) 
@@ -38,7 +38,6 @@ library(data.table)
 library(here)
 library(dplyr)
 library(tidyr)
-library(kableExtra)
 library(readr)
 ```
 
@@ -46,7 +45,7 @@ library(readr)
 
 To reproduce this step download the database on : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
 
-```{r, results='hide'}
+```{r Importation_of_the_data, results='hide'}
 
 insee <- fread("Ficdep19.csv")
 ```
@@ -55,11 +54,20 @@ insee <- fread("Ficdep19.csv")
 
 ### Explanation of the process
 
-```{r, echo=FALSE, results='hide'}
+```{r Calculation_of_the_number_of_variable, echo=FALSE, results='hide'}
 metadata <- read_delim("varmod_FICDEP_2019.csv", delim = ";", escape_double = FALSE, trim_ws = TRUE) 
 
 nb_val <- metadata %>% 
   summarize(unique_count = n_distinct(LIB_VAR))
+
+
+```
+
+The original database is composed of `r nb_val` variables.
+
+"POND" is our key variable. It gives us the number of inhabitant regarding the different characteristics detailed by the other variables (department, age, ...).
+
+```{r Total_of_possible_combinations, echo=FALSE, results='hide'}
 
 metadata <- metadata %>% rename("Variable"=LIB_VAR)
 metadata <- metadata %>% rename("Code"=COD_VAR)
@@ -69,24 +77,19 @@ table_stat <- metadata %>%
   summarize("Number of potential values" = n())
 
 nb_combi <- prod(table_stat$`Number of potential values`)
-
 ```
-
-The original database is composed of `r nb_val` variables.
-
-"POND" is our key variable. It gives us the number of inhabitant regarding the different characteristics detailed by the other variables (department, age, ...).
 
 However, the format of the table tend to create a RAM-consuming CSV. Some chararacteristic variable has an important number of "categories"/"levels". 5 variables have for example more than 100 categories. The result is that in total, we have a total of `r nb_combi`potential combinations. It explains the important size of the INSEE's database.
 
-However we do not need so many combinaitions. Indeed, among these variables we find :
+The reality is that our project do not need so many combinations. Indeed, among these variables we find :
 
 -   some variables wich has many levels but are useless for us;
 
--   but also the variable AGE_REV, a variable that give us the age that can have an inhabitant. A variable wichi is important but has to many levels (a level by age).
+-   but also the variable AGE_REV, a variable that give us the age that can have an inhabitant. A variable wich is important but has to many levels (a level by age).
 
 *Annex : Table on the original characteristic variable*
 
-```{r, echo=FALSE}
+```{r Printing_of_table_stat, echo=FALSE}
 table_stat %>%
   filter(Code != "POND")%>%
   arrange(Code) %>%
@@ -106,7 +109,7 @@ We have two goal to reduce our database
 
 ### Main codes in themselves
 
-```{r}
+```{r Creation_of_our_new_database}
 insee <- insee |> 
   mutate(AGE_GROUP = case_when( AGE_REV < 15 ~ "<15", 
                                 between(AGE_REV, 15, 29) ~ "15-29", 
@@ -117,12 +120,12 @@ insee <- insee |>
 
 Insee_cleanv3 <- insee |> 
   group_by(AN_RECENS,DEP_RES_21,AGE_GROUP,TYP_ACT,CSP) |>
-  summarize(test = sum(POND, na.rm = TRUE)) 
+  summarize( POND2 = sum(POND, na.rm = TRUE)) 
 
 ```
 
-## Exportation of our result in a CSV
+## Export of our result in a CSV
 
-```{r}
+```{r Exportat_in_csv}
 write.csv(Insee_cleanv3, file = "INSEE_cleanv3.csv")
 ```
