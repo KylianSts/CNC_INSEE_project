@@ -51,11 +51,27 @@ cnc_data_merge <- left_join(cnc_data_merge, cnc_data_long, by = c("departement_c
 
 We have an xlsx file with multiple sheets. Each sheet is a variable, rows are departements and columns years. we have to rename the first column so that we make sure that for each sheet we have the same name, we drop the second column which is the departement name and then we can merge.
 
+
 ```{r}
-cnc_data_merge <- cnc_data_merge |>
+cnc_data_clean <- cnc_data_merge |>
   filter(!is.na(departement_code))
 ```
 
 In each sheet we have a row with the total so we drop it 
 
+# Merging the INSEE and CNC database 
+
+```{r}
+insee_data <- read.csv("INSEE_clean.csv")
+
+insee_data <- insee_data |> rename(departement_code = DEP_RES_21, year =  AN_RECENS)
+cnc_data_clean$year <- as.integer(cnc_data_clean$year) 
+
+data_merge <- left_join(cnc_data_clean, insee_data, by = c("departement_code", "year"))
+```
+
+```{r}
+data_clean <- data_merge |>
+  filter(!is.na(POND))
+```
 
