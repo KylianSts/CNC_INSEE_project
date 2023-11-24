@@ -1,0 +1,39 @@
+---
+title: "Parallel_code_Insee"
+author: "C. BAZILE & K. SANTOS"
+format: html
+editor: visual
+---
+
+## Presentation of the documents
+
+The codes below describeb the stepped we used to reduce the size of the initial Insee's 3 Go database in a smaller - and therefore more workable - database.
+
+The INSEE's database is intitled : "***Données harmonisées des recensements de la population à partir de 1968***".
+
+It was not possible to put the database on Github but it can be donwload on the following link : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
+
+In English, it can be translate by : "***Harmonized population census data from 1968***"
+
+It contains socio-demographic information on the french population by department between 1968 and 2019.
+
+The format of the database make it quite memory-consuming.
+
+To permit an easier exploitation, we work on a solution to reduce the size of the aforementioned database. This document reconstruct the steps of our work.
+
+## Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
