@@ -28,7 +28,7 @@ To permit an easier exploitation, we work on a solution to reduce the size of th
 
 ## Setup
 
-```{r}
+```{r, results='hide'}
  here::i_am("CNC_INSEE_project.Rproj")
 
 library(data.table) 
@@ -36,14 +36,77 @@ library(data.table)
 # The  "data.table" package will be  one of our keytools. Indeed, its characteristics allows us to exploit easely big database what will be usefull in our situation 
 
 library(here)
-library(dplyr) library(tidyr) library(kableExtra)
+library(dplyr)
+library(tidyr)
+library(kableExtra)
+library(readr)
 ```
 
 ## Importation of the data using the data.table pakcage
+
 To reproduce this step download the database on : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
 
-```{r}
+```{r, results='hide'}
 
 insee <- fread("Ficdep19.csv")
 ```
 
+## Main codes
+
+```{r, echo=FALSE, results='hide'}
+metadata <- read_delim("varmod_FICDEP_2019.csv", delim = ";", escape_double = FALSE, trim_ws = TRUE) 
+
+nb_val <- metadata %>% 
+  summarize(unique_count = n_distinct(LIB_VAR))
+
+metadata <- metadata %>% rename("Variable"=LIB_VAR)
+metadata <- metadata %>% rename("Code"=COD_VAR)
+
+table_stat <- metadata %>% 
+  group_by(Variable, Code) %>% 
+  summarize("Number of potential values" = n())
+
+nb_combi <- prod(table_stat$`Number of potential values`)
+
+```
+
+The original database is composed of `r nb_val` variables.
+
+"POND" is our key variable. It gives us the number of inhabitant regarding the different characteristics detailed by the other variables (department, age, ...).
+
+However, the format of the table tend to create a RAM-consuming CSV. Some chararacteristic variable has an important number of "categories"/"levels". 5 variables have for example more than 100 categories. The result is that in total, we have a total of `r nb_combi`potential combinations. It explains the important size of the INSEE's database.
+
+However we do not need so many combinaitions. Indeed, among these variables we find :
+
+-   some variables wich has many levels but are useless for us;
+
+-   but also the variable AGE_REV, a variable that give us the age that can have an inhabitant. A variable wichi is important but has to many levels (a level by age).
+
+*Annex : Table on the original characteristic variable*
+
+```{r, echo=FALSE}
+table_stat %>%
+  filter(Code != "POND")%>%
+  arrange(Code) %>%
+  knitr::kable(caption = "Number of values that take each 'characteristics' variables", format="html", align = "c")
+
+# We did not keep the variable 'Ponderation' because the statistic computed with `n()` can be misleading. 
+
+# Indeed, in the metadata (varmod_FICDEP_2019.csv), unlike the other variables, 'POND' does not have a row for each value it can take.
+
+```
+
+We have two goal to reduce our database
+
+1.  Simplify AGE_REV , by replacing its 120 levels by 5 that are age ranges.
+
+2.  Use the function "group_by" to keep the information of the values contains in the variable "POND" with uniquely the variables that interest us
+
+```{r}
+insee <- insee |> 
+  mutate(AGE_GROUP = case_when( AGE_REV < 15 ~ "<15", between(AGE_REV, 15, 29) ~ "15-29", between(AGE_REV, 30, 44) ~ "30-44", between(AGE_REV, 45, 59) ~ "45-59", between(AGE_REV, 60, 74) ~ "60-74", AGE_REV > 75 ~ "75 and more", TRUE ~ NA_character_)) 
+
+Insee_cleanv3 <- insee |> group_by(AN_RECENS,DEP_RES_21,AGE_GROUP,TYP_ACT,CSP) |> summarize(test = sum(POND, na.rm = TRUE)) rm(insee)
+```
+
+## 
