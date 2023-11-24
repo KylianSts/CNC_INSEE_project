@@ -13,38 +13,49 @@ library(dplyr)
 library(tidyr)
 library(readxl)
 ```
-# Formating of the CNC database
+# Formating and cleanning of the CNC database
 
-```{r}
+```{r message=FALSE}
+
 file_path <- "exploitation_données_par_département.xlsx"
 
 cnc_data <- read_excel(file_path, sheet = 4, skip = 5)
 
 cnc_data_long <-  cnc_data |>
   select(-colnames(cnc_data)[2]) |>
-  rename(departement = colnames(cnc_data)[1]) |>
+  rename(departement_code = colnames(cnc_data)[1]) |>
   pivot_longer(
-    cols = -departement,
+    cols = -departement_code,
     names_to = "year", 
     values_to = excel_sheets(file_path)[4]
     )
 
 cnc_data_merge <- cnc_data_long
 
-for (i in 5:length(excel_sheets(file_path))) {
+for (i in 5:which(excel_sheets(file_path) == "tmofAE")) {
   cnc_data <- read_excel(file_path, sheet = i, skip = 5)
 
 cnc_data_long <-  cnc_data |>
   select(-colnames(cnc_data)[2]) |>
-  rename(departement = colnames(cnc_data)[1]) |>
+  rename(departement_code = colnames(cnc_data)[1]) |>
   pivot_longer(
-    cols = -departement,
+    cols = -departement_code,
     names_to = "year", 
     values_to = excel_sheets(file_path)[i]
     )
 
-cnc_data_merge <- left_join(cnc_data_merge, cnc_data_long, by = c("departement", "year"))
+cnc_data_merge <- left_join(cnc_data_merge, cnc_data_long, by = c("departement_code", "year"))
 }
 
 ```
+
+We have an xlsx file with multiple sheets. Each sheet is a variable, rows are departements and columns years. we have to rename the first column so that we make sure that for each sheet we have the same name, we drop the second column which is the departement name and then we can merge.
+
+```{r}
+cnc_data_merge <- cnc_data_merge |>
+  filter(!is.na(departement_code))
+```
+
+In each sheet we have a row with the total so we drop it 
+
 
