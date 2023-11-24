@@ -1,0 +1,49 @@
+---
+title: "Parallel_code_Insee : A reduction of a 3 Go Insee's database"
+author: "C. BAZILE & K. SANTOS"
+format: html
+editor: visual
+execute :
+  keep-md: TRUE
+  warning: FALSE
+---
+
+# Presentation of the document
+
+The codes below describeb the stepped we used to reduce the size of the initial Insee's 3 Go database in a smaller - and therefore more workable - database.
+
+The INSEE's database is intitled : "***Données harmonisées des recensements de la population à partir de 1968***".
+
+It was not possible to put the database on Github but it can be donwload on the following link : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
+
+In English, it can be translate by : "***Harmonized population census data from 1968***"
+
+It contains socio-demographic information on the french population by department between 1968 and 2019.
+
+The format of the database make it quite memory-consuming.
+
+To permit an easier exploitation, we work on a solution to reduce the size of the aforementioned database. This document reconstruct the steps of our work.
+
+# Codes
+
+## Setup
+
+```{r}
+ here::i_am("CNC_INSEE_project.Rproj")
+
+library(data.table) 
+
+# The  "data.table" package will be  one of our keytools. Indeed, its characteristics allows us to exploit easely big database what will be usefull in our situation 
+
+library(here)
+library(dplyr) library(tidyr) library(kableExtra)
+```
+
+## Importation of the data using the data.table pakcage
+To reproduce this step download the database on : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
+
+```{r}
+
+insee <- fread("Ficdep19.csv")
+```
+
