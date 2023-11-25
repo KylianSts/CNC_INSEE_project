@@ -23,11 +23,12 @@ library(here)
 library(dplyr)
 library(tidyr)
 library(readxl)
+library(readr)
 ```
 
 # A presentation of the project
 
-## The sources
+## Sources
 
 This project is powered by two databases :
 
@@ -75,11 +76,24 @@ The database that we will use is an harmonized compilation of data from 8 census
 
 It can be downloaded from the [INSEE website](https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232) in a DBF or CSV format.
 
-## 
+### Modification of the original databases
 
-# Codes
+The two databases underwent transformation to be exploitable for our project. The main problem of the insee one is that it consumes many RAM because of its size (3GB). Indeed characteristic variables have an important number of "categories". For example, a variable on the age of the population contains 120 levels, one by each possible year of life of an individual. The result is that the total number of potential combinations - and therefore of rows - is impressive causing the important size of the database.
 
-## Formating and cleanning of the CNC database
+```{r Computation_of_the_number_of_rows_in_Insee_cleanv3, echo=FALSE}
+
+Insee_cleanv3 <- read_csv("INSEE_cleanv3.csv")
+
+In_nrow <- Insee_cleanv3 %>% nrow()
+```
+
+Our work was to reduce the number of these combinations and therefore the size of the database. To do so, we transform the 120 levels of the variable corresponding to the age into 5 age ranges. Furthermore, we removed the variables that were not useful to our project. It allows us to go from a database of more than 50 millions of rows to a CSV of one of `r In_nrow`.
+
+The process that we used is detailed in the "Parallel_code_Insee" quarto document available in this R project (*because of the important size of the treated database, we have prefered to put it in a separate qmd)*.
+
+The CNC's data was less memory-consuming. However their format was not convenient for coding with R. Indeed, the original xslx document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
+
+#### Formating and cleanning of the CNC database
 
 ```{r message=FALSE}
 
@@ -122,9 +136,29 @@ cnc_data_clean <- cnc_data_merge |>
   filter(!is.na(departement_code))
 ```
 
-In each sheet we have a row with the total so we drop it
+In each sheet we have a row with the total so we drop it.
 
-## Merging the INSEE and CNC database
+### Description of the final base before merging
+
+The final result is two modified dataset
+
+**cnc_data_clean**
+
+```{r Nrow_and_columns, echo=FALSE}
+cnc_data_clean %>% 
+  summarize("Number of rows" = prettyNum(nrow(.), big.mark = " "), "Number of columns" = ncol(.)) %>%
+  knitr::kable(caption = "Description of the database", format = "html", align='c')
+```
+
+**Insee_clean_v3**
+
+```{r}
+INSEE_cleanv3 %>% 
+  summarize("Number of rows" = prettyNum(nrow(.), big.mark = " "), "Number of columns" = ncol(.)) %>% 
+  knitr::kable(caption = "Description of the database", format = "html", align='c')
+```
+
+# Merging the INSEE and CNC database
 
 ```{r}
 insee_data <- read.csv("INSEE_clean.csv")
