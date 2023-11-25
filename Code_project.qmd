@@ -1,11 +1,22 @@
 ---
-title: "Untitled"
+title: "Evolution of cinema's frequentation in France"
 author: "Kylian SANTOS and Cédric BAZILE"
-format: html
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
 editor: visual
 ---
 
-```{r configuration}
+<center>
+
+# Github link
+
+</center>
+
+<center><https://github.com/KylianSts/CNC_INSEE_project></center>
+
+```{r Configuration}
 here::i_am("CNC_INSEE_project.Rproj")
 
 library(here)
@@ -13,7 +24,62 @@ library(dplyr)
 library(tidyr)
 library(readxl)
 ```
-# Formating and cleanning of the CNC database
+
+# A presentation of the project
+
+## The sources
+
+This project is powered by two databases :
+
+-   CNC's "**Exploitation - data by department**" : <https://www.cnc.fr/cinema/etudes-et-rapports/exploitation--donnees-par-departement_223440>
+
+-   INSEE's "***Harmonized population census data from 1968***" : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
+
+### "Exploitation - data by departement"
+
+*Original french name : "**Exploitation - données par département**"*
+
+The first database was created by the French National Centre for Cinema and the Moving Image (CNC). The CNC is an agency of the French Ministry of Culture. Its role is to implement the state's policy on the question of cinema, audiovisual and multimedia. It is notably in charge of the regulation promotion and distribution of french movies.
+
+The database "Exploitation - data by department" is a statistical monitoring on the evolution of french cinema theater between 1966 and 2022. It contains data on the number of venues and their characteristics but also on the number of sold tickets and the gained revenues. The data are presented by french department (according to their 2022 administrative division) which is the statistical unit of the base.
+
+The aforementioned database were constructed with two main sources :
+
+-   the **list of cinemas** authorized by the agency
+
+-   and their "bordereaux des recettes" which can be roughly translated by "**revenue slips**"
+
+### "***Harmonized population census data from 1968***"
+
+*Original title : Données harmonisées des recensements de la population à partir de 1968*
+
+The second database was produced by INSEE, the french National Institute of Statistics and Economic Studies. The base has for sources demographic data of the census between 1968 and 2019.
+
+```{r Summary_of_the_last_census, echo=FALSE}
+list_of_census <- data.frame(census = paste0("n°", 1:8),year=c(1968,1975,1982,1990,1999,2008,2013,2019))
+
+
+list_of_census<- list_of_census %>%  pivot_wider(names_from="census",values_from = "year")
+
+
+list_of_census %>% knitr::kable(caption ="French census between 1968 and 2019", format="html", align='c')
+```
+
+The census is one of the most important data collections taking place in France. All residents have the obligation to participate to it under penalty of fine (article 3 of the Law n°51-711 of 7 June 1951).
+
+Historically, the census took the form of an exhaustive collect of all French townships in the same year.However, the collection method evolved in 2002. Nowadays, Insee uses a rotational approach. 8% of the housing of the township of at least 10 000 inhabitants are interviewed. The goal is to cover 40% of their population over a 5-year period. For the townships of less of 10 000 inhabitants, the collect is still exhaustive but not simultaneous. The collect takes place in a fifth of them each year to ensure that all townships are censused every 5 years.
+
+The data is collected by face-to-face interviews and -since 2015- via internet surveys.
+
+The database that we will use is an harmonized compilation of data from 8 census databases. Its content includes the number of inhabitant by department and key socio-demographic variables (e.g. age, socio-professional categories, type of professional activity).
+
+It can be downloaded from the [INSEE website](https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232) in a DBF or CSV format.
+
+## 
+
+# Codes
+
+## Formating and cleanning of the CNC database
 
 ```{r message=FALSE}
 
@@ -51,15 +117,14 @@ cnc_data_merge <- left_join(cnc_data_merge, cnc_data_long, by = c("departement_c
 
 We have an xlsx file with multiple sheets. Each sheet is a variable, rows are departements and columns years. we have to rename the first column so that we make sure that for each sheet we have the same name, we drop the second column which is the departement name and then we can merge.
 
-
 ```{r}
 cnc_data_clean <- cnc_data_merge |>
   filter(!is.na(departement_code))
 ```
 
-In each sheet we have a row with the total so we drop it 
+In each sheet we have a row with the total so we drop it
 
-# Merging the INSEE and CNC database 
+## Merging the INSEE and CNC database
 
 ```{r}
 insee_data <- read.csv("INSEE_clean.csv")
@@ -74,4 +139,3 @@ data_merge <- left_join(cnc_data_clean, insee_data, by = c("departement_code", "
 data_clean <- data_merge |>
   filter(!is.na(POND))
 ```
-
