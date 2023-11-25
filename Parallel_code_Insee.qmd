@@ -8,7 +8,11 @@ execute :
   warning: FALSE
 ---
 
+<center>
+
 # Presentation of the document
+
+<center>
 
 The codes below describe the steps we used to reduce the size of the initial INSEE's 3 GB database in a smaller - and therefore more workable - database.
 
@@ -24,7 +28,11 @@ The format of the database makes it quite memory-consuming.
 
 To facilitate its exploitation, we work on a solution to reduce the size of the aforementioned database. This document reconstruct the steps of our work.
 
+<center>
+
 # Codes
+
+<center>
 
 ## Setup
 
@@ -67,19 +75,7 @@ The original database is composed of `r nb_val` variables.
 
 "POND" is our key variable. It gives us the number of inhabitant regarding the different characteristics detailed by the other variables (department, age, ...).
 
-```{r Total_of_possible_combinations, echo=FALSE, results='hide'}
-
-metadata <- metadata %>% rename("Variable"=LIB_VAR)
-metadata <- metadata %>% rename("Code"=COD_VAR)
-
-table_stat <- metadata %>% 
-  group_by(Variable, Code) %>% 
-  summarize("Number of potential values" = n())
-
-nb_combi <- prod(table_stat$`Number of potential values`)
-```
-
-However, the format of the table tend to create a RAM-consuming CSV. Some characteristic variables have an important number of "categories"/"levels". 5 variables have for example more than 100 categories. The result is that in total, we have a total of `r nb_combi`potential combinations. It explains the important size of the INSEE's database.
+However, the format of the table tend to create a RAM-consuming CSV. Some characteristic variables have an important number of "categories"/"levels". 5 variables have for example more than 100 categories. The result is that in total, we have an important number of potential combinations. It explains the important size of the INSEE's database.
 
 The reality is that our project do not need so many combinations. Indeed, among these variables we find :
 
@@ -87,9 +83,20 @@ The reality is that our project do not need so many combinations. Indeed, among 
 
 -   but also the variable AGE_REV, a variable that give us the age that can have an inhabitant. A variable wHich is important but has toO many levels (a level by age).
 
+<center>
+
 *Annex : Table on the original characteristic variable*
 
-```{r Printing_of_table_stat, echo=FALSE}
+<center>
+
+```{r Creating_our_annex_table, echo=FALSE}
+metadata <- metadata %>% rename("Variable"=LIB_VAR)
+metadata <- metadata %>% rename("Code"=COD_VAR)
+
+table_stat <- metadata %>% 
+  group_by(Variable, Code) %>% 
+  summarize("Number of potential values" = n())
+
 table_stat %>%
   filter(Code != "POND")%>%
   arrange(Code) %>%
