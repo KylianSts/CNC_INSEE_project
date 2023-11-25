@@ -93,9 +93,9 @@ The process that we used is detailed in the "Parallel_code_Insee" quarto documen
 
 The CNC's data was less memory-consuming. However their format was not convenient for coding with R. Indeed, the original xslx document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
 
-#### Formating and cleanning of the CNC database
+#### Formating and cleaning of the CNC database
 
-```{r message=FALSE}
+```{r Cleaning_CNC_database,message=FALSE}
 
 file_path <- "exploitation_données_par_département.xlsx"
 
@@ -131,20 +131,20 @@ cnc_data_merge <- left_join(cnc_data_merge, cnc_data_long, by = c("departement_c
 
 We have an xlsx file with multiple sheets. Each sheet is a variable, rows are departements and columns years. we have to rename the first column so that we make sure that for each sheet we have the same name, we drop the second column which is the departement name and then we can merge.
 
-```{r}
+```{r Suppression_of_empty_rows}
 cnc_data_clean <- cnc_data_merge |>
   filter(!is.na(departement_code))
 ```
 
 In each sheet we have a row with the total so we drop it.
 
-### Description of the final base before merging
+### Description of the final bases before merging
 
-The final result is two modified dataset
+The final result is two modified datasets.
 
 **cnc_data_clean**
 
-```{r Nrow_and_columns, echo=FALSE}
+```{r Nb_rows_and_columns, echo=FALSE}
 cnc_data_clean %>% 
   summarize("Number of rows" = prettyNum(nrow(.), big.mark = " "), "Number of columns" = ncol(.)) %>%
   knitr::kable(caption = "Description of the database", format = "html", align='c')
@@ -152,7 +152,7 @@ cnc_data_clean %>%
 
 **Insee_clean_v3**
 
-```{r}
+```{r Nb_rows_and_columns, echo=FALSE}
 INSEE_cleanv3 %>% 
   summarize("Number of rows" = prettyNum(nrow(.), big.mark = " "), "Number of columns" = ncol(.)) %>% 
   knitr::kable(caption = "Description of the database", format = "html", align='c')
@@ -160,7 +160,7 @@ INSEE_cleanv3 %>%
 
 # Merging the INSEE and CNC database
 
-```{r}
+```{r Merger}
 insee_data <- read.csv("INSEE_clean.csv")
 
 insee_data <- insee_data |> rename(departement_code = DEP_RES_21, year =  AN_RECENS)
