@@ -3,22 +3,20 @@ title: "Evolution of cinema's frequentation in France"
 author: "Kylian SANTOS and Cédric BAZILE"
 output:
   html_document:
-    toc: true
-    toc_depth: 2
+    toc: TRUE
 editor: visual
 ---
 
 <center>
 
-# Github link
+# Github link  
 
 </center>
 
 <center><https://github.com/KylianSts/CNC_INSEE_project></center>
 
-```{r Configuration}
+```{r Configuration, message=FALSE, warning=FALSE}
 here::i_am("CNC_INSEE_project.Rproj")
-
 library(here)
 library(dplyr)
 library(tidyr)
@@ -26,7 +24,11 @@ library(readxl)
 library(readr)
 ```
 
-# A presentation of the project
+<center>
+
+# A presentation of the project  
+
+</center>
 
 ## Sources
 
@@ -80,7 +82,7 @@ It can be downloaded from the [INSEE website](https://www.insee.fr/fr/statistiqu
 
 The two databases underwent transformation to be exploitable for our project. The main problem of the insee one is that it consumes many RAM because of its size (3GB). Indeed characteristic variables have an important number of "categories". For example, a variable on the age of the population contains 120 levels, one by each possible year of life of an individual. The result is that the total number of potential combinations - and therefore of rows - is impressive causing the important size of the database.
 
-```{r Computation_of_the_number_of_rows_in_Insee_cleanv3, echo=FALSE}
+```{r Computation_of_the_number_of_rows_in_Insee_cleanv3, echo=FALSE, message=FALSE}
 
 Insee_cleanv3 <- read_csv("INSEE_cleanv3.csv")
 
@@ -144,7 +146,7 @@ The final result is two modified datasets.
 
 **cnc_data_clean**
 
-```{r Nb_rows_and_columns, echo=FALSE}
+```{r Nb_rows_and_columns_CNC, echo=FALSE}
 cnc_data_clean %>% 
   summarize("Number of rows" = prettyNum(nrow(.), big.mark = " "), "Number of columns" = ncol(.)) %>%
   knitr::kable(caption = "Description of the database", format = "html", align='c')
@@ -152,16 +154,20 @@ cnc_data_clean %>%
 
 **Insee_clean_v3**
 
-```{r Nb_rows_and_columns, echo=FALSE}
-INSEE_cleanv3 %>% 
+```{r Nb_rows_and_columns_Insee, echo=FALSE}
+Insee_cleanv3 %>% 
   summarize("Number of rows" = prettyNum(nrow(.), big.mark = " "), "Number of columns" = ncol(.)) %>% 
   knitr::kable(caption = "Description of the database", format = "html", align='c')
 ```
 
+</center>
+
 # Merging the INSEE and CNC database
 
+</center>
+
 ```{r Merger}
-insee_data <- read.csv("INSEE_clean.csv")
+insee_data <- read.csv("INSEE_cleanv3.csv")
 
 insee_data <- insee_data |> rename(departement_code = DEP_RES_21, year =  AN_RECENS)
 cnc_data_clean$year <- as.integer(cnc_data_clean$year) 
@@ -171,5 +177,5 @@ data_merge <- left_join(cnc_data_clean, insee_data, by = c("departement_code", "
 
 ```{r}
 data_clean <- data_merge |>
-  filter(!is.na(POND))
+  filter(!is.na(POND2))
 ```
