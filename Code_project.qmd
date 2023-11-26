@@ -13,6 +13,7 @@ library(dplyr)
 library(tidyr)
 library(readxl)
 ```
+
 # Formating and cleanning of the CNC database
 
 ```{r message=FALSE}
@@ -46,32 +47,52 @@ cnc_data_long <-  cnc_data |>
 
 cnc_data_merge <- left_join(cnc_data_merge, cnc_data_long, by = c("departement_code", "year"))
 }
-
 ```
 
 We have an xlsx file with multiple sheets. Each sheet is a variable, rows are departements and columns years. we have to rename the first column so that we make sure that for each sheet we have the same name, we drop the second column which is the departement name and then we can merge.
-
 
 ```{r}
 cnc_data_clean <- cnc_data_merge |>
   filter(!is.na(departement_code))
 ```
 
-In each sheet we have a row with the total so we drop it 
-
-# Merging the INSEE and CNC database 
+In each sheet we have a row with the total so we drop it.
 
 ```{r}
-insee_data <- read.csv("INSEE_clean.csv")
+multiplexes_with_0 <- cnc_data_clean |> 
+  select(multiplexes, year, departement_code) |> 
+  pivot_wider(names_from = year, values_from = multiplexes) |> 
+  mutate(across(where(~any(!is.na(.))), ~ifelse(is.na(.), 0, .))) |> 
+  pivot_longer(cols = -departement_code, names_to = "year", values_to = "multiplexes")
+
+cnc_data_clean <- cnc_data_clean |> select(-multiplexes) 
+  
+cnc_data_clean <- left_join(cnc_data_clean, multiplexes_with_0, by = c("departement_code", "year"))
+
+```
+
+In the multiplexes sheet, NA value means that there are 0 multiplexes so we replace NA value by 0 but only from years data have been collected.
+
+# Merging the INSEE and CNC database
+
+```{r}
+insee_data <- read.csv("INSEE_cleanv3.csv")
 
 insee_data <- insee_data |> rename(departement_code = DEP_RES_21, year =  AN_RECENS)
-cnc_data_clean$year <- as.integer(cnc_data_clean$year) 
 
-data_merge <- left_join(cnc_data_clean, insee_data, by = c("departement_code", "year"))
+insee_data_clean <- insee_data |> filter(!is.na(AGE_GROUP))
 ```
 
 ```{r}
+cnc_data_clean$year <- as.integer(cnc_data_clean$year) 
+
+data_merge <- left_join(cnc_data_clean, insee_data, by = c("departement_code", "year"))
+
 data_clean <- data_merge |>
-  filter(!is.na(POND))
+  filter(!is.na(POND2))
+```
+
+```{r}
+data_clean |> group_by(year) |>  summarise(across(everything(), ~sum(is.na(.)), .names = "missing_{.col}"))
 ```
 
