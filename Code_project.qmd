@@ -1,22 +1,103 @@
 ---
-title: "Untitled"
+title: "Evolution of cinema's frequentation in France"
 author: "Kylian SANTOS and Cédric BAZILE"
-format: html
+output:
+  html_document:
+    toc: TRUE
 editor: visual
 ---
 
-```{r configuration}
-here::i_am("CNC_INSEE_project.Rproj")
+<center>
 
+# Github link
+
+</center>
+
+<center><https://github.com/KylianSts/CNC_INSEE_project></center>
+
+```{r Configuration, warning=FALSE, message = FALSE}
+here::i_am("CNC_INSEE_project.Rproj")
 library(here)
 library(dplyr)
 library(tidyr)
 library(readxl)
+library(readr)
 ```
 
 # Formating and cleanning of the CNC database
 
-```{r message=FALSE}
+<center>
+
+# A presentation of the project
+
+</center>
+
+## Sources
+
+This project is powered by two databases :
+
+-   CNC's "**Exploitation - data by department**" : <https://www.cnc.fr/cinema/etudes-et-rapports/exploitation--donnees-par-departement_223440>
+
+-   INSEE's "***Harmonized population census data from 1968***" : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
+
+### "Exploitation - data by departement"
+
+*Original french name : "**Exploitation - données par département**"*
+
+The first database was created by the French National Centre for Cinema and the Moving Image (CNC). The CNC is an agency of the French Ministry of Culture. Its role is to implement the state's policy on the question of cinema, audiovisual and multimedia. It is notably in charge of the regulation promotion and distribution of french movies.
+
+The database "Exploitation - data by department" is a statistical monitoring on the evolution of french cinema theater between 1966 and 2022. It contains data on the number of venues and their characteristics but also on the number of sold tickets and the gained revenues. The data are presented by french department (according to their 2022 administrative division) which is the statistical unit of the base.
+
+The aforementioned database were constructed with two main sources :
+
+-   the **list of cinemas** authorized by the agency
+
+-   and their "bordereaux des recettes" which can be roughly translated by "**revenue slips**"
+
+### "***Harmonized population census data from 1968***"
+
+*Original title : Données harmonisées des recensements de la population à partir de 1968*
+
+The second database was produced by INSEE, the french National Institute of Statistics and Economic Studies. The base has for sources demographic data of the census between 1968 and 2019.
+
+```{r Summary_of_the_last_census, echo=FALSE, message = FALSE}
+list_of_census <- data.frame(census = paste0("n°", 1:8),year=c(1968,1975,1982,1990,1999,2008,2013,2019))
+
+list_of_census<- list_of_census |>  pivot_wider(names_from="census",values_from = "year")
+
+list_of_census |> knitr::kable(caption ="French census between 1968 and 2019", format="html", align='c')
+```
+
+The census is one of the most important data collections taking place in France. All residents have the obligation to participate to it under penalty of fine (article 3 of the Law n°51-711 of 7 June 1951).
+
+Historically, the census took the form of an exhaustive collect of all French townships in the same year.However, the collection method evolved in 2002. Nowadays, Insee uses a rotational approach. 8% of the housing of the township of at least 10 000 inhabitants are interviewed. The goal is to cover 40% of their population over a 5-year period. For the townships of less of 10 000 inhabitants, the collect is still exhaustive but not simultaneous. The collect takes place in a fifth of them each year to ensure that all townships are censused every 5 years.
+
+The data is collected by face-to-face interviews and -since 2015- via internet surveys.
+
+The database that we will use is an harmonized compilation of data from 8 census databases. Its content includes the number of inhabitant by department and key socio-demographic variables (e.g. age, socio-professional categories, type of professional activity).
+
+It can be downloaded from the [INSEE website](https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232) in a DBF or CSV format.
+
+### Modification of the original databases
+
+The two databases underwent transformation to be exploitable for our project. The main problem of the insee one is that it consumes many RAM because of its size (3GB). Indeed characteristic variables have an important number of "categories". For example, a variable on the age of the population contains 120 levels, one by each possible year of life of an individual. The result is that the total number of potential combinations - and therefore of rows - is impressive causing the important size of the database.
+
+```{r Computation_of_the_number_of_rows_in_Insee_cleanv3, echo=FALSE, message = FALSE}
+
+Insee_cleanv3 <- read_csv("INSEE_cleanv3.csv")
+
+In_nrow <- Insee_cleanv3 |> nrow()
+```
+
+Our work was to reduce the number of these combinations and therefore the size of the database. To do so, we transform the 120 levels of the variable corresponding to the age into 5 age ranges. Furthermore, we removed the variables that were not useful to our project. It allows us to go from a database of more than 50 millions of rows to a CSV of one of `r In_nrow`.
+
+The process that we used is detailed in the "Parallel_code_Insee" quarto document available in this R project (*because of the important size of the treated database, we have prefered to put it in a separate qmd)*.
+
+The CNC's data was less memory-consuming. However their format was not convenient for coding with R. Indeed, the original xslx document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
+
+#### Formating and cleaning of the CNC database
+
+```{r Cleaning_CNC_database, message = FALSE}
 
 file_path <- "exploitation_données_par_département.xlsx"
 
@@ -51,14 +132,14 @@ cnc_data_merge <- left_join(cnc_data_merge, cnc_data_long, by = c("departement_c
 
 We have an xlsx file with multiple sheets. Each sheet is a variable, rows are departements and columns years. we have to rename the first column so that we make sure that for each sheet we have the same name, we drop the second column which is the departement name and then we can merge.
 
-```{r}
+```{r Suppression_of_total_rows, message = FALSE}
 cnc_data_clean <- cnc_data_merge |>
   filter(!is.na(departement_code))
 ```
 
 In each sheet we have a row with the total so we drop it.
 
-```{r}
+```{r replace_NA_by_0_multiplexes, message = FALSE}
 multiplexes_with_0 <- cnc_data_clean |> 
   select(multiplexes, year, departement_code) |> 
   pivot_wider(names_from = year, values_from = multiplexes) |> 
@@ -68,14 +149,67 @@ multiplexes_with_0 <- cnc_data_clean |>
 cnc_data_clean <- cnc_data_clean |> select(-multiplexes) 
   
 cnc_data_clean <- left_join(cnc_data_clean, multiplexes_with_0, by = c("departement_code", "year"))
-
 ```
 
 In the multiplexes sheet, NA value means that there are 0 multiplexes so we replace NA value by 0 but only from years data have been collected.
 
-# Merging the INSEE and CNC database
+### Description of the final bases before merging
 
-```{r}
+The final result is two modified datasets.
+
+**cnc_data_clean**
+
+```{r Nb_rows_and_columns_CNC, echo=FALSE, message = FALSE}
+cnc_data_clean %>%
+  summarize("Number of rows" = prettyNum(nrow(.), big.mark = " "),
+            "Number of columns" = ncol(.)) %>%
+  knitr::kable(caption = "Description of the database", format = "html", align = 'c')
+```
+
+**Insee_clean_v3**
+
+```{r Nb_rows_and_columns_Insee, echo=FALSE}
+summary_table <- Insee_cleanv3 %>%
+  summarize("Number of rows" = prettyNum(nrow(.), big.mark = " "),
+            "Number of columns" = ncol(.))
+
+knitr::kable(summary_table, caption = "Description of the Insee_cleanv3 database", format = "html", align='c')
+```
+
+</center>
+
+#### Description of the variables
+
+</center>
+
+We have in the CNC database different variables :
+
+-   "établissement" represents the number of movie theater for each department
+-   "écrans" represents the number of screen which means movie rooms for each department
+-   "fauteuils" represents the total number of seat in all movie theater for each department
+-   "multiplexes" represents the number of multiplexes for each department . A multiplex is a movie theater complex with multiple screens within a single complex.
+-   "séances" represents the total number of seance in thousand for each department
+-   "entrées" represents the total number of ticket bought in million for each department
+-   "recettes" represents the total revenue in million for each department
+-   "RME" represents the average revenue by ticket bought
+-   "Taux d'occupation des fauteuils" is the ratio between entries during the year and the product between the number of chairs and the number of sessions. Taux d'occupation des fauteuils makes it possible to assess the "fullness" of the rooms.
+
+And we have the same for Arthouse. the term Arthouse refers to so-called auteur films, economically independent, with small budgets, open to the different cultures of the world. An Arthouse cinema is a cinematographic establishment which exhibits a significant proportion of recommended Arthouse films and which supports these often difficult films with an adapted animation policy.
+
+We have in the INSEE database variables on the population :
+
+-   "DEP_RES_21" represents the residence department, where people live.
+-   "AGE_GROUP" represents the age of the population by range of 15 years.
+-   "TYP_ACT" represents the type of activity (see metadata).
+-   "CSP" represents the socio-professional category.
+
+</center>
+
+#### Merging the INSEE and CNC database
+
+</center>
+
+```{r insee_database}
 insee_data <- read.csv("INSEE_cleanv3.csv")
 
 insee_data <- insee_data |> rename(departement_code = DEP_RES_21, year =  AN_RECENS)
@@ -83,7 +217,7 @@ insee_data <- insee_data |> rename(departement_code = DEP_RES_21, year =  AN_REC
 insee_data_clean <- insee_data |> filter(!is.na(AGE_GROUP))
 ```
 
-```{r}
+```{r mergeing}
 cnc_data_clean$year <- as.integer(cnc_data_clean$year) 
 
 data_merge <- left_join(cnc_data_clean, insee_data, by = c("departement_code", "year"))
@@ -95,4 +229,3 @@ data_clean <- data_merge |>
 ```{r}
 data_clean |> group_by(year) |>  summarise(across(everything(), ~sum(is.na(.)), .names = "missing_{.col}"))
 ```
-

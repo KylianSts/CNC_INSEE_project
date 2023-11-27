@@ -1,5 +1,5 @@
 ---
-title: "Parallel_code_Insee : Reducing the 3 Go Insee's database"
+title: "Parallel_code_Insee : Reducing the 3 GB INSEE's Database"
 author: "C. BAZILE & K. SANTOS"
 format: html
 editor: visual
@@ -8,23 +8,31 @@ execute :
   warning: FALSE
 ---
 
+<center>
+
 # Presentation of the document
 
-The codes below describes the steps we used to reduce the size of the initial INSEE's 3 Go database in a smaller - and therefore more workable - database.
+<center>
 
-The INSEE's database is entitled : "***Données harmonisées des recensements de la population à partir de 1968***".
+The codes below describe the steps we used to reduce the size of the initial INSEE's 3 GB database in a smaller - and therefore more workable - database.
 
-It was not possible to put the database on Github but it can be download on the following link : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
+The INSEE database is titled : "***Données harmonisées des recensements de la population à partir de 1968***".
+
+It was not possible to put the database on GitHub but it can be downloaded on the following link : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
 
 In English, it can be translated as: "***Harmonized population census data from 1968***"
 
-It contains socio-demographic information on the french population by department between 1968 and 2019.
+It contains socio-demographic information on the French population by department between 1968 and 2019.
 
-The format of the database make it quite memory-consuming.
+The format of the database makes it quite memory-consuming.
 
-To permit an easier exploitation, we work on a solution to reduce the size of the aforementioned database. This document reconstruct the steps of our work.
+To facilitate its exploitation, we work on a solution to reduce the size of the aforementioned database. This document reconstruct the steps of our work.
+
+<center>
 
 # Codes
+
+<center>
 
 ## Setup
 
@@ -33,7 +41,7 @@ To permit an easier exploitation, we work on a solution to reduce the size of th
 
 library(data.table) 
 
-# The  "data.table" package will be  one of our keytools. Indeed, its characteristics allows us to exploit easely big database what will be usefull in our situation 
+# The  "data.table" package will be  one of our key tools. Indeed, its characteristics allows us to exploit easily big database which will be usefull in our situation 
 
 library(here)
 library(dplyr)
@@ -67,8 +75,21 @@ The original database is composed of `r nb_val` variables.
 
 "POND" is our key variable. It gives us the number of inhabitant regarding the different characteristics detailed by the other variables (department, age, ...).
 
-```{r Total_of_possible_combinations, echo=FALSE, results='hide'}
+However, the format of the table tend to create a RAM-consuming CSV. Some characteristic variables have an important number of "categories"/"levels". 5 variables have for example more than 100 categories. The result is that in total, we have an important number of potential combinations. It explains the important size of the INSEE's database.
 
+The reality is that our project do not need so many combinations. Indeed, among these variables we find :
+
+-   some variables which has many levels but are useless for us;
+
+-   but also the variable AGE_REV, a variable that give us the age that can have an inhabitant. A variable wHich is important but has toO many levels (a level by age).
+
+<center>
+
+*Annex : Table on the original characteristic variable*
+
+<center>
+
+```{r Creating_our_annex_table, echo=FALSE}
 metadata <- metadata %>% rename("Variable"=LIB_VAR)
 metadata <- metadata %>% rename("Code"=COD_VAR)
 
@@ -76,20 +97,6 @@ table_stat <- metadata %>%
   group_by(Variable, Code) %>% 
   summarize("Number of potential values" = n())
 
-nb_combi <- prod(table_stat$`Number of potential values`)
-```
-
-However, the format of the table tend to create a RAM-consuming CSV. Some chararacteristic variable has an important number of "categories"/"levels". 5 variables have for example more than 100 categories. The result is that in total, we have a total of `r nb_combi`potential combinations. It explains the important size of the INSEE's database.
-
-The reality is that our project do not need so many combinations. Indeed, among these variables we find :
-
--   some variables wich has many levels but are useless for us;
-
--   but also the variable AGE_REV, a variable that give us the age that can have an inhabitant. A variable wich is important but has to many levels (a level by age).
-
-*Annex : Table on the original characteristic variable*
-
-```{r Printing_of_table_stat, echo=FALSE}
 table_stat %>%
   filter(Code != "POND")%>%
   arrange(Code) %>%
@@ -101,11 +108,11 @@ table_stat %>%
 
 ```
 
-We have two goal to reduce our database
+We have two goals for reducing our database
 
 1.  Simplify AGE_REV , by replacing its 120 levels by 5 that are age ranges.
 
-2.  Use the function "group_by" to keep the information of the values contains in the variable "POND" with uniquely the variables that interest us
+2.  Use the "group_by" function to keep the information of the values contains in the variable "POND" with uniquely the variables that interest us
 
 ### Main codes in themselves
 
@@ -126,6 +133,6 @@ Insee_cleanv3 <- insee |>
 
 ## Export of our result in a CSV
 
-```{r Exportat_in_csv}
+```{r Export_to_csv}
 write.csv(Insee_cleanv3, file = "INSEE_cleanv3.csv")
 ```
