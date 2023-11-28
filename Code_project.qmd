@@ -72,7 +72,9 @@ It can be downloaded from the [INSEE website](https://www.insee.fr/fr/statistiqu
 
 ### Modification of the original databases
 
-The two databases underwent transformation to be exploitable for our project. The main problem of the Insee one is that it consumes a lot of RAM because of its size (3GB). Indeed some categorial variables have an important number of "categories"/"levels". For example, the variable on the age of the population contains 120 levels, one by each possible year of life of an individual. The result is that the number of potential combinations, and therefore of rows, among all variables is impressively large contributing to the important size of the database.
+#### Formatting and cleaning the Insee database
+
+The two databases underwent transformation to be exploitable for our project. The main problem of the Insee one is that it consumes a lot of RAM because of its size (3GB). Indeed some categorical variables have an important number of "categories"/"levels". For example, the variable on the age of the population contains 120 levels, one by each possible year of life of an individual. The result is that the number of potential combinations, and therefore of rows, among all variables is impressively large contributing to the important size of the database.
 
 ```{r Computation_of_the_number_of_rows_in_Insee_cleanv3, echo=FALSE, message = FALSE}
 
@@ -83,13 +85,13 @@ In_nrow <- Insee_cleanv3 |> nrow()
 
 Our work was to reduce the number of these combinations in order to downsize the database. To do so, we transform the 120 levels of the variable corresponding to the age into 5 age ranges. Furthermore, we get rid of the variables that were not useful to our project using a group_by function. It allows us to go from a database of more than 50 millions of rows to a CSV of `r In_nrow` rows.
 
-The process that we used is detailed in the quarto document entitled "Parallel_code_Insee" that is available in this R project. We ha ve preferred to put it in a separate qmd because of the important size of the database linked with its code.
+The process that we used is detailed in the quarto document entitled "Parallel_code_Insee" that is available in this R project. We ha ve preferred to put it in a separate QMD because of the important size of the database linked with its code.
 
-The CNC's data was less memory-consuming. However their format was not convenient for coding with R. Indeed, the original XSLX document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
+#### Formatting and cleaning the CNC database
 
-#### Formating and cleaning of the CNC database
+The CNC's data was less memory-consuming. However itsformat was not convenient for coding with R. Indeed, the original XSLX document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
 
-```{r Cleaning_ormating_unction, message = FALSE}
+```{r Cleaning_formating_function, message = FALSE}
 file_path <- "exploitation_données_par_département.xlsx"
 
 # Function to read and process a sheet
@@ -115,7 +117,7 @@ for (i in seq(from = 5, to = which(excel_sheets(file_path) == "tmofAE"))) {
 }
 ```
 
-As mentioned above, the original XSLX file has multiple sheets : each sheet being a variable with :
+As mentioned above, the original XSLX file has multiple sheets. Each sheet is equivalent to a variable and has :
 
 -   rows as departements
 
