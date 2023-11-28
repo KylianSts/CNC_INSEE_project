@@ -25,8 +25,6 @@ library(readxl)
 
 # A presentation of the project
 
-</center>
-
 ## Sources
 
 This project is powered by two databases :
@@ -78,6 +76,8 @@ The two databases underwent transformation to be exploitable for our project. Th
 ```{r Computation_of_the_number_of_rows_in_Insee_cleanv3, echo=FALSE, message = FALSE}
 
 insee_data <- read.csv("Data/INSEE_cleanv3.csv")
+
+insee_data <- insee_data %>% select(-X) #we drop X, the column which is an index of each row
 
 In_nrow <- insee_data |> nrow()
 ```
@@ -161,16 +161,41 @@ cnc_data_clean %>%
            list("Mean" = ~mean(., na.rm = TRUE), "Median" = ~median(., na.rm = TRUE)))
   ) %>%
   t() %>%
-  knitr::kable(caption = "Description of the database", format = "html", align = 'c')
+  knitr::kable(caption = "Description of the CNC database", format = "html", align = 'c')
+
 ```
 
-**Insee_clean_v3**
+```{r}
+#Alternative presentation
+cnc_data_clean %>%
+  summarize( "Number of rows" = prettyNum(nrow(.), big.mark = " "),  "Number of columns" = ncol(.)) %>%
+  knitr::kable(caption = "Description of the CNC database", format = "html", align = 'c')
+```
+
+```{r}
+cnc_data_clean %>% 
+  group_by(year) %>% 
+  summarize(across( where(is.numeric),list(Mean = ~mean(., na.rm = TRUE), Median = ~median(., na.rm = TRUE)))) %>% t() %>% 
+  knitr::kable(caption = "Description of the CNC's variables", format = "markdown", align = 'c')
+
+  
+```
+
+**insee_data (from Insee_cleanv3.csv)**
 
 ```{r Nb_rows_and_columns_Insee, echo=FALSE}
-Insee_cleanv3 %>%
+insee_data %>%
   summarize("Number of rows" = prettyNum(nrow(.), big.mark = " "),
             "Number of columns" = ncol(.))%>%
-  t() %>%knitr::kable(caption = "Description of the Insee_cleanv3 database", format = "html", align='c')
+ knitr::kable(caption = "Description of the Insee database", format = "html", align='c')
+```
+
+```{r}
+insee_data %>%
+   summarize(across(everything(),n_distinct)) %>% 
+  mutate(across(everything(), ~prettyNum(., big.mark = " "))) %>% pivot_longer(everything(),names_to = "Variable", values_to="N.") %>% 
+  knitr::kable(caption = "Number of unique values by variable", format = "html", align = 'c')
+
 ```
 
 <center>
@@ -234,4 +259,4 @@ The goal of this project is to answer at a dual challenge.
 
 The first aspect of our investigation is to understand the dynamic of French movie theaters over the last 50 years.
 
-Questions such as \"How evolves the number of venues?\"  or \"What is the evolution of attendance levels ?\" will be at the core of this paper. To be more precise, the goal of the project is, therefore, to understand how movies theater have evolved in terms of volume (i.e. number of location), size (i.e. seats and screens), attendance and, revenue. The use panel data allows us to try to grasp not only the overall temporal trend of our subject but also to observe potential cross-sectional differences. Indeed, one of our key objectives is to comprehend whether there are differences in trajectories and characteristics among French departments.
+Questions such as "How evolves the number of venues?"  or "What is the evolution of attendance levels ?" will be at the core of this paper. To be more precise, the goal of the project is, therefore, to understand how movies theater have evolved in terms of volume (i.e. number of location), size (i.e. seats and screens), attendance and, revenue. The use panel data allows us to try to grasp not only the overall temporal trend of our subject but also to observe potential cross-sectional differences. Indeed, one of our key objectives is to comprehend whether there are differences in trajectories and characteristics among French departments.
