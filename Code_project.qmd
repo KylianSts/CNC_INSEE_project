@@ -152,19 +152,23 @@ The final result is two modified datasets.
 
 ```{r Nb_rows_and_columns_CNC, echo=FALSE, message = FALSE}
 cnc_data_clean %>%
-  summarize("Number of rows" = prettyNum(nrow(.), big.mark = " "),
-            "Number of columns" = ncol(.)) %>%
+  summarize(
+    "Number of rows" = prettyNum(nrow(.), big.mark = " "),
+    "Number of columns" = ncol(.),
+    across(where(is.numeric), 
+           list("Mean" = ~mean(., na.rm = TRUE), "Median" = ~median(., na.rm = TRUE)))
+  ) %>%
+  t() %>%
   knitr::kable(caption = "Description of the database", format = "html", align = 'c')
 ```
 
 **Insee_clean_v3**
 
 ```{r Nb_rows_and_columns_Insee, echo=FALSE}
-summary_table <- Insee_cleanv3 %>%
+Insee_cleanv3 %>%
   summarize("Number of rows" = prettyNum(nrow(.), big.mark = " "),
-            "Number of columns" = ncol(.))
-
-knitr::kable(summary_table, caption = "Description of the Insee_cleanv3 database", format = "html", align='c')
+            "Number of columns" = ncol(.))%>%
+  t() %>%knitr::kable(caption = "Description of the Insee_cleanv3 database", format = "html", align='c')
 ```
 
 <center>
@@ -219,7 +223,6 @@ data_clean <- data_merge |>
 
 ```{r}
 data_clean |> group_by(year) |>  summarise(across(everything(), ~sum(is.na(.)), .names = "missing_{.col}")) 
-
 
 data_clean |> group_by(year) |>  summarise(nb_value = n())
 ```
