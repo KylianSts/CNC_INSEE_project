@@ -15,13 +15,12 @@ editor: visual
 
 <center><https://github.com/KylianSts/CNC_INSEE_project></center>
 
-```{r Configuration, warning=FALSE, message = FALSE}
+```{r Configuration, warning=FALSE, echo=FALSE, message=FALSE}
 here::i_am("CNC_INSEE_project.Rproj")
 library(here)
 library(dplyr)
 library(tidyr)
 library(readxl)
-library(readr)
 ```
 
 # A presentation of the project
@@ -78,9 +77,9 @@ The two databases underwent transformation to be exploitable for our project. Th
 
 ```{r Computation_of_the_number_of_rows_in_Insee_cleanv3, echo=FALSE, message = FALSE}
 
-Insee_cleanv3 <- read_csv("INSEE_cleanv3.csv")
+insee_data <- read.csv("Data/INSEE_cleanv3.csv")
 
-In_nrow <- Insee_cleanv3 |> nrow()
+In_nrow <- insee_data |> nrow()
 ```
 
 Our work was to reduce the number of these combinations in order to downsize the database. To do so, we transform the 120 levels of the variable corresponding to the age into 5 age ranges. Furthermore, we get rid of the variables that were not useful to our project using a group_by function. It allows us to go from a database of more than 50 millions of rows to a CSV of `r In_nrow` rows.
@@ -91,8 +90,13 @@ The process that we used is detailed in the quarto document entitled "Parallel_c
 
 The CNC's data was less memory-consuming. However itsformat was not convenient for coding with R. Indeed, the original XSLX document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
 
+<<<<<<< HEAD
 ```{r Cleaning_formating_function, message = FALSE}
 file_path <- "exploitation_données_par_département.xlsx"
+=======
+```{r Cleaning_ormating_unction, message = FALSE}
+file_path <- "Data/exploitation_données_par_département.xlsx"
+>>>>>>> f95bef95e93f0dc3738a3fe051ca500ad1938fc8
 
 # Function to read and process a sheet
 read_and_process_sheet <- function(sheet_index) {
@@ -209,14 +213,12 @@ Insee database is a sociodemographic description of each department with variabl
 </center>
 
 ```{r insee_database}
-insee_data <- read.csv("INSEE_cleanv3.csv")
-
 insee_data <- insee_data |> rename(departement_code = DEP_RES_21, year =  AN_RECENS)
 
 insee_data_clean <- insee_data |> filter(!is.na(AGE_GROUP))
 ```
 
-```{r mergeing}
+```{r merging}
 cnc_data_clean$year <- as.integer(cnc_data_clean$year) 
 
 data_merge <- left_join(cnc_data_clean, insee_data, by = c("departement_code", "year"))
