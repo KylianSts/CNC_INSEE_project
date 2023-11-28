@@ -24,7 +24,7 @@ library(readxl)
 library(readr)
 ```
 
-# Formating and cleanning of the CNC database
+# Formating and cleaning of the CNC database
 
 <center>
 
@@ -44,11 +44,9 @@ This project is powered by two databases :
 
 *Original french name : "**Exploitation - données par département**"*
 
-The first database was created by the French National Centre for Cinema and the Moving Image (CNC). The CNC is an agency of the French Ministry of Culture. Its role is to implement the state's policy on the question of cinema, audiovisual and multimedia. It is notably in charge of the regulation promotion and distribution of french movies.
+The first database was created by the French National Center for Cinema and the Moving Image, most commonly known as CNC. CNC is an agency of the French Ministry of Culture. Its role is to implement the state's policy on the question of cinema, audiovisual and multimedia. It is notably in charge of the regulation, promotion and distribution of french movies. The French agency also collects data regarding its purview and proposes part of them in open data.
 
-The database "Exploitation - data by department" is a statistical monitoring on the evolution of french cinema theater between 1966 and 2022. It contains data on the number of venues and their characteristics but also on the number of sold tickets and the gained revenues. The data are presented by french department (according to their 2022 administrative division) which is the statistical unit of the base.
-
-The aforementioned database were constructed with two main sources :
+The database "Exploitation - data by department" is one of the aforementioned opan data. It is a statistical monitoring on the evolution of french cinema theater and its attendance between 1966 and 2022. It notably contains data on the number of venues, their characteristics (e.g. number of screens, seating capacity, ...); but also on the number of sold tickets and gained revenues. As its name indicates, french departments (according to their 2021 administrative division) are the statistical unit of the base. The database were constructed by using two main sources :
 
 -   the **list of cinemas** authorized by the agency
 
@@ -58,7 +56,7 @@ The aforementioned database were constructed with two main sources :
 
 *Original title : Données harmonisées des recensements de la population à partir de 1968*
 
-The second database was produced by INSEE, the french National Institute of Statistics and Economic Studies. The base has for sources demographic data of the census between 1968 and 2019.
+The second database was produced by Insee, the french National Institute of Statistics and Economic Studies. Insee is French national bureau and one of its bigger data provider. The data that will be used for its project has for sources demographic information which come frome the different population censuses between 1968 and 2019.
 
 ```{r Summary_of_the_last_census, echo=FALSE, message = FALSE}
 list_of_census <- data.frame(census = paste0("n°", 1:8),year=c(1968,1975,1982,1990,1999,2008,2013,2019))
@@ -68,19 +66,17 @@ list_of_census<- list_of_census |>  pivot_wider(names_from="census",values_from 
 list_of_census |> knitr::kable(caption ="French census between 1968 and 2019", format="html", align='c')
 ```
 
-The census is one of the most important data collections taking place in France. All residents have the obligation to participate to it under penalty of fine (article 3 of the Law n°51-711 of 7 June 1951).
+Censuses are one of the most important data collections taking place in France. Answering their survey is an obligation for all inhabitants under penalty of a fine (article 3 of the Law n°51-711 of 7 June 1951). Historically, population censuses took the form of an exhaustive collect of all French townships during asame year. However, the collection method evolved in 2002. Nowadays, Insee uses a rotational approach. For townships of at least 10 000 inhabitants, 8% of the housing of are interviewed each year. The goal is then to cover 40% of their population over a 5-year period. This 5-year moving sample is then used to estimate demographic data annually. For townships withless of 10 000 inhabitants, the collection is still exhaustive but is not simultaneous. Indeed, it occurs in a fifth of towns each year ensuring that all townships are censused every 5 years. Demographic information between 2 collection is then estimated using data from the nearest one.
 
-Historically, the census took the form of an exhaustive collect of all French townships in the same year.However, the collection method evolved in 2002. Nowadays, Insee uses a rotational approach. 8% of the housing of the township of at least 10 000 inhabitants are interviewed. The goal is to cover 40% of their population over a 5-year period. For the townships of less of 10 000 inhabitants, the collect is still exhaustive but not simultaneous. The collect takes place in a fifth of them each year to ensure that all townships are censused every 5 years.
+The data is collected by face-to-face interviews or-since 2015- via internet surveys.
 
-The data is collected by face-to-face interviews and -since 2015- via internet surveys.
-
-The database that we will use is an harmonized compilation of data from 8 census databases. Its content includes the number of inhabitant by department and key socio-demographic variables (e.g. age, socio-professional categories, type of professional activity).
+The database that will be used in this project is an harmonized compilation of data from 8 census databases. Its content includes the number of inhabitant by department and key socio-demographic variables (e.g. age, socio-professional categories, type of professional activity).
 
 It can be downloaded from the [INSEE website](https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232) in a DBF or CSV format.
 
 ### Modification of the original databases
 
-The two databases underwent transformation to be exploitable for our project. The main problem of the insee one is that it consumes many RAM because of its size (3GB). Indeed characteristic variables have an important number of "categories". For example, a variable on the age of the population contains 120 levels, one by each possible year of life of an individual. The result is that the total number of potential combinations - and therefore of rows - is impressive causing the important size of the database.
+The two databases underwent transformation to be exploitable for our project. The main problem of the Insee one is that it consumes a lot of RAM because of its size (3GB). Indeed some categorial variables have an important number of "categories"/"levels". For example, the variable on the age of the population contains 120 levels, one by each possible year of life of an individual. The result is that the number of potential combinations, and therefore of rows, among all variables is impressively large contributing to the important size of the database.
 
 ```{r Computation_of_the_number_of_rows_in_Insee_cleanv3, echo=FALSE, message = FALSE}
 
@@ -89,11 +85,11 @@ Insee_cleanv3 <- read_csv("INSEE_cleanv3.csv")
 In_nrow <- Insee_cleanv3 |> nrow()
 ```
 
-Our work was to reduce the number of these combinations and therefore the size of the database. To do so, we transform the 120 levels of the variable corresponding to the age into 5 age ranges. Furthermore, we removed the variables that were not useful to our project. It allows us to go from a database of more than 50 millions of rows to a CSV of one of `r In_nrow`.
+Our work was to reduce the number of these combinations in order to downsize the database. To do so, we transform the 120 levels of the variable corresponding to the age into 5 age ranges. Furthermore, we get rid of the variables that were not useful to our project using a group_by function. It allows us to go from a database of more than 50 millions of rows to a CSV of `r In_nrow` rows.
 
-The process that we used is detailed in the "Parallel_code_Insee" quarto document available in this R project (*because of the important size of the treated database, we have prefered to put it in a separate qmd)*.
+The process that we used is detailed in the quarto document entitled "Parallel_code_Insee" that is available in this R project. We ha ve preferred to put it in a separate qmd because of the important size of the database linked with its code.
 
-The CNC's data was less memory-consuming. However their format was not convenient for coding with R. Indeed, the original xslx document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
+The CNC's data was less memory-consuming. However their format was not convenient for coding with R. Indeed, the original XSLX document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
 
 #### Formating and cleaning of the CNC database
 
@@ -130,14 +126,20 @@ cnc_data_merge <- left_join(cnc_data_merge, cnc_data_long, by = c("departement_c
 }
 ```
 
-We have an xlsx file with multiple sheets. Each sheet is a variable, rows are departements and columns years. we have to rename the first column so that we make sure that for each sheet we have the same name, we drop the second column which is the departement name and then we can merge.
+As mentioned above, the original XSLX file has multiple sheets : each sheet being a variable with :
+
+-   rows as departements
+
+-   and columns as years.
+
+To permit the merger between each sheets, the prime step was to rename the first column so that we make sure that each sheet shares the same name. Then the second column which is the department was dropped. It permit us to start the merger.
 
 ```{r Suppression_of_total_rows, message = FALSE}
 cnc_data_clean <- cnc_data_merge |>
   filter(!is.na(departement_code))
 ```
 
-In each sheet we have a row with the total so we drop it.
+Each sheet has a row wich represents the total. We preferred to drop it in order to simplify next statistics treatment.
 
 ```{r replace_NA_by_0_multiplexes, message = FALSE}
 multiplexes_with_0 <- cnc_data_clean |> 
@@ -151,7 +153,7 @@ cnc_data_clean <- cnc_data_clean |> select(-multiplexes)
 cnc_data_clean <- left_join(cnc_data_clean, multiplexes_with_0, by = c("departement_code", "year"))
 ```
 
-In the multiplexes sheet, NA value means that there are 0 multiplexes so we replace NA value by 0 but only from years data have been collected.
+In the original "Multiplexes" sheet, NA value were assigned when there were 0 multiplexes. We replaced this NA value with 0. and ensured that this replacement only occurs for the year when data had been collected
 
 ### Description of the final bases before merging
 
@@ -184,24 +186,25 @@ knitr::kable(summary_table, caption = "Description of the Insee_cleanv3 database
 
 We have in the CNC database different variables :
 
--   "établissement" represents the number of movie theater for each department
--   "écrans" represents the number of screen which means movie rooms for each department
--   "fauteuils" represents the total number of seat in all movie theater for each department
--   "multiplexes" represents the number of multiplexes for each department . A multiplex is a movie theater complex with multiple screens within a single complex.
--   "séances" represents the total number of seance in thousand for each department
--   "entrées" represents the total number of ticket bought in million for each department
--   "recettes" represents the total revenue in million for each department
--   "RME" represents the average revenue by ticket bought
--   "Taux d'occupation des fauteuils" is the ratio between entries during the year and the product between the number of chairs and the number of sessions. Taux d'occupation des fauteuils makes it possible to assess the "fullness" of the rooms.
+-   "**établissement**" represents the **number of movie theaters** for each department
+-   "**écrans**" represents the **number of screens,** i.e. movie rooms for each department
+-   "**fauteuils**" represents the total **number of seats** in all movie theaters for each department
+-   "**multiplexes**" represents the **number of** **multiplexes** for each department . A multiplex is a movie theater complex with multiple screens within a single complex.
+-   "**séances**" represents the total **number of seances [in thousand]{.underline}** for each department
+-   "**entrées**" represents the total **number of tickets bought [in million]{.underline}** for each department
+-   "**recettes**" represents the **total** **revenue in million** for each department
+-   "**RME**" represents the **average revenue by bought tickets**
+-   "**Taux d'occupation des fauteuils**" is the ratio between **entries during the year and the product between the number of chairs and the number of sessions**. Taux d'occupation des fauteuils makes it possible to assess the [**"fullness" of the rooms.**]{.underline}
 
 And we have the same for Arthouse. the term Arthouse refers to so-called auteur films, economically independent, with small budgets, open to the different cultures of the world. An Arthouse cinema is a cinematographic establishment which exhibits a significant proportion of recommended Arthouse films and which supports these often difficult films with an adapted animation policy.
 
-We have in the INSEE database variables on the population :
+Insee database is a sociodemographic description of each department with variables such as :
 
--   "DEP_RES_21" represents the residence department, where people live.
--   "AGE_GROUP" represents the age of the population by range of 15 years.
--   "TYP_ACT" represents the type of activity (see metadata).
--   "CSP" represents the socio-professional category.
+-   "**DEP_RES_21**" represents the **department of residence where individuals live**
+-   "**AGE_GROUP**" is our computed data representing the a**ge of the population by range of 15 years**.
+-   "**TYP_ACT**" give us the **type of activity** .
+-   "**CSP**" is a categorial data that has for levels **socio-professional category**
+-   "**POND2**" gives us **the number of** **inhabitants** a**ccording the combination of all previous variables**
 
 </center>
 
