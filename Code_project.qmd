@@ -88,7 +88,7 @@ The process that we used is detailed in the quarto document entitled "Parallel_c
 
 #### Formatting and cleaning the CNC database
 
-The CNC's data was less memory-consuming. However itsformat was not convenient for coding with R. Indeed, the original XSLX document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
+The CNC's data was less memory-consuming. However its format was not convenient for coding with R. Indeed, the original XSLX document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
 
 ```{r Cleaning_formating_function, message = FALSE}
 file_path <- "Data/exploitation_données_par_département.xlsx"
@@ -227,3 +227,11 @@ data_clean |> group_by(year) |>  summarise(across(everything(), ~sum(is.na(.)), 
 
 data_clean |> group_by(year) |>  summarise(nb_value = n())
 ```
+
+## Research question
+
+The goal of this project is to answer at a dual challenge.
+
+The first aspect of our investigation is to understand the dynamic of French movie theaters over the last 50 years.
+
+Questions such as \"How evolves the number of venues?\"  or \"What is the evolution of attendance levels ?\" will be at the core of this paper. To be more precise, the goal of the project is, therefore, to understand how movies theater have evolved in terms of volume (i.e. number of location), size (i.e. seats and screens), attendance and, revenue. The use panel data allows us to try to grasp not only the overall temporal trend of our subject but also to observe potential cross-sectional differences. Indeed, one of our key objectives is to comprehend whether there are differences in trajectories and characteristics among French departments.
