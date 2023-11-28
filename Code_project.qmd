@@ -90,13 +90,8 @@ The process that we used is detailed in the quarto document entitled "Parallel_c
 
 The CNC's data was less memory-consuming. However itsformat was not convenient for coding with R. Indeed, the original XSLX document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
 
-<<<<<<< HEAD
 ```{r Cleaning_formating_function, message = FALSE}
-file_path <- "exploitation_données_par_département.xlsx"
-=======
-```{r Cleaning_ormating_unction, message = FALSE}
 file_path <- "Data/exploitation_données_par_département.xlsx"
->>>>>>> f95bef95e93f0dc3738a3fe051ca500ad1938fc8
 
 # Function to read and process a sheet
 read_and_process_sheet <- function(sheet_index) {
