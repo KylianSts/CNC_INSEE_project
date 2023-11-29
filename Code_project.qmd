@@ -1,5 +1,5 @@
 ---
-title: "Role of sociodemographic factors in the french cinema landscape over the last 50 years "
+title: "Role of sociodemographic factors in the French cinema landscape over the last 50 years "
 author: "Kylian SANTOS and Cédric BAZILE"
 output:
   html_document:
@@ -41,13 +41,13 @@ This project is powered by two databases :
 
 <br>
 
-### "***Exploitation - data by departement***"
+### "***Exploitation - data by department***"
 
 *Original french name : "**Exploitation - données par département**"*
 
-The first database was created by the French National Center for Cinema and the Moving Image, most commonly known as CNC. CNC is an agency of the French Ministry of Culture. Its role is to implement the state's policy on the question of cinema, audiovisual and multimedia. It is notably in charge of the regulation, promotion and distribution of french movies. The French agency also collects data regarding its purview and proposes part of them in open data.
+The first database was created by the French National Center for Cinema and the Moving Image, most commonly known as CNC. The CNC is an agency of the French Ministry of Culture. Its role is to implement the state's policy on the question of cinema, audiovisual and multimedia. It is notably in charge of the regulation, promotion and distribution of French movies.
 
-The database "Exploitation - data by department" is one of the aforementioned open data. It is a statistical monitoring on the evolution of french cinema theater and its attendance between 1966 and 2022. It notably contains data on the number of venues, their characteristics (e.g. number of screens, seating capacity, ...); but also on the number of sold tickets and gained revenues. As its name indicates, french departments (according to their 2021 administrative division) are the statistical unit of the base. The database were constructed by using two main sources :
+In the execution of its mission, the French agency also collects data regarding its purview and proposes part of them in open access. The database "Exploitation - data by department" is one of the aforementioned open data. It is a statistical monitoring of the evolution of French cinema theaters and their attendance between 1966 and 2022. Notably, it contains data on the number of venues, their characteristics (e.g. number of screens, seating capacity, ...); but also on the number of sold tickets and gained revenues. As its name indicates, French departments (according to their 2021 administrative division) are the statistical unit of the data. The CNC's data is constructed by using two primary sources :
 
 -   the **list of cinemas** authorized by the agency
 
@@ -59,7 +59,7 @@ The database "Exploitation - data by department" is one of the aforementioned op
 
 *Original title : Données harmonisées des recensements de la population à partir de 1968*
 
-The second database was produced by Insee, the french National Institute of Statistics and Economic Studies. Insee is French national bureau and one of its bigger data provider. The data that will be used for its project has for sources demographic information which come from the different population censuses between 1968 and 2019.
+The second database was produced by Insee, the french National Institute of Statistics and Economic Studies. Insee is French national bureau and one of its major data providers. The data that will be used for this project has for source demographic information which comes from the different population censuses between 1968 and 2019.
 
 ```{r Summary_of_the_last_census, echo=FALSE, message = FALSE}
 list_of_census <- data.frame(census = paste0("n°", 1:8),year=c(1968,1975,1982,1990,1999,2008,2013,2019))
@@ -69,11 +69,11 @@ list_of_census<- list_of_census |>  pivot_wider(names_from="census",values_from 
 list_of_census |> knitr::kable(caption ="French census between 1968 and 2019", format="html", align='c')
 ```
 
-Censuses are one of the most important data collections taking place in France. Answering their survey is an obligation for all inhabitants under penalty of a fine (article 3 of the Law n°51-711 of 7 June 1951). Historically, population censuses took the form of an exhaustive collect of all French townships during a same year. However, the collection method evolved in 2002. Nowadays, Insee uses a rotational approach. For townships of at least 10 000 inhabitants, 8% of the housing of are interviewed each year. The goal is then to cover 40% of their population over a 5-year period. This 5-year moving sample is then used to estimate demographic data annually. For townships withless of 10 000 inhabitants, the collection is still exhaustive but is not simultaneous. Indeed, it occurs in a fifth of towns each year ensuring that all townships are censused every 5 years. Demographic information between 2 collection is then estimated using data from the nearest one.
+Censuses are one of the most important data collections taking place in France. Answering their survey is an obligation for all inhabitants under penalty of a fine (article 3 of the Law n°51-711 of 7 June 1951). Historically, population censuses took the form of an exhaustive collect of all French townships during a same year. However, the collection method evolved in 2002. Nowadays, Insee uses a rotational approach. For townships of at least 10 000 inhabitants, 8% of the housing of are interviewed each year. The goal is then to cover 40% of their population over a 5-year period. This 5-year moving sample is then used to estimate demographic data annually. For townships with less than 10 000 inhabitants, the collection is still exhaustive but is not simultaneous. Indeed, it occurs in a fifth of towns each year ensuring that all townships are censused every 5 years. Demographic information between 2 collections is then estimated using data from the nearest one.
 
 The data is collected by face-to-face interviews or-since 2015- via internet surveys.
 
-The database that will be used in this project is an harmonized compilation of data from 8 census databases. Its content includes the number of inhabitant by department and key socio-demographic variables (e.g. age, socio-professional categories, type of professional activity).
+The database that will be used in this project is an harmonized compilation of data from 8 census databases. Its content includes the number of inhabitants by department and key socio-demographic variables (e.g. age, socio-professional categories, type of professional activity).
 
 It can be downloaded from the [INSEE website](https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232) in a DBF or CSV format.
 
@@ -83,7 +83,7 @@ It can be downloaded from the [INSEE website](https://www.insee.fr/fr/statistiqu
 
 #### Formatting and cleaning the Insee database
 
-The two databases underwent transformation to be exploitable for our project. The main problem of the Insee one is that it consumes a lot of RAM because of its size (3GB). Indeed some categorical variables have an important number of "categories"/"levels". For example, the variable on the age of the population contains 120 levels, one by each possible year of life of an individual. The result is that the number of potential combinations, and therefore of rows, among all variables is impressively large contributing to the important size of the database.
+The two databases underwent transformations to become exploitable for our project. The main problem of the Insee one is that it consumes a lot of RAM because of its size (3GB). Indeed, some categorical variables have a significant number of "categories"/"levels". For example, the variable on the age of the population contains 120 levels, one by each possible year of life of an individual. As a result, the number of potential combinations, and therefore the number of rows, among all variables is impressively large, contributing to the important size of the database.
 
 ```{r Computation_of_the_number_of_rows_in_Insee_cleanv3, echo=FALSE, message = FALSE}
 
@@ -94,15 +94,15 @@ insee_data <- insee_data %>% select(-X) #we drop X, the column which is an index
 In_nrow <- insee_data |> nrow()
 ```
 
-Our work was to reduce the number of these combinations in order to downsize the database. To do so, we transform the 120 levels of the variable corresponding to the age into 5 age ranges. Furthermore, we get rid of the variables that were not useful to our project using a group_by function. It allows us to go from a database of more than 50 millions of rows to a CSV of `r In_nrow` rows.
+Our task was to reduce the number of these combinations in order to downsize the database. To do so, we transform the 120 levels of the variable corresponding to the age into 5 age ranges. Furthermore, we get rid of the variables that were not useful to our project using a group_by function. This allows us to go from a database of more than 50 millions rows to a CSV with `r In_nrow` rows.
 
-The process that we used is detailed in the quarto document entitled "Parallel_code_Insee" that is available in this R project. We ha ve preferred to put it in a separate QMD because of the important size of the database linked with its code.
+The process that we used is detailed in the quarto document entitled "Parallel_code_Insee" that is available in this R project. We have preferred to put it in a separate QMD because of the size of the database linked with its code.
 
 <br>
 
-#### Formating and cleaning of the CNC database
+#### Formatting and cleaning of the CNC database
 
-The CNC's data was less memory-consuming. However its format was not convenient for coding with R. Indeed, the original XSLX document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
+The CNC's data was less memory-consuming. However, its format was not convenient for coding with R. Indeed, the original XSLX document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
 
 ```{r Cleaning_formating_function, message = FALSE}
 file_path <- "Data/exploitation_données_par_département.xlsx"
@@ -136,14 +136,14 @@ As mentioned above, the original XSLX file has multiple sheets. Each sheet is eq
 
 -   and columns as years.
 
-To permit the merger between each sheets, the prime step was to rename the first column so that we make sure that each sheet shares the same name. Then the second column which is the department was dropped. It permit us to start the merger.
+To facilitate the merger of each sheets, the initial step was to rename the first column so that we make sure that each sheet shares the same name. This task was performed by the codes above. Then, the second column which is the department was dropped. It permit us to start the merger.
 
 ```{r Suppression_of_total_rows, message = FALSE}
 cnc_data_clean <- cnc_data_merge |>
   filter(!is.na(departement_code))
 ```
 
-Each sheet has a row which represents the total. We preferred to drop it in order to simplify next statistics treatment.
+Additionallu, each sheet includes a row which represents the total. We preferred to exclude it in order to simplify next statistical treatment.
 
 ```{r replace_NA_by_0_multiplexes, message = FALSE}
 
@@ -200,7 +200,7 @@ cnc_data_clean %>%
     ))
     ) %>% 
   t() %>%
-  knitr::kable(caption = "Description of the CNC's variables", format = "markdown", align = 'c')
+  knitr::kable(caption = "Statistics of the CNC's variables", format = "html", align = 'c')
 ```
 
 **insee_data (from Insee_cleanv3.csv)**
@@ -219,7 +219,7 @@ insee_data %>%
   select(-POND2) %>%
   summarize(across(everything(),n_distinct)) %>% 
   t() %>% 
-  knitr::kable(caption = "Number of unique values by variable", format = "html", align = 'c')
+  knitr::kable(caption = "Number of unique values/levels by characteristics variable", format = "html", align = 'c')
 ```
 
 <br>
@@ -271,18 +271,26 @@ data_clean <- data_merge |>
 
 ## Research question
 
-The central inquiry driving our investigation is as follows: **"How has the cinematic landscape in France evolved over the past five decades, and what role have sociodemographic factors played in shaping these transformations?"**
+A central question will guide our research : **"How has the movie theater landscape in France evolved over the past five decades, and what role have sociodemographic factors played in shaping these transformations?"**
 
-Our study is poised to delve into this question with a myriad of variables at our disposal, collectively weaving a rich tapestry of insights. The research question gains significance through the exploration of the following key aspects:
+The databases at our disposal will help us to explore this question by looking into the following key aspects:
 
-**Demographic Dynamics and Cinematic Choices:** The inclusion of variables from the INSEE database, such as department of residence (DEP_RES_21), age groups (AGE_GROUP), and socio-professional categories (CSP), enables us to discern correlations between demographic shifts and the cinematic preferences of distinct population segments. This facet unveils how societal changes influence and are influenced by the cinematic landscape.
+1.  **Evolution of the Market :** The information provided will help us understand how the movie theater market has evolved in terms of volumes over the last fifty years. One of the key aspects in exploring this question will be to examine the market evolution in terms of venues (établissements). However, the number of movie theaters will not be our sole indicator. Indeed, the number of sessions (séances), seats (fauteuils), and screens (écrans) will be complementary variables that can help us to put under the spotlight potential trends that may not be apparent when solely examining the number of venues.  Employing panel data has a dual utility here. It not only enables us to capture the overall temporal trends but also to observe potential cross-sectional differences. Indeed, one of our key objectives is to comprehend whether divergences in trajectories and characteristics exist among the various French departments.
 
-**Economic Health of the Industry:** Variables such as the number of tickets bought (entrées), total revenue (recettes), and average revenue per bought ticket (RME) serve as pivotal metrics for gauging the economic vitality of the cinema industry. Understanding these economic aspects is crucial for deciphering the financial sustainability and success of the film sector.
+2.  **Structural Shifts with Multiplexes:** A zoom on the multiplexes permits evaluating a recent structural transformation in the movie theater industry. The first one appears in France during the end of the 1990s and can be arguably seen as a shift in the cinema market. Blanchard ([2014](https://www.cairn.info/revue-migrations-societe-2014-1-page-153.htm)) argues that these facilities \"have contributed to the resurgence of attendance, notably by making the cinema more accessible to suburban residents.\" Furthermore, despite their relative novelty, they represent an important share of the market industry. Investigating the ascendancy and impact of multiplexes sheds light on societal preferences, emphasizing convenience and a simultaneous offering of diverse films.
 
-**Cultural Diversity through Arthouse Cinemas:** The representation of Arthouse cinemas in our dataset unveils the emergence of a distinctive cultural niche. Examining the growth and audience engagement of these cinemas provides valuable insights into the demand for culturally diverse and intellectually stimulating cinematic content.
+3.  **Economic Health of the Industry:** Variables such as the number of tickets bought (entrées) and total revenue (recettes) will also be complementary and potentially important information. They will notably be key tools for gauging the economic vitality of the industry and determining if the economic dynamics align with the stock of venues, seats, and their past investments.
 
-**Structural Shifts with Multiplexes:** The variable "multiplexes" signifies a structural transformation in how cinemas are conceived and experienced. Investigating the ascendancy and impact of multiplexes sheds light on societal preferences, emphasizing convenience and a simultaneous offering of diverse films.
+4.  **Cultural Diversity through Arthouse Cinemas:** The representation of Arthouse cinemas in our dataset highlights the emergence of a cultural niche. Examining the growth and audience engagement of these cinemas provides insights into the supply and demand for culturally diverse content.
 
-**Societal Interaction through Occupancy Rates:** The occupancy rate of seats (Taux d'occupation des fauteuils) stands as a unique metric that extends beyond mere film popularity. It mirrors societal dynamics associated with communal entertainment experiences. This metric unveils the social aspects of cinema-going, providing a holistic perspective that goes beyond conventional economic indicators.
+5.  **Demographic Dynamics :** The inclusion of variables from the INSEE database is a key step in our investigation. Utilizing information on age groups (AGE_GROUP) and socio-professional categories (CSP) will enable us to discern whether correlations exist between the demographic composition of the population and the trajectories of distinct departmental markets.
 
-In essence, our exploration is poised to uncover the intricate interplay between cinematic evolution and sociodemographic factors, shedding light on the multifaceted nature of this dynamic relationship over the past 50 years in France.
+In essence, our research delves into the recent history of movie theaters in France in order to explore the connection between their evolution and sociodemographic factors, while taking into account departmental heterogeneity.
+
+<br>
+
+# Bibliography 
+
+*APA format*
+
+**Blanchard, J. (2014).** "Multiplexes, public de banlieue et création cinématographique française : caractère marchand de l\'ethnicité sur grand écran". *Migrations Société*, 151, 153-164. <https://doi.org/10.3917/migra.151.0153>
