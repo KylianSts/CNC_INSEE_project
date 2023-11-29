@@ -28,11 +28,9 @@ The format of the database makes it quite memory-consuming.
 
 To facilitate its exploitation, we work on a solution to reduce the size of the aforementioned database. This document reconstructs the steps of our work.
 
-<center>
+<br>
 
 # Codes
-
-<center>
 
 ## Setup
 
@@ -49,21 +47,25 @@ library(tidyr)
 library(readr)
 ```
 
+<br>
+
 ## Importation of the data using the data.table package
 
 To reproduce this step download the database on (the data are also include in the zip document) : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
 
 ```{r Importation_of_the_data, results='hide'}
 
-insee <- fread("Ficdep19.csv")
+insee <- fread("Data/Ficdep19.csv")
 ```
+
+<br>
 
 ## Main codes
 
 ### Explanation of the process
 
 ```{r Calculation_of_the_number_of_variable, echo=FALSE, results='hide'}
-metadata <- read_delim("varmod_FICDEP_2019.csv", delim = ";", escape_double = FALSE, trim_ws = TRUE) 
+metadata <- read_delim("Data/varmod_FICDEP_2019.csv", delim = ";", escape_double = FALSE, trim_ws = TRUE) 
 
 nb_val <- metadata %>% 
   summarize(unique_count = n_distinct(LIB_VAR))
@@ -83,11 +85,9 @@ The reality is that our project do not need so many combinations. Indeed, among 
 
 -   but also the variable AGE_REV which gives us the age that an inhabitant can have. While this variable is quite important, it has too many levels (one level for each age).
 
-<center>
+<br>
 
 *Annex : Table on the original characteristic variable*
-
-<center>
 
 ```{r Creating_our_annex_table, echo=FALSE}
 metadata <- metadata %>% rename("Variable"=LIB_VAR)
@@ -114,6 +114,8 @@ We have two goals for reducing our database
 
 2.  Use the "group_by" function to keep the information of the values contains in the variable "POND" with the variables that are of interest to us uniquely
 
+<br>
+
 ### Main codes in themselves
 
 ```{r Creation_of_our_new_database}
@@ -131,8 +133,10 @@ Insee_cleanv3 <- insee |>
 
 ```
 
+<br>
+
 ## Export of our result in a CSV
 
 ```{r Export_to_csv}
-write.csv(Insee_cleanv3, file = "INSEE_cleanv3.csv")
+write.csv(Insee_cleanv3, file = "Data/INSEE_cleanv3.csv")
 ```
