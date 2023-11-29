@@ -1,9 +1,7 @@
 ---
 title: "Role of sociodemographic factors in the French cinema landscape over the last 50 years "
 author: "Kylian SANTOS and Cédric BAZILE"
-output:
-  html_document:
-    toc: TRUE
+format: html
 editor: visual
 ---
 

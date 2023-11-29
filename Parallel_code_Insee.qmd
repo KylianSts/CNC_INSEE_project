@@ -14,11 +14,11 @@ execute :
 
 <center>
 
-The codes below describe the steps we used to reduce the size of the initial INSEE's 3 GB database in a smaller - and therefore more workable - database.
+The codes below describe the steps we used to reduce the size of the initial Insee 3 GB database in a smaller - and therefore more workable - database.
 
 The INSEE database is titled : "***Données harmonisées des recensements de la population à partir de 1968***".
 
-It was not possible to put the database on GitHub but it can be downloaded on the following link : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
+It was not possible to upload the data on GitHub, but it can be downloaded on the following link : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
 
 In English, it can be translated as: "***Harmonized population census data from 1968***"
 
@@ -26,7 +26,7 @@ It contains socio-demographic information on the French population by department
 
 The format of the database makes it quite memory-consuming.
 
-To facilitate its exploitation, we work on a solution to reduce the size of the aforementioned database. This document reconstruct the steps of our work.
+To facilitate its exploitation, we work on a solution to reduce the size of the aforementioned database. This document reconstructs the steps of our work.
 
 <center>
 
@@ -49,9 +49,9 @@ library(tidyr)
 library(readr)
 ```
 
-## Importation of the data using the data.table pakcage
+## Importation of the data using the data.table package
 
-To reproduce this step download the database on : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
+To reproduce this step download the database on (the data are also include in the zip document) : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
 
 ```{r Importation_of_the_data, results='hide'}
 
@@ -75,13 +75,13 @@ The original database is composed of `r nb_val` variables.
 
 "POND" is our key variable. It gives us the number of inhabitant regarding the different characteristics detailed by the other variables (department, age, ...).
 
-However, the format of the table tend to create a RAM-consuming CSV. Some characteristic variables have an important number of "categories"/"levels". 5 variables have for example more than 100 categories. The result is that in total, we have an important number of potential combinations. It explains the important size of the INSEE's database.
+However, the format of the table tends to create a RAM-consuming CSV. Some characteristic variables have an important number of "categories"/"levels". For example, 5 variables have more than 100 categories. The result is that, in total, we have a significant number of potential combinations. It explains the important size of the INSEE's database.
 
 The reality is that our project do not need so many combinations. Indeed, among these variables we find :
 
--   some variables which has many levels but are useless for us;
+-   some variables which have many levels but are useless for us;
 
--   but also the variable AGE_REV, a variable that give us the age that can have an inhabitant. A variable wHich is important but has toO many levels (a level by age).
+-   but also the variable AGE_REV which gives us the age that an inhabitant can have. While this variable is quite important, it has too many levels (one level for each age).
 
 <center>
 
@@ -110,9 +110,9 @@ table_stat %>%
 
 We have two goals for reducing our database
 
-1.  Simplify AGE_REV , by replacing its 120 levels by 5 that are age ranges.
+1.  Simplify AGE_REV by replacing its 120 levels with 5 that are age ranges. The use of 5 age ranges corresponding to 15-year interval is inspired by Insee's work. The institute often used this interval as a convention when it writes its "Dossier complet", an annual report individually dedicated to each French township.
 
-2.  Use the "group_by" function to keep the information of the values contains in the variable "POND" with uniquely the variables that interest us
+2.  Use the "group_by" function to keep the information of the values contains in the variable "POND" with the variables that are of interest to us uniquely
 
 ### Main codes in themselves
 
