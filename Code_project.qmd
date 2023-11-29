@@ -98,15 +98,11 @@ Our work was to reduce the number of these combinations in order to downsize the
 
 The process that we used is detailed in the quarto document entitled "Parallel_code_Insee" that is available in this R project. We ha ve preferred to put it in a separate QMD because of the important size of the database linked with its code.
 
-#### Formatting and cleaning the CNC database
-
-<<<<<<< HEAD
 <br>
 
 #### Formating and cleaning of the CNC database
-=======
+
 The CNC's data was less memory-consuming. However its format was not convenient for coding with R. Indeed, the original XSLX document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
->>>>>>> 68857efd1cddd3db45cfb20c319dabfbbcea5229
 
 ```{r Cleaning_formating_function, message = FALSE}
 file_path <- "Data/exploitation_données_par_département.xlsx"
@@ -220,7 +216,7 @@ insee_data %>%
 
 ```{r}
 insee_data %>%
-  select(-X, -POND2) %>%
+  select(-POND2) %>%
   summarize(across(everything(),n_distinct)) %>% 
   t() %>% 
   knitr::kable(caption = "Number of unique values by variable", format = "html", align = 'c')
