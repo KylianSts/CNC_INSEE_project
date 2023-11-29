@@ -1,5 +1,5 @@
 ---
-title: "Evolution of cinema's frequentation in France"
+title: "Role of sociodemographic factors in the french cinema landscape over the last 50 years "
 author: "Kylian SANTOS and Cédric BAZILE"
 output:
   html_document:
@@ -7,13 +7,17 @@ output:
 editor: visual
 ---
 
+<br> <br>
+
 <center>
 
-# Github link
+### Github link
 
 </center>
 
 <center><https://github.com/KylianSts/CNC_INSEE_project></center>
+
+<br>
 
 ```{r Configuration, warning=FALSE, echo=FALSE, message=FALSE}
 here::i_am("CNC_INSEE_project.Rproj")
@@ -25,8 +29,6 @@ library(readxl)
 
 # A presentation of the project
 
-</center>
-
 ## Sources
 
 This project is powered by two databases :
@@ -34,6 +36,8 @@ This project is powered by two databases :
 -   CNC's "**Exploitation - data by department**" : <https://www.cnc.fr/cinema/etudes-et-rapports/exploitation--donnees-par-departement_223440>
 
 -   INSEE's "***Harmonized population census data from 1968***" : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
+
+<br>
 
 ### "Exploitation - data by departement"
 
@@ -46,6 +50,8 @@ The database "Exploitation - data by department" is one of the aforementioned op
 -   the **list of cinemas** authorized by the agency
 
 -   and their "bordereaux des recettes" which can be roughly translated by "**revenue slips**"
+
+<br>
 
 ### "***Harmonized population census data from 1968***"
 
@@ -69,6 +75,8 @@ The database that will be used in this project is an harmonized compilation of d
 
 It can be downloaded from the [INSEE website](https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232) in a DBF or CSV format.
 
+<br>
+
 ### Modification of the original databases
 
 The two databases underwent transformation to be exploitable for our project. The main problem of the Insee one is that it consumes a lot of RAM because of its size (3GB). Indeed some categorial variables have an important number of "categories"/"levels". For example, the variable on the age of the population contains 120 levels, one by each possible year of life of an individual. The result is that the number of potential combinations, and therefore of rows, among all variables is impressively large contributing to the important size of the database.
@@ -85,6 +93,8 @@ Our work was to reduce the number of these combinations in order to downsize the
 The process that we used is detailed in the quarto document entitled "Parallel_code_Insee" that is available in this R project. We ha ve preferred to put it in a separate qmd because of the important size of the database linked with its code.
 
 The CNC's data was less memory-consuming. However their format was not convenient for coding with R. Indeed, the original XSLX document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
+
+<br>
 
 #### Formating and cleaning of the CNC database
 
@@ -144,6 +154,8 @@ cnc_data_clean <- left_join(cnc_data_clean, multiplexes_with_0, by = c("departem
 
 In the original "Multiplexes" sheet, NA value were assigned when there were 0 multiplexes. We replaced this NA value with 0. and ensured that this replacement only occurs for the year when data had been collected
 
+<br>
+
 ### Description of the final bases before merging
 
 The final result is two modified datasets.
@@ -165,17 +177,16 @@ cnc_data_clean %>%
 **Insee_clean_v3**
 
 ```{r Nb_rows_and_columns_Insee, echo=FALSE}
-Insee_cleanv3 %>%
+insee_data %>%
   summarize("Number of rows" = prettyNum(nrow(.), big.mark = " "),
             "Number of columns" = ncol(.))%>%
-  t() %>%knitr::kable(caption = "Description of the Insee_cleanv3 database", format = "html", align='c')
+  t() %>%
+  knitr::kable(caption = "Description of the Insee_cleanv3 database", format = "html", align='c')
 ```
 
-<center>
+<br>
 
 #### Description of the variables
-
-</center>
 
 We have in the CNC database different variables :
 
@@ -194,16 +205,14 @@ And we have the same for Arthouse. the term Arthouse refers to so-called auteur 
 Insee database is a sociodemographic description of each department with variables such as :
 
 -   "**DEP_RES_21**" represents the **department of residence where individuals live**
--   "**AGE_GROUP**" is our computed data representing the a**ge of the population by range of 15 years**.
+-   "**AGE_GROUP**" is our computed data representing the **age of the population by range of 15 years**.
 -   "**TYP_ACT**" give us the **type of activity** .
 -   "**CSP**" is a categorial data that has for levels **socio-professional category**
 -   "**POND2**" gives us **the number of** **inhabitants** a**ccording the combination of all previous variables**
 
-</center>
+<br>
 
 #### Merging the INSEE and CNC database
-
-</center>
 
 ```{r insee_database}
 insee_data <- insee_data |> rename(departement_code = DEP_RES_21, year =  AN_RECENS)
@@ -220,8 +229,14 @@ data_clean <- data_merge |>
   filter(!is.na(POND2))
 ```
 
-```{r}
+```{r message=FALSE, echo=FALSE, results='hide'}
 data_clean |> group_by(year) |>  summarise(across(everything(), ~sum(is.na(.)), .names = "missing_{.col}")) 
 
 data_clean |> group_by(year) |>  summarise(nb_value = n())
 ```
+
+<br>
+
+## Research question
+
+The main question we aim to answer in this paper is : **"How has the cinema landscape evolved over the last 50 years in France, and what role do sociodemographic factors play in these changes?"**
