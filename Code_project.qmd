@@ -164,6 +164,22 @@ cnc_data_clean <- left_join(cnc_data_clean, multiplexes_with_0, by = c("departem
 
 In the original "Multiplexes" sheet, NA value were assigned when there were 0 multiplexes. We replaced this NA value with 0. and ensured that this replacement only occurs for the year when data had been collected
 
+```{r}
+rme <- cnc_data_clean |> select(RME)
+rmeAE <- cnc_data_clean |> select(RMEAE)
+tmof <- cnc_data_clean |> select(`taux d'occupation des fauteuils`)
+tmofAE <- cnc_data_clean |> select(tmofAE)
+
+cnc_data_clean <- cnc_data_clean |> select(-`indice de fréquentation`, 
+                                           -`indice de fréquentationAE`, 
+                                           -RME, 
+                                           -RMEAE,
+                                           -`taux d'occupation des fauteuils`,
+                                           -tmofAE)
+```
+
+We exclude redundant variables from the final, cleaned database and retain them in separate variables. This ensures that the excluded variables are preserved for future reference, eliminating the need to recalculate them later on.
+
 <br>
 
 ### Description of the final bases before merging
