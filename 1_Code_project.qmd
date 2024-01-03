@@ -337,6 +337,8 @@ Attendance_nat <- Attendance_nat %>%
   arrange(year) %>% 
   mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
 
+#Computation of the growth rate between 1966 and 1992
+
 Growth_rate_1966_1992 <- Attendance_nat %>%
   filter(year %in% c(1966, 1992)) %>%  
   select(-Growth)
@@ -347,6 +349,23 @@ Growth_rate_1966_1992 <-Growth_rate_1966_1992 %>%
   pull(Growth) %>% 
   round(.,digits = 2)
 
+#Computation of the average growth rate between 1966 and 1992
+
+nrow_1966_1992 <-
+  Attendance_nat %>% 
+  filter(year<1993) %>% 
+  nrow()
+
+Av_Growth_rate_1966_1992 <- Attendance_nat %>% 
+  filter(year %in% c(1966,1992)) %>% 
+  select(-Growth) %>% 
+  mutate(Growth = ((Attendance / lag(Attendance))^(1/nrow_1966_1992) - 1) * 100) %>% 
+  filter(!is.na(Growth))  %>% 
+  pull(Growth) %>%
+  round(., digits=1)
+
+#Computation of the growth rate between 1966 and 1969
+
 Growth_rate_1966_1969 <- Attendance_nat %>%
   filter(year %in% c(1966, 1969)) %>%  
   select(-Growth)
@@ -356,6 +375,8 @@ Growth_rate_1966_1969 <-Growth_rate_1966_1969 %>%
   filter(!is.na(Growth)) %>% 
   pull(Growth) %>% 
   round(.,digits = 2)
+
+#Computation of the growth rate between 1982 and 1992
 
 Growth_rate_1982_1992 <- Attendance_nat %>%
   filter(year %in% c(1982, 1992)) %>%  
@@ -368,7 +389,7 @@ Growth_rate_1982_1992 <-Growth_rate_1982_1992 %>%
   round(.,digits = 2)
 ```
 
-Our analytic journey starts in 1966, which is the first availabe year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` %). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance droped by `r abs(Growth_rate_1966_1969)` %. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
+Our analytic journey starts in 1966, which is the first availabe year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992` % during the period). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance droped by `r abs(Growth_rate_1966_1969)` %. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
 
 ```{r}
 #Graphic of the evolution of attendance in time
@@ -412,7 +433,7 @@ Att_graph2 <-Attendance_nat %>%
   ggplot(aes(x = year, y = Growth, fill=Growth_rate)) +
   geom_col() +
   scale_fill_manual(values = c("lightblue", "orange")) +
-  scale_y_continuous(labels = scales::percent_format(scale = 1), limits = c(-25, 12)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
   labs(title = "Growth rate by year [1967-1992]", x="Year", y="Growth rate by year", fill="Growth rate") +
   theme_minimal()
 
@@ -427,9 +448,85 @@ browsable(F_Att_graph2)
 
 ### "Act 2" - The resurgence
 
+```{r}
+
+Att_graph3 <- Attendance_nat %>% 
+  filter(year >1992 & year<2019) %>% 
+  ggplot(aes(x = year, y = Attendance)) +
+  geom_line(color="orange") +
+  scale_y_continuous(labels = scales::number_format())+ 
+  labs(title ="Attendance in France by year [1993-2018]", x="Year", y="Attendance")+
+  theme_minimal()
+
+F_Att_graph3 <-ggplotly(Att_graph3)
+
+htmlwidgets::saveWidget(F_Att_graph3, file = "C:/Users/cedri/OneDrive/Documents/Dauphine/M1 Quantitative Economics/Data Management/Peer project/CNC_INSEE_project/F_Att_graph3.html")
+
+browsable(F_Att_graph3)
+
+
+```
+
+<br>
+
+```{r}
+Att_graph4 <-Attendance_nat %>% 
+  filter(year >1992 & year<2019) %>% 
+  mutate(Growth_rate=ifelse(Growth<0, "Negative", "Positive")) %>% 
+  ggplot(aes(x = year, y = Growth, fill=Growth_rate)) +
+  geom_col() +
+  scale_fill_manual(values = c("lightblue", "orange")) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
+  labs(title = "Growth rate by year [1993-2018]", x="Year", y="Growth rate by year", fill="Growth rate") +
+  theme_minimal()
+
+F_Att_graph4 <-ggplotly(Att_graph4)
+
+htmlwidgets::saveWidget(F_Att_graph4, file = "C:/Users/cedri/OneDrive/Documents/Dauphine/M1 Quantitative Economics/Data Management/Peer project/CNC_INSEE_project/F_Att_graph4.html")
+
+browsable(F_Att_graph4)
+```
+
 <br>
 
 ### "Act 3" - Modern era
+
+```{r}
+Att_graph5 <- Attendance_nat %>% 
+  filter(year >2018) %>% 
+  ggplot(aes(x = year, y = Attendance)) +
+  geom_line(color="orange") +
+  scale_y_continuous(labels = scales::number_format())+ 
+  labs(title ="Attendance in France by year [2019-2022] - Dynamic graph", x="Year", y="Attendance")+
+  theme_minimal()
+
+F_Att_graph5 <-ggplotly(Att_graph5)
+
+htmlwidgets::saveWidget(F_Att_graph5, file = "C:/Users/cedri/OneDrive/Documents/Dauphine/M1 Quantitative Economics/Data Management/Peer project/CNC_INSEE_project/F_Att_graph5.html")
+
+browsable(F_Att_graph5)
+
+```
+
+<br>
+
+```{r}
+Att_graph6 <-Attendance_nat %>% 
+  filter(year >2018) %>% 
+  mutate(Growth_rate=ifelse(Growth<0, "Negative", "Positive")) %>% 
+  ggplot(aes(x = year, y = Growth, fill=Growth_rate)) +
+  geom_col() +
+  scale_fill_manual(values = c("lightblue", "orange")) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
+  labs(title = "Growth rate by year [2019-2022]", x="Year", y="Growth rate by year", fill="Growth rate") +
+  theme_minimal()
+
+F_Att_graph6 <-ggplotly(Att_graph6)
+
+htmlwidgets::saveWidget(F_Att_graph6, file = "C:/Users/cedri/OneDrive/Documents/Dauphine/M1 Quantitative Economics/Data Management/Peer project/CNC_INSEE_project/F_Att_graph6.html")
+
+browsable(F_Att_graph6)
+```
 
 <br>
 
