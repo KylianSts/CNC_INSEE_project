@@ -12,7 +12,7 @@ execute :
 
 # Presentation of the document
 
-<center>
+</center>
 
 The codes below describe the steps we used to reduce the size of the initial Insee 3 GB database in a smaller - and therefore more workable - database.
 

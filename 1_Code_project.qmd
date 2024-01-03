@@ -287,26 +287,78 @@ In essence, our research delves into the recent history of movie theaters in Fra
 
 <br>
 
+# Evolution of the cinema market in time : a description of the major trend
+
+## Introduction : the "golden age" of the first half of the 20th century
+
+The history of the movie theater market unfolds on a winter day. In December 28th 1895, two brothers August and Louis Lumiere gave the first commercial public screening. Because a good history is full of happy coincidences, it is in France, at the Salon Indien du Grand Café in Paris that the two brothers used their *cinématographe*.
+
+![](Pictures and illustrations/cinema-lumiere.jpg)
+
+The movie theaters market experienced fast growth. According to Muhlberger (2013), in 1920s, cinema became a mass leisure activity in France but also in the USA and numerous European countries. In the Hexagon, cinema market fully blossomed a decade later. The period between 1929 and 1957 is often described as a golden age for cinema in France. Movie theaters attendance reached its zenith, with peaks beyond 400 millions entries. In a report for the French Senate, Thiolliere and Ralite (2003) link this fast period with the introduction of talking films.
+
+<br>
+
+The importance of cinema during this period maybe undestimated by our contemporary eyes. However, the two senatorial rapporteur explain that :
+
+*“We forget too often \[...\] that until the advent of the ‘petite lucarne’ (i.e. television) in households, cinema had a monopoly on the broadcasting of images. People frequented the theater, not to see a film, but rather to watch a program consisting of one or more short films, news, the trailer for the next film and, after the intermission and advertising, of the ‘feature film’. ”*
+
+<center>
+
+**THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.** L'évolution du secteur de l'exploitation cinématographique, Rapport d’information sénatoriale n°308 (2002-2003)
+
+</center>
+
+<br>
+
+Nevertheless, as in many stories, the golden age is not eternal. Ours knew its dawns in 1957. Attendance collapsed between 1957 and 1966. It more than halved in 10 years. The arrival of television is often cited as not the sole but a pivotal factor in this decline, which we will see will continue during most of the 20th century.
+
+<br>
+
+## Evolution of cinema in France from 1966 to 2018 : a global perspective
+
+<br>
+
+### "Act 1, Scene 1" - The decline continues
+
+<br>
+
+### "Act 2" - The resurgence
+
+<br>
+
+### "Act 3" - Modern era
+
+<br>
+
 # Bibliography
 
-**Blanchard, Jean-Philippe (2014).** "Multiplexes, public de banlieue et création cinématographique française : caractère marchand de l'ethnicité sur grand écran". *Migrations Société*, 151, 153-164. <https://doi.org/10.3917/migra.151.0153>
+**BLANCHARD Jean-Philippe, 2014.** " Multiplexes, public de banlieue et création cinématographique française : caractère marchand de l'ethnicité sur grand écran ". *Migrations Société*, 151, 153-164. <https://doi.org/10.3917/migra.151.0153>
 
-**CNC, 2008.** Evolution du public des salles de cinéma 1993-2007, les études du CNC
+**CNC, 2008.** " Evolution du public des salles de cinéma 1993-2007 ". *Les études du CNC*
 
-**CNC,2013.** L’évolution du public  des salles de cinéma 1993-2012, les études du CNC, septembre 2013
+**CNC, 2013.** " L’évolution du public des salles de cinéma 1993-2012 ". *Les études du CNC*, *septembre 2013*
 
-**CNC, 2016.** Les publics du cinéma 1993-2015, les études du CNC, septembre 2016
+**CNC, 2016.** " Les publics du cinéma 1993-2015 ", *Les études du CNC, septembre 2016*
 
-**CNC, 2020.** Observatoire de la diffusion et de la fréquentation cinématographiques - Indicateurs permanents  Année 2018
+**CNC, 2020.** Observatoire de la diffusion et de la fréquentation cinématographiques - Indicateurs permanents Année 2018
 
-**CRETON Laurent, 2011.** Économie du cinéma et multiplication des supports de diffusion. Le cas français entre exemplarité et incertitude. *Le cinéma: permanences et métamorphoses*, 180, Raison présente, 2011.
+**CRETON Laurent, 2011.** " Économie du cinéma et multiplication des supports de diffusion. Le cas français entre exemplarité et incertitude ". *Le cinéma: permanences et métamorphoses*, 180, Raison présente, 2011.
 
-**DURAND Jacques, 1960.** Le film et son marché. *Esprit, Nouvelle série*, No. 285 (6), pp. 1024-1033
+**DURAND Jacques, 1960.** " Le film et son marché " . *Esprit, Nouvelle série*, No. 285 (6), pp. 1024-1033
 
 URL: <https://www.jstor.org/stable/24255988>
 
-**DUVAL Julien, 2011.** « L'offre et les goûts cinématographiques en France ». *Sociologie*, 2011/1 (Vol. 2), p. 1-18. DOI : 10.3917/socio.021.0001.
+**DUVAL Julien, 2011.** " L'offre et les goûts cinématographiques en France ". *Sociologie*, 2011/1 (Vol. 2), p. 1-18. DOI : 10.3917/socio.021.0001.
 
 URL : <https://www.cairn.info/revue-sociologie-2011-1-page-1.htm>
 
 **MUHLBERGER David 2013.** Cinema attendance during crises is there a relationship between cinema attendance and the state of the economy in France in the period 1992-2012?
+
+**SHUAI Cao, 2020.** " La politique publique du cinéma en France (1981-2012) ". *Territoires contemporains - nouvelle série \[en ligne\]*, 2 septembre 2020,
+
+URL : <http://tristan.u-bourgogne.fr/CGC/prodscientifique/TC.html>
+
+**THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.** L'évolution du secteur de l'exploitation cinématographique, Rapport d’information sénatoriale n°308 (2002-2003)
+
+URL : <https://www.senat.fr/rap/r02-308/r02-308_mono.html#toc5>
