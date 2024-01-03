@@ -3,6 +3,9 @@ title: "Role of sociodemographic factors in the French cinema landscape over the
 author: "Kylian SANTOS and Cédric BAZILE"
 format: html
 editor: visual
+execute :
+  echo: FALSE
+  warning: FALSE
 ---
 
 <br>
@@ -25,6 +28,7 @@ library(here)
 library(dplyr)
 library(tidyr)
 library(readxl)
+library(ggplot2)
 ```
 
 # A presentation of the project
@@ -141,7 +145,7 @@ cnc_data_clean <- cnc_data_merge |>
   filter(!is.na(departement_code))
 ```
 
-Additionallu, each sheet includes a row which represents the total. We preferred to exclude it in order to simplify next statistical treatment.
+Additionally, each sheet includes a row which represents the total. We preferred to exclude it in order to simplify next statistical treatment.
 
 ```{r replace_NA_by_0_multiplexes, message = FALSE}
 
@@ -293,7 +297,7 @@ In essence, our research delves into the recent history of movie theaters in Fra
 
 The history of the movie theater market unfolds on a winter day. In December 28th 1895, two brothers August and Louis Lumiere gave the first commercial public screening. Because a good history is full of happy coincidences, it is in France, at the Salon Indien du Grand Café in Paris that the two brothers used their *cinématographe*.
 
-![](Pictures and illustrations/cinema-lumiere.jpg)
+![](Pictures and illustrations/cinema-lumiere.jpg){fig-align="center"}
 
 The movie theaters market experienced fast growth. According to Muhlberger (2013), in 1920s, cinema became a mass leisure activity in France but also in the USA and numerous European countries. In the Hexagon, cinema market fully blossomed a decade later. The period between 1929 and 1957 is often described as a golden age for cinema in France. Movie theaters attendance reached its zenith, with peaks beyond 400 millions entries. In a report for the French Senate, Thiolliere and Ralite (2003) link this fast period with the introduction of talking films.
 
@@ -311,7 +315,7 @@ The importance of cinema during this period maybe undestimated by our contempora
 
 <br>
 
-Nevertheless, as in many stories, the golden age is not eternal. Ours knew its dawns in 1957. Attendance collapsed between 1957 and 1966. It more than halved in 10 years. The arrival of television is often cited as not the sole but a pivotal factor in this decline, which we will see will continue during most of the 20th century.
+Nevertheless, as in many stories, the golden age is not eternal. Ours knew its dawn in 1957. Attendance collapsed. It more than halved between 1957 and 1966. The arrival of television is often cited as not the sole but a pivotal factor in this decline, which we will see will continue during most of the 20th century.
 
 <br>
 
@@ -320,6 +324,104 @@ Nevertheless, as in many stories, the golden age is not eternal. Ours knew its d
 <br>
 
 ### "Act 1, Scene 1" - The decline continues
+
+```{r}
+#Aggregate of attendance by year 
+Attendance_nat <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  summarize(Attendance = sum(entrées, na.rm = TRUE))
+
+
+#Computation of the growth rate of attendance by year
+Attendance_nat <- Attendance_nat %>% 
+  arrange(year) %>% 
+  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
+
+Growth_rate_1966_1992 <- Attendance_nat %>%
+  filter(year %in% c(1966, 1992)) %>%  
+  select(-Growth)
+
+Growth_rate_1966_1992 <-Growth_rate_1966_1992 %>% 
+  reframe(Growth=(Attendance-lag(Attendance))/lag(Attendance)*100) %>% 
+  filter(!is.na(Growth)) %>% 
+  pull(Growth) %>% 
+  round(.,digits = 2)
+
+Growth_rate_1966_1969 <- Attendance_nat %>%
+  filter(year %in% c(1966, 1969)) %>%  
+  select(-Growth)
+
+Growth_rate_1966_1969 <-Growth_rate_1966_1969 %>% 
+  reframe(Growth=(Attendance-lag(Attendance))/lag(Attendance)*100) %>% 
+  filter(!is.na(Growth)) %>% 
+  pull(Growth) %>% 
+  round(.,digits = 2)
+
+Growth_rate_1982_1992 <- Attendance_nat %>%
+  filter(year %in% c(1982, 1992)) %>%  
+  select(-Growth)
+
+Growth_rate_1982_1992 <-Growth_rate_1982_1992 %>% 
+  reframe(Growth=(Attendance-lag(Attendance))/lag(Attendance)*100) %>% 
+  filter(!is.na(Growth)) %>% 
+  pull(Growth) %>% 
+  round(.,digits = 2)
+```
+
+Our analytic journey starts in 1966, which is the first availabe year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` %). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance droped by `r abs(Growth_rate_1966_1969)` %. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
+
+```{r}
+#Graphic of the evolution of attendance in time
+
+library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
+
+Att_graph1 <- Attendance_nat %>% 
+  filter(year < 1993) %>% 
+  ggplot(aes(x = year, y = Attendance)) +
+  geom_line(color="orange") +
+  scale_y_continuous(labels = scales::number_format())+ 
+  labs(title ="Attendance in France by year [1966-1992] - Dynamic graph", x="Year", y="Attendance")+
+  theme_minimal()
+
+library(plotly) #plotly will allow us to create interactive graph
+Att_graph1$yaxis$title <- list(tickformat = ",.3s")
+
+F_Att_graph1 <-ggplotly(Att_graph1)
+
+
+library(htmlwidgets) 
+#WWe had an issue with path creation using the classic print function, making it impossible to render the final dynamic graph. The utilization of Htmlwidgets and htmltools helped us overcome the problem, ensuring that our interactive graph appears in the final rendering.
+
+
+htmlwidgets::saveWidget(F_Att_graph1, file = "C:/Users/cedri/OneDrive/Documents/Dauphine/M1 Quantitative Economics/Data Management/Peer project/CNC_INSEE_project/F_Att_graph1.html")
+
+library(htmltools)
+browsable(F_Att_graph1)
+
+
+
+```
+
+18 of the 26 years between 1966 (not included) and 1992 (included) are thus characterized by a negative attendance's growth rate.
+
+```{r}
+#Graphic of the Growth by year
+Att_graph2 <-Attendance_nat %>% 
+  filter(year < 1993 & year>1966) %>% 
+  mutate(Growth_rate=ifelse(Growth<0, "Negative", "Positive")) %>% 
+  ggplot(aes(x = year, y = Growth, fill=Growth_rate)) +
+  geom_col() +
+  scale_fill_manual(values = c("lightblue", "orange")) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1), limits = c(-25, 12)) + 
+  labs(title = "Growth rate by year [1967-1992]", x="Year", y="Growth rate by year", fill="Growth rate") +
+  theme_minimal()
+
+F_Att_graph2 <-ggplotly(Att_graph2)
+
+htmlwidgets::saveWidget(F_Att_graph2, file = "C:/Users/cedri/OneDrive/Documents/Dauphine/M1 Quantitative Economics/Data Management/Peer project/CNC_INSEE_project/F_Att_graph2.html")
+
+browsable(F_Att_graph2)
+```
 
 <br>
 
