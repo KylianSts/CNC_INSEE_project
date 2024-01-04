@@ -309,7 +309,6 @@ The importance of cinema during this period maybe undestimated by our contempora
 
 <center>*THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.* L'évolution du secteur de l'exploitation cinématographique, Rapport d'information sénatoriale n°308 (2002-2003)</center>
 
-
 <br>
 
 Nevertheless, as in many stories, the golden age is not eternal. Ours knew its dawn in 1957. Attendance collapsed. It more than halved between 1957 and 1966. The arrival of television is often cited as not the sole but a pivotal factor in this decline, which we will see will continue during most of the 20th century.
@@ -429,6 +428,82 @@ F_Att_graph2
 ```
 
 <br>
+
+Chang
+
+```{r}
+#Aggregation of the number of chairs and screens at the national level
+Equip_nat <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  summarize(Screens = sum(écrans, na.rm = TRUE), Chairs=sum(fauteuils, na.rm=TRUE))
+
+
+
+
+#Addition of base index 100 variable
+
+Equip_nat <- Equip_nat %>%  mutate(Screens_b100=Screens/Screens[year==1966], Chairs_b100=Chairs/Chairs[year==1966])
+
+
+
+#Evolution of the number of chairs
+Ch_graph1 <- Equip_nat %>% 
+  ggplot(aes(x=year, y=Chairs)) +
+  geom_line(color="brown")+
+  labs(title = "Number of chairs", x="Year", y="Number of chairs")+
+  theme_minimal()
+
+F_Ch_graph1 <- ggplotly(Ch_graph1)
+
+
+F_Ch_graph1
+
+#Evolution of the number of screens
+Sc_graph1 <- Equip_nat %>% 
+  ggplot(aes(x=year, y=Screens)) +
+  geom_line(color="red")
+  labs(title = "Number of screens by year", x="Year", y="Number of chairs")+
+  theme_minimal()
+
+Sc_graph1$yaxis$title <- list(tickformat = ",.3s")
+F_Sc_graph1 <- ggplotly(Sc_graph1)
+
+
+F_Sc_graph1
+
+#Comparaison the number of chairs and screens
+Ch_Sc_graph1 <- Equip_nat %>% 
+  ggplot(aes(x=year)) +
+  geom_line(aes(y=Chairs_b100), color="brown") +
+  geom_line(aes(y=Screens_b100), color="red")
+  labs(title = "Comparaison of the number of chairs and screens (base index 100)", x="Year", y="Number of chairs")+
+  theme_minimal()
+
+Ch_Sc_graph1$yaxis$title <- list(tickformat = ",.3s")
+F_Ch_Sc_graph1 <- ggplotly(Ch_Sc_graph1)
+
+
+F_Ch_Sc_graph1
+```
+
+```{r}
+#Ratio screen/chair
+Equip_nat <- Equip_nat %>% 
+  mutate(Chairs_by_screens = Chairs/Screens)
+
+
+Ch_Sc_graph2 <- Equip_nat %>% 
+  ggplot(aes(x=year,y=Chairs_by_screens))+
+  geom_bar(stat="identity")+
+  labs(title = "Ratio of Chairs by Screens in France by Year", x="Year", y="Chairs by Screen")+
+  theme_minimal()
+
+F_Ch_Sc_graph2 <- ggplotly(Ch_Sc_graph2)
+
+
+F_Ch_Sc_graph2
+
+```
 
 ### "Act 2" - The resurgence
 
