@@ -278,8 +278,8 @@ A central question will guide our research : **"How has the movie theater landsc
 The databases at our disposal will help us to explore this question by looking into the following key aspects:
 
 1.  **Evolution of the Market :** The information provided will help us understand how the movie theater market has evolved in terms of volumes over the last fifty years. One of the key aspects in exploring this question will be to examine the market evolution in terms of venues (établissements). However, the number of movie theaters will not be our sole indicator. Indeed, the number of sessions (séances), seats (fauteuils), and screens (écrans) will be complementary variables that can help us to put under the spotlight potential trends that may not be apparent when solely examining the number of venues.  Employing panel data has a dual utility here. It not only enables us to capture the overall temporal trends but also to observe potential cross-sectional differences. Indeed, one of our key objectives is to comprehend whether divergences in trajectories and characteristics exist among the various French departments.
-
-2.  **Structural Shifts with Multiplexes:** A zoom on the multiplexes permits evaluating a recent structural transformation in the movie theater industry. The first one appears in France during the end of the 1990s and can be arguably seen as a shift in the cinema market. Blanchard ([2014](https://www.cairn.info/revue-migrations-societe-2014-1-page-153.htm)) argues that these facilities "have contributed to the resurgence of attendance, notably by making the cinema more accessible to suburban residents." Furthermore, despite their relative novelty, they represent an important share of the market industry.
+t in the cinema market. Blanchard ([2014](https://www.cairn.info/revue-migrations-societe-2014-1-page-153.htm)) argues that these facilities "have contributed to the resurgence of attendance, notably by making the cinema more accessible to sub
+2.  **Structural Shifts with Multiplexes:** A zoom on the multiplexes permits evaluating a recent structural transformation in the movie theater industry. The first one appears in France during the end of the 1990s and can be arguably seen as a shifurban residents." Furthermore, despite their relative novelty, they represent an important share of the market industry.
 
 3.  **Economic Health of the Industry:** Variables such as the number of tickets bought (entrées) and total revenue (recettes) will also be complementary and potentially important information. They will notably be key tools for gauging the economic vitality of the industry and determining if the economic dynamics align with the stock of venues, seats, and their past investments.
 
@@ -326,6 +326,10 @@ Nevertheless, as in many stories, the golden age is not eternal. Ours knew its d
 Attendance_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
   summarize(Attendance = sum(entrées, na.rm = TRUE))
+
+Attendance_AE_nat <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  summarize(Attendance = sum(entréesAE, na.rm = TRUE))
 
 
 #Computation of the growth rate of attendance by year
@@ -383,6 +387,14 @@ Growth_rate_1982_1992 <-Growth_rate_1982_1992 %>%
   filter(!is.na(Growth)) %>% 
   pull(Growth) %>% 
   round(.,digits = 2)
+
+multiplex_nat <- cnc_data_clean %>% 
+  filter(year >= 1992) %>% 
+  group_by(year) %>% 
+  summarize(nb_multiplex = sum(multiplexes, na.rm = TRUE), 
+            nb_etablissement = sum(établissements, na.rm = TRUE),
+            share_multiplexe = (nb_multiplex /nb_etablissement)*100
+            )
 ```
 
 Our analytic journey starts in 1966, which is the first availabe year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992` % during the period). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance droped by `r abs(Growth_rate_1966_1969)` %. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
@@ -520,7 +532,6 @@ Att_graph3 <- Attendance_nat %>%
 F_Att_graph3 <-ggplotly(Att_graph3)
 
 F_Att_graph3
-
 ```
 
 <br>
@@ -539,6 +550,32 @@ Att_graph4 <-Attendance_nat %>%
 F_Att_graph4 <-ggplotly(Att_graph4)
 
 F_Att_graph4
+```
+
+```{r}
+ Att_graph8 <- multiplex_nat %>% 
+  filter(year >1992) %>% 
+  ggplot(aes(x = year, y = nb_multiplex)) +
+  geom_line(color="orange") +
+  scale_y_continuous(labels = scales::number_format())+ 
+  theme_minimal()
+
+F_Att_graph8 <-ggplotly(Att_graph8)
+
+F_Att_graph8
+```
+
+```{r}
+ Att_graph10 <- multiplex_nat %>% 
+  filter(year >1992) %>% 
+  ggplot(aes(x = year, y = share_multiplexe)) +
+  geom_line(color="orange") +
+  scale_y_continuous(labels = scales::number_format())+ 
+  theme_minimal()
+
+F_Att_graph10 <-ggplotly(Att_graph10)
+
+F_Att_graph10
 ```
 
 <br>
@@ -578,6 +615,22 @@ F_Att_graph6
 ```
 
 <br>
+
+### Art et Essaie en hausse
+
+```{r}
+Att_graph7 <- Attendance_AE_nat %>% 
+  filter(year >2001) %>% 
+  ggplot(aes(x = year, y = Attendance)) +
+  geom_line(color="orange") +
+  scale_y_continuous(labels = scales::number_format())+ 
+  labs(title ="Attendance AE in France by year [2002-2022]", x="Year", y="Attendance")+
+  theme_minimal()
+
+F_Att_graph7 <-ggplotly(Att_graph7)
+
+F_Att_graph7
+```
 
 # Bibliography
 
