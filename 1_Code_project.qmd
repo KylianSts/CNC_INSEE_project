@@ -238,7 +238,7 @@ We have in the CNC database different variables :
 -   "**entrées**" represents the total **number of tickets bought [in million]{.underline}** for each department
 -   "**recettes**" represents the **total** **revenue in million** for each department
 -   "**RME**" represents the **average revenue by bought tickets**
--   "**Taux d'occupation des fauteuils**" is the ratio between **entries during the year and the product between the number of chairs and the number of sessions**. Taux d'occupation des fauteuils makes it possible to assess the [**"fullness" of the rooms.**]{.underline}
+-   "**Taux d'occupation des fauteuils**" is the ratio between **entries during the year and the product between the number of seats and the number of sessions**. Taux d'occupation des fauteuils makes it possible to assess the [**"fullness" of the rooms.**]{.underline}
 
 And we have the same for Arthouse. the term Arthouse refers to so-called auteur films, economically independent, with small budgets, open to the different cultures of the world. An Arthouse cinema is a cinematographic establishment which exhibits a significant proportion of recommended Arthouse films and which supports these often difficult films with an adapted animation policy.
 
@@ -277,8 +277,8 @@ A central question will guide our research : **"How has the movie theater landsc
 
 The databases at our disposal will help us to explore this question by looking into the following key aspects:
 
-1.  **Evolution of the Market :** The information provided will help us understand how the movie theater market has evolved in terms of volumes over the last fifty years. One of the key aspects in exploring this question will be to examine the market evolution in terms of venues (établissements). However, the number of movie theaters will not be our sole indicator. Indeed, the number of sessions (séances), seats (fauteuils), and screens (écrans) will be complementary variables that can help us to put under the spotlight potential trends that may not be apparent when solely examining the number of venues.  Employing panel data has a dual utility here. It not only enables us to capture the overall temporal trends but also to observe potential cross-sectional differences. Indeed, one of our key objectives is to comprehend whether divergences in trajectories and characteristics exist among the various French departments.
-t in the cinema market. Blanchard ([2014](https://www.cairn.info/revue-migrations-societe-2014-1-page-153.htm)) argues that these facilities "have contributed to the resurgence of attendance, notably by making the cinema more accessible to sub
+1.  **Evolution of the Market :** The information provided will help us understand how the movie theater market has evolved in terms of volumes over the last fifty years. One of the key aspects in exploring this question will be to examine the market evolution in terms of venues (établissements). However, the number of movie theaters will not be our sole indicator. Indeed, the number of sessions (séances), seats (fauteuils), and screens (écrans) will be complementary variables that can help us to put under the spotlight potential trends that may not be apparent when solely examining the number of venues.  Employing panel data has a dual utility here. It not only enables us to capture the overall temporal trends but also to observe potential cross-sectional differences. Indeed, one of our key objectives is to comprehend whether divergences in trajectories and characteristics exist among the various French departments. t in the cinema market. Blanchard ([2014](https://www.cairn.info/revue-migrations-societe-2014-1-page-153.htm)) argues that these facilities "have contributed to the resurgence of attendance, notably by making the cinema more accessible to sub
+
 2.  **Structural Shifts with Multiplexes:** A zoom on the multiplexes permits evaluating a recent structural transformation in the movie theater industry. The first one appears in France during the end of the 1990s and can be arguably seen as a shifurban residents." Furthermore, despite their relative novelty, they represent an important share of the market industry.
 
 3.  **Economic Health of the Industry:** Variables such as the number of tickets bought (entrées) and total revenue (recettes) will also be complementary and potentially important information. They will notably be key tools for gauging the economic vitality of the industry and determining if the economic dynamics align with the stock of venues, seats, and their past investments.
@@ -320,6 +320,8 @@ Nevertheless, as in many stories, the golden age is not eternal. Ours knew its d
 <br>
 
 ### "Act 1, Scene 1" - The decline continues
+
+#### Evolution of the attendance between 1966 and 1992
 
 ```{r}
 #Aggregate of attendance by year 
@@ -388,7 +390,8 @@ Growth_rate_1982_1992 <-Growth_rate_1982_1992 %>%
   pull(Growth) %>% 
   round(.,digits = 2)
 
-multiplex_nat <- cnc_data_clean %>% 
+#Statistics on multiplexes
+Multiplex_nat <- cnc_data_clean %>% 
   filter(year >= 1992) %>% 
   group_by(year) %>% 
   summarize(nb_multiplex = sum(multiplexes, na.rm = TRUE), 
@@ -420,7 +423,9 @@ F_Att_graph1 <- ggplotly(Att_graph1)
 F_Att_graph1
 ```
 
-18 of the 26 years between 1966 (not included) and 1992 (included) are thus characterized by a negative attendance's growth rate.
+<br>
+
+18 of the 26 years between 1966 (not included) and 1992 (included) are thus characterized by a negative attendance's growth rate.The causes of this degrowth are multifactorial. The democratisation of television and of automobile are however presented as one of the the key factors of this decay.
 
 ```{r}
 #Graphic of the Growth by year
@@ -441,83 +446,121 @@ F_Att_graph2
 
 <br>
 
-Chang
+#### Evolution of the structure of the market
+
+The number of seats strongly declined during this period. As we can see on the graphic below, while the Hexagon welcomed 2,4 million of cinema seats in 1966, only 93 000 seats characetrized the French market in 1992.
 
 ```{r}
-#Aggregation of the number of chairs and screens at the national level
+#Aggregation of the number of Seats and screens at the national level
 Equip_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
-  summarize(Screens = sum(écrans, na.rm = TRUE), Chairs=sum(fauteuils, na.rm=TRUE))
+  summarize(Screens = sum(écrans, na.rm = TRUE), Seats=sum(fauteuils, na.rm=TRUE))
 
 
-
-
-#Addition of base index 100 variable
-
-Equip_nat <- Equip_nat %>%  mutate(Screens_b100=Screens/Screens[year==1966], Chairs_b100=Chairs/Chairs[year==1966])
-
-
-
-#Evolution of the number of chairs
-Ch_graph1 <- Equip_nat %>% 
-  ggplot(aes(x=year, y=Chairs)) +
+#Evolution of the number of Seats
+Se_graph1 <- Equip_nat %>% 
+  filter(year<1993) %>% 
+  ggplot(aes(x=year, y=Seats)) +
   geom_line(color="brown")+
-  labs(title = "Number of chairs", x="Year", y="Number of chairs")+
+  labs(title = "Number of Seats in France", x="Year", y="Number of Seats")+
   theme_minimal()
 
-F_Ch_graph1 <- ggplotly(Ch_graph1)
+F_Se_graph1 <- ggplotly(Se_graph1)
 
 
-F_Ch_graph1
+F_Se_graph1
 
-#Evolution of the number of screens
-Sc_graph1 <- Equip_nat %>% 
-  ggplot(aes(x=year, y=Screens)) +
-  geom_line(color="red")
-  labs(title = "Number of screens by year", x="Year", y="Number of chairs")+
-  theme_minimal()
-
-Sc_graph1$yaxis$title <- list(tickformat = ",.3s")
-F_Sc_graph1 <- ggplotly(Sc_graph1)
-
-
-F_Sc_graph1
-
-#Comparaison the number of chairs and screens
-Ch_Sc_graph1 <- Equip_nat %>% 
-  ggplot(aes(x=year)) +
-  geom_line(aes(y=Chairs_b100), color="brown") +
-  geom_line(aes(y=Screens_b100), color="red")
-  labs(title = "Comparaison of the number of chairs and screens (base index 100)", x="Year", y="Number of chairs")+
-  theme_minimal()
-
-Ch_Sc_graph1$yaxis$title <- list(tickformat = ",.3s")
-F_Ch_Sc_graph1 <- ggplotly(Ch_Sc_graph1)
-
-
-F_Ch_Sc_graph1
 ```
+
+<br>
+
+Data on the number of cinemas is not available on our database before 1992. However, we have for hypothesis that a part of this decline is due to the foreclosure of movie theaters. Nevertheless, this hypothesis is not sufficient to understand the evolution of the number of seats during this quarter of century.
+
+Indeed, what can be surprising is that, at the same time that the number of seats diminished, the number of screens had a different journey.
+
+Until 1971, the number of seats and screens followed the same downward trajectory. However, while the number of seats plundered, the number of screens tended to stabilize then to grow between 1972 and 1985. The graphic below highlights these elements. By using a 1966 base index 100 for both variables, we can focus on their evolution, putting aside the scale effect. The index of the number of seats almost halved from 1972 to 1985. In parallel the index of the number of screens is more than 20 points higher in 1985 than what was observed in 1972. It is even 5 points higher than the index in 1966. Despite the fact that the number of screens experienced a period of degrowth between 1986 and 1992, a serious gap exists between the two indexes in 1992.
+
+```{r}
+#Addition of base index 100 variable
+Equip_nat <- Equip_nat %>%  mutate(Screens_b100=Screens/Screens[year==1966]*100, Seats_b100=Seats/Seats[year==1966]*100)
+
+
+#Comparaison the number of seats and screens
+ ## Pivot
+ Equip_nat_b100 <- Equip_nat %>% select(year,Screens_b100,Seats_b100) %>% 
+   pivot_longer(cols = c(Screens_b100,Seats_b100),names_to = "Variable", values_to =  "Base_index_100")
+ 
+ ##Graphic
+ Se_Sc_graph1 <- Equip_nat_b100 %>% 
+   filter(year<1993) %>% 
+  ggplot(aes(x=year, y=Base_index_100, color=Variable)) +
+  geom_line() +
+  scale_color_manual(values = c("red", "brown")) +
+  labs(title = "Comparaison of the number of seats and screens (base index 100)", x="Year", y="Number of seats")+
+  theme_minimal()
+
+ F_Se_Sc_graph1 <- ggplotly(Se_Sc_graph1)
+
+
+ F_Se_Sc_graph1
+```
+
+<br>
+
+How can we comprehend these contradictory trends? Thiolliere and Ralite (2003) explained that this paradox can be explained by a structural change of the movie theater market. Prior to the late 60s, a large portion of the cinema market was dominated by single-screen movie halls with a substantial number of seats. Everything changed after the 60s. The second half of the 21st century witnessed a shift from one-room movie halls to halls with fewer seats but a plural number of screens. Thus, some former one-room cinemas repurposed their spaces to welcome more screens, and multiroom setups became predominant among newly constructed cinemas. Thiolliere and Ralite assert that this new structure enabled the industry to intensify its exploitation capabilities in order to offer more choices for its consumers. These new cinemas had better performance than their one-room elders, explaining the latter's gradual disappearance. This shift can be observed in the ratio of chairs to screens, which can be interpreted as an indicator of the size of the screening room in terms of seats.
 
 ```{r}
 #Ratio screen/chair
 Equip_nat <- Equip_nat %>% 
-  mutate(Chairs_by_screens = Chairs/Screens)
+  mutate(Seats_by_screens = Seats/Screens)
 
-
-Ch_Sc_graph2 <- Equip_nat %>% 
-  ggplot(aes(x=year,y=Chairs_by_screens))+
-  geom_bar(stat="identity")+
-  labs(title = "Ratio of Chairs by Screens in France by Year", x="Year", y="Chairs by Screen")+
+#Graphic
+Se_Sc_graph2 <- Equip_nat %>%
+  filter(year<1993) %>% 
+  ggplot(aes(x=year,y=Seats_by_screens))+
+  geom_bar(stat="identity",fill="gold")+
+  labs(title = "Ratio of Seats by Screens in France by Year", x="Year", y="Seats by Screen")+
   theme_minimal()
 
-F_Ch_Sc_graph2 <- ggplotly(Ch_Sc_graph2)
+F_Se_Sc_graph2 <- ggplotly(Se_Sc_graph2)
 
 
-F_Ch_Sc_graph2
-
+F_Se_Sc_graph2
 ```
 
+<br>
+
 ### "Act 2" - The resurgence
+
+#### Evolution of the attendance
+
+```{r}
+#Computation of the growth rate between 1993 and 2018
+
+Growth_rate_1993_2018 <- Attendance_nat %>%
+  filter(year %in% c(1993, 2018)) %>%
+  reframe(Growth=(Attendance-lag(Attendance))/lag(Attendance)*100) %>% 
+  filter(!is.na(Growth)) %>% 
+  pull(Growth) %>% 
+  round(.,digits = 2)
+
+#Computation of the average growth rate between 1966 and 1992
+
+nrow_1993_2018 <-
+  Attendance_nat %>% 
+  filter(year>1992 & year<2019) %>% 
+  nrow()
+
+Av_Growth_rate_1993_2018 <- Attendance_nat %>% 
+  filter(year %in% c(1993,2018)) %>% 
+  select(-Growth) %>% 
+  mutate(Growth = ((Attendance / lag(Attendance))^(1/nrow_1993_2018) - 1) * 100) %>% 
+  filter(!is.na(Growth))  %>% 
+  pull(Growth) %>%
+  round(., digits=1)
+```
+
+In many movies, after a tragic downfall, the hero comeback in a flamboyant manner.If this storyline mark movies in theater, it also echoes the history of the industry. The 25 years between 1993 and 2018 are a period of growth for the cinema's market. The attendance went from 130 million to suprass the symbolic bar of the 200 million. If this level is still lower thanwhat was observed during the "golden age", the upturn is still significant with agrowth of `r Growth_rate_1993_2018` % during the period and an average growth of `r Av_Growth_rate_1993_2018` % by year.
 
 ```{r}
 
@@ -552,30 +595,137 @@ F_Att_graph4 <-ggplotly(Att_graph4)
 F_Att_graph4
 ```
 
+Numerous scientific papers and reports agree that this revival is due to the development of multiplexes (Blanchard, 2014 ; CNC, 2013; Muhlberger, 2013; Thiolliere and Ralite, 2003). Theses structures would have sparked again the interest of the consumers for movie theaters.
+
+<br>
+
+#### Evolution of the structure of the market
+
+Several concurrent definitions exist for the term 'multiplex.' A broad one can characterize multiplexes as movie halls with a large number of screens. Nevertheless, Blanchard (2014) argues that multiplexes cannot be solely summarized by the number of screens. He highlights that multiplexes also offer a better quality of the consumers' experience, with enhanced overall comfort in the screening room and access to additional services such as arcades or restaurants. According to this definition, the first multiplex opened in France in Toulon in 1993. The CNC (National Center of Cinematography and the Moving Image) uses a simpler definition to establish its statistics. It describes multiplexes as movie theaters with at least 8 screens - with this definition, 31 movie theaters met the multiplex criteria in 1992. Despite these differing definitions, both the CNC and Blanchard draw the same conclusion about the significant impact of multiplexes on the market upturn.
+
+The last three decades are indeed an era of sustained growth for multiplexes. Their numbers have multiplied by seven between 1993 and 2022.
+
 ```{r}
- Att_graph8 <- multiplex_nat %>% 
-  filter(year >1992) %>% 
+ M_graph1 <- Multiplex_nat %>% 
+  filter(year >1992 & year<2019) %>% 
   ggplot(aes(x = year, y = nb_multiplex)) +
-  geom_line(color="orange") +
-  scale_y_continuous(labels = scales::number_format())+ 
+  geom_bar(fill="navy", stat = "identity") + 
+   labs(titre="Number of multiplexes in France by year between 1993 and 2018", x="Year", y="Number of multiplexes")+
   theme_minimal()
 
-F_Att_graph8 <-ggplotly(Att_graph8)
+F_M_graph1 <-ggplotly(M_graph1)
 
-F_Att_graph8
+F_M_graph1
 ```
 
+<br>
+
+The share of multiplexes in the total number of movie theaters also grew during this year, gaining 9.5 percentage points between 1993 and 2018. Furthermore, if multiplexes may still be a minority in the overall number of cinemas, this is not the case for the total number of attendance. Indeed, they accounted for more than half of the entries in 2012 (Blanchard, 2014).
+
 ```{r}
- Att_graph10 <- multiplex_nat %>% 
-  filter(year >1992) %>% 
+M_graph2 <- Multiplex_nat %>% 
+  filter(year >1992 & year<2019) %>% 
   ggplot(aes(x = year, y = share_multiplexe)) +
-  geom_line(color="orange") +
-  scale_y_continuous(labels = scales::number_format())+ 
+  geom_line(color="navy") +
+  scale_y_continuous(labels = scales::percent_format(scale = 1))+ 
+   labs(title="Share of the multiplexes in the total of movie theater between 1993 and 2018", x="Year", y="Percentage")+
   theme_minimal()
 
-F_Att_graph10 <-ggplotly(Att_graph10)
+F_M_graph2 <-ggplotly(M_graph2)
 
-F_Att_graph10
+F_M_graph2
+
+#Test of an alternative
+M_graph3 <- Multiplex_nat %>% 
+  filter(year >1992 & year<2019) %>% 
+  select(year, share_multiplexe) %>%  
+  rename(Multiplexes=share_multiplexe) %>%  
+  mutate("Other movie theaters" = 100-Multiplexes) %>% 
+  pivot_longer(cols=c(Multiplexes, `Other movie theaters`),names_to = "Type of movie theater",values_to = "percent") %>%  
+  ggplot(aes(x=year, y=percent, fill=`Type of movie theater`))+
+  geom_col(position = position_stack(reverse = TRUE)) +
+  scale_fill_manual(values = c("navy", "darkcyan"))+
+  scale_y_continuous(labels = scales::percent_format(scale = 1))+ 
+   labs(title="Share of the multiplexes in the total of movie theater between 1993 and 2018", x="Year", y="Percentage")+
+  theme_minimal()
+
+#The use  geom_col(position = position_stack(reverse = TRUE)) is to inverse the order of the stacked bar (i.e. to have the statistics of Multiplexes below the ones on the Other Movie theater)
+
+F_M_graph3 <-ggplotly(M_graph3)
+
+F_M_graph3
+```
+
+<br>
+
+The number of screens rose with the development of multiplexes.
+
+```{r}
+Sc_graph <- Equip_nat %>% 
+  filter(year > 1992 & year < 2019) %>% 
+  ggplot(aes(x = year, y = Screens)) +
+  geom_line(color = "red") +
+  labs(title = "Number of Screens in France between 1993 and 2018", x = "Year", y = "Number of Screens") +
+  theme_minimal()
+
+
+F_Sc_graph <- ggplotly(Sc_graph)
+
+
+F_Sc_graph
+```
+
+<br>
+
+```{r}
+Se_diff_rate_1993_2018 <- Equip_nat %>%
+  filter(year %in% c(1993, 2018)) %>%  
+  select(-Screens) %>% 
+  reframe(Growth=(Seats-lag(Seats))) %>% 
+  filter(!is.na(Growth)) %>% 
+  pull(Growth)
+
+Se_diff_rate_1993_2018 <- format(Se_diff_rate_1993_2018, big.mark = " ") 
+
+Se_Growth_rate_1993_2018 <- Equip_nat %>%
+  filter(year %in% c(1993, 2018)) %>%  
+  select(-Screens) %>% 
+  reframe(Growth=(Seats-lag(Seats))/lag(Seats)*100) %>% 
+  filter(!is.na(Growth)) %>% 
+  pull(Growth) %>% 
+  round(.,digits = 0)
+```
+
+The number of seats started also to grow again. This growth is smaller than the significant decline that marked the second haft of the 20th century - c.f. graph below on the 1962-2022 period. However, it is significant regarding the level observed in 1993 -c.f. graph below on the 1993-2018 period. In total, the numver of seats increased of `r Se_diff_rate_1993_2018` seats, representing an increase of `r Se_Growth_rate_1993_2018` %.
+
+```{r}
+#Evolution of the number of Seats
+Se_graph2 <- Equip_nat %>% 
+  filter(year<2019) %>% 
+  ggplot(aes(x=year, y=Seats)) +
+  geom_line(color="brown")+
+  geom_vline(xintercept = 1993, linetype = "dashed", color = "pink")+
+  labs(title = "Number of Seats in France between 1962 and 2018", x="Year", y="Number of Seats")+
+  theme_minimal()
+
+F_Se_graph2 <- ggplotly(Se_graph2)
+
+
+F_Se_graph2
+
+#Evolution of the number of Seats
+Se_graph3 <- Equip_nat %>% 
+  filter(year>1992 & year<2019) %>% 
+  ggplot(aes(x=year, y=Seats)) +
+  geom_line(color="brown")+
+  labs(title = "Number of Seats in France between 1993 and 2018", x="Year", y="Number of Seats")+
+  theme_minimal()
+
+F_Se_graph3 <- ggplotly(Se_graph3)
+
+
+F_Se_graph3
+
 ```
 
 <br>
