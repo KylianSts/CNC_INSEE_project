@@ -297,7 +297,7 @@ In essence, our research delves into the recent history of movie theaters in Fra
 
 The history of the movie theater market unfolds on a winter day. In December 28th 1895, two brothers August and Louis Lumiere gave the first commercial public screening. Because a good history is full of happy coincidences, it is in France, at the Salon Indien du Grand Café in Paris that the two brothers used their *cinématographe*.
 
-![](Pictures and illustrations/cinema-lumiere.jpg){fig-align="center"}
+![](Pictures%20and%20illustrations/cinema-lumiere.jpg){fig-align="center"}
 
 The movie theaters market experienced fast growth. According to Muhlberger (2013), in 1920s, cinema became a mass leisure activity in France but also in the USA and numerous European countries. In the Hexagon, cinema market fully blossomed a decade later. The period between 1929 and 1957 is often described as a golden age for cinema in France. Movie theaters attendance reached its zenith, with peaks beyond 400 millions entries. In a report for the French Senate, Thiolliere and Ralite (2003) link this fast period with the introduction of talking films.
 
@@ -305,13 +305,9 @@ The movie theaters market experienced fast growth. According to Muhlberger (2013
 
 The importance of cinema during this period maybe undestimated by our contemporary eyes. However, the two senatorial rapporteur explain that :
 
-*“We forget too often \[...\] that until the advent of the ‘petite lucarne’ (i.e. television) in households, cinema had a monopoly on the broadcasting of images. People frequented the theater, not to see a film, but rather to watch a program consisting of one or more short films, news, the trailer for the next film and, after the intermission and advertising, of the ‘feature film’. ”*
+*"We forget too often \[...\] that until the advent of the 'petite lucarne' (i.e. television) in households, cinema had a monopoly on the broadcasting of images. People frequented the theater, not to see a film, but rather to watch a program consisting of one or more short films, news, the trailer for the next film and, after the intermission and advertising, of the 'feature film'."*
 
-<center>
-
-**THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.** L'évolution du secteur de l'exploitation cinématographique, Rapport d’information sénatoriale n°308 (2002-2003)
-
-</center>
+<center>**THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.** L'évolution du secteur de l'exploitation cinématographique, Rapport d'information sénatoriale n°308 (2002-2003)</center>
 
 <br>
 
@@ -407,20 +403,9 @@ Att_graph1 <- Attendance_nat %>%
 library(plotly) #plotly will allow us to create interactive graph
 Att_graph1$yaxis$title <- list(tickformat = ",.3s")
 
-F_Att_graph1 <-ggplotly(Att_graph1)
+F_Att_graph1 <- ggplotly(Att_graph1)
 
-
-library(htmlwidgets) 
-#WWe had an issue with path creation using the classic print function, making it impossible to render the final dynamic graph. The utilization of Htmlwidgets and htmltools helped us overcome the problem, ensuring that our interactive graph appears in the final rendering.
-
-
-htmlwidgets::saveWidget(F_Att_graph1, file = "C:/Users/cedri/OneDrive/Documents/Dauphine/M1 Quantitative Economics/Data Management/Peer project/CNC_INSEE_project/F_Att_graph1.html")
-
-library(htmltools)
-browsable(F_Att_graph1)
-
-
-
+F_Att_graph1
 ```
 
 18 of the 26 years between 1966 (not included) and 1992 (included) are thus characterized by a negative attendance's growth rate.
@@ -439,9 +424,7 @@ Att_graph2 <-Attendance_nat %>%
 
 F_Att_graph2 <-ggplotly(Att_graph2)
 
-htmlwidgets::saveWidget(F_Att_graph2, file = "C:/Users/cedri/OneDrive/Documents/Dauphine/M1 Quantitative Economics/Data Management/Peer project/CNC_INSEE_project/F_Att_graph2.html")
-
-browsable(F_Att_graph2)
+F_Att_graph2
 ```
 
 <br>
@@ -460,10 +443,7 @@ Att_graph3 <- Attendance_nat %>%
 
 F_Att_graph3 <-ggplotly(Att_graph3)
 
-htmlwidgets::saveWidget(F_Att_graph3, file = "C:/Users/cedri/OneDrive/Documents/Dauphine/M1 Quantitative Economics/Data Management/Peer project/CNC_INSEE_project/F_Att_graph3.html")
-
-browsable(F_Att_graph3)
-
+F_Att_graph3
 
 ```
 
@@ -482,9 +462,7 @@ Att_graph4 <-Attendance_nat %>%
 
 F_Att_graph4 <-ggplotly(Att_graph4)
 
-htmlwidgets::saveWidget(F_Att_graph4, file = "C:/Users/cedri/OneDrive/Documents/Dauphine/M1 Quantitative Economics/Data Management/Peer project/CNC_INSEE_project/F_Att_graph4.html")
-
-browsable(F_Att_graph4)
+F_Att_graph4
 ```
 
 <br>
@@ -502,10 +480,7 @@ Att_graph5 <- Attendance_nat %>%
 
 F_Att_graph5 <-ggplotly(Att_graph5)
 
-htmlwidgets::saveWidget(F_Att_graph5, file = "C:/Users/cedri/OneDrive/Documents/Dauphine/M1 Quantitative Economics/Data Management/Peer project/CNC_INSEE_project/F_Att_graph5.html")
-
-browsable(F_Att_graph5)
-
+F_Att_graph5
 ```
 
 <br>
@@ -523,9 +498,7 @@ Att_graph6 <-Attendance_nat %>%
 
 F_Att_graph6 <-ggplotly(Att_graph6)
 
-htmlwidgets::saveWidget(F_Att_graph6, file = "C:/Users/cedri/OneDrive/Documents/Dauphine/M1 Quantitative Economics/Data Management/Peer project/CNC_INSEE_project/F_Att_graph6.html")
-
-browsable(F_Att_graph6)
+F_Att_graph6
 ```
 
 <br>
@@ -536,7 +509,7 @@ browsable(F_Att_graph6)
 
 **CNC, 2008.** " Evolution du public des salles de cinéma 1993-2007 ". *Les études du CNC*
 
-**CNC, 2013.** " L’évolution du public des salles de cinéma 1993-2012 ". *Les études du CNC*, *septembre 2013*
+**CNC, 2013.** " L'évolution du public des salles de cinéma 1993-2012 ". *Les études du CNC*, *septembre 2013*
 
 **CNC, 2016.** " Les publics du cinéma 1993-2015 ", *Les études du CNC, septembre 2016*
 
@@ -558,6 +531,6 @@ URL : <https://www.cairn.info/revue-sociologie-2011-1-page-1.htm>
 
 URL : <http://tristan.u-bourgogne.fr/CGC/prodscientifique/TC.html>
 
-**THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.** L'évolution du secteur de l'exploitation cinématographique, Rapport d’information sénatoriale n°308 (2002-2003)
+**THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.** L'évolution du secteur de l'exploitation cinématographique, Rapport d'information sénatoriale n°308 (2002-2003)
 
 URL : <https://www.senat.fr/rap/r02-308/r02-308_mono.html#toc5>
