@@ -87,7 +87,7 @@ It can be downloaded from the [INSEE website](https://www.insee.fr/fr/statistiqu
 
 The two databases underwent transformations to become exploitable for our project. The main problem of the Insee one is that it consumes a lot of RAM because of its size (3GB). Indeed, some categorical variables have a significant number of "categories"/"levels". For example, the variable on the age of the population contains 120 levels, one by each possible year of life of an individual. As a result, the number of potential combinations, and therefore the number of rows, among all variables is impressively large, contributing to the important size of the database.
 
-```{r Computation_of_the_number_of_rows_in_Insee_cleanv3, echo=FALSE, message = FALSE}
+```{r Calculation_of_the_number_of_rows_in_Insee_cleanv3, echo=FALSE, message = FALSE}
 
 insee_data <- read.csv("Data/INSEE_cleanv3.csv")
 
@@ -334,12 +334,12 @@ Attendance_AE_nat <- cnc_data_clean %>%
   summarize(Attendance = sum(entréesAE, na.rm = TRUE))
 
 
-#Computation of the growth rate of attendance by year
+#Calculation of the growth rate of attendance by year
 Attendance_nat <- Attendance_nat %>% 
   arrange(year) %>% 
   mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
 
-#Computation of the growth rate between 1966 and 1992
+#Calculation of the growth rate between 1966 and 1992
 
 Growth_rate_1966_1992 <- Attendance_nat %>%
   filter(year %in% c(1966, 1992)) %>%  
@@ -351,7 +351,7 @@ Growth_rate_1966_1992 <-Growth_rate_1966_1992 %>%
   pull(Growth) %>% 
   round(.,digits = 2)
 
-#Computation of the average growth rate between 1966 and 1992
+#Calculation of the average growth rate between 1966 and 1992
 
 nrow_1966_1992 <-
   Attendance_nat %>% 
@@ -366,7 +366,7 @@ Av_Growth_rate_1966_1992 <- Attendance_nat %>%
   pull(Growth) %>%
   round(., digits=1)
 
-#Computation of the growth rate between 1966 and 1969
+#Calculation of the growth rate between 1966 and 1969
 
 Growth_rate_1966_1969 <- Attendance_nat %>%
   filter(year %in% c(1966, 1969)) %>%  
@@ -378,7 +378,7 @@ Growth_rate_1966_1969 <-Growth_rate_1966_1969 %>%
   pull(Growth) %>% 
   round(.,digits = 2)
 
-#Computation of the growth rate between 1982 and 1992
+#Calculation of the growth rate between 1982 and 1992
 
 Growth_rate_1982_1992 <- Attendance_nat %>%
   filter(year %in% c(1982, 1992)) %>%  
@@ -488,15 +488,15 @@ Equip_nat <- Equip_nat %>%  mutate(Screens_b100=Screens/Screens[year==1966]*100,
 #Comparaison the number of seats and screens
  ## Pivot
  Equip_nat_b100 <- Equip_nat %>% select(year,Screens_b100,Seats_b100) %>% 
-   pivot_longer(cols = c(Screens_b100,Seats_b100),names_to = "Variable", values_to =  "Base_index_100")
+   pivot_longer(cols = c(Screens_b100,Seats_b100),names_to = "Variables", values_to =  "Base_index_100")
  
  ##Graphic
  Se_Sc_graph1 <- Equip_nat_b100 %>% 
    filter(year<1993) %>% 
-  ggplot(aes(x=year, y=Base_index_100, color=Variable)) +
+  ggplot(aes(x=year, y=Base_index_100, color=Variables)) +
   geom_line() +
   scale_color_manual(values = c("red", "brown")) +
-  labs(title = "Comparaison of the number of seats and screens (base index 100)", x="Year", y="Number of seats")+
+  labs(title = "Comparaison of the number of seats and screens (base index 100 in 1966)", x="Year", y="Number of seats")+
   theme_minimal()
 
  F_Se_Sc_graph1 <- ggplotly(Se_Sc_graph1)
@@ -535,7 +535,7 @@ F_Se_Sc_graph2
 #### Evolution of the attendance
 
 ```{r}
-#Computation of the growth rate between 1993 and 2018
+#Calculation of the growth rate between 1993 and 2018
 
 Growth_rate_1993_2018 <- Attendance_nat %>%
   filter(year %in% c(1993, 2018)) %>%
@@ -544,7 +544,7 @@ Growth_rate_1993_2018 <- Attendance_nat %>%
   pull(Growth) %>% 
   round(.,digits = 2)
 
-#Computation of the average growth rate between 1966 and 1992
+#Calculation of the average growth rate between 1966 and 1992
 
 nrow_1993_2018 <-
   Attendance_nat %>% 
@@ -610,7 +610,7 @@ The last three decades are indeed an era of sustained growth for multiplexes. Th
   filter(year >1992 & year<2019) %>% 
   ggplot(aes(x = year, y = nb_multiplex)) +
   geom_bar(fill="navy", stat = "identity") + 
-   labs(titre="Number of multiplexes in France by year between 1993 and 2018", x="Year", y="Number of multiplexes")+
+   labs(titre="Number of multiplexes in France between 1993 and 2018", x="Year", y="Number of multiplexes")+
   theme_minimal()
 
 F_M_graph1 <-ggplotly(M_graph1)
@@ -620,7 +620,41 @@ F_M_graph1
 
 <br>
 
-The share of multiplexes in the total number of movie theaters also grew during this year, gaining 9.5 percentage points between 1993 and 2018. Furthermore, if multiplexes may still be a minority in the overall number of cinemas, this is not the case for the total number of attendance. Indeed, they accounted for more than half of the entries in 2012 (Blanchard, 2014).
+Data on the number of cinemas were not available in the database prior to 1992. The existing data seem to reveal 3 phases :
+
+-   a period of growth in the 90s
+
+-   a decline in the number of cinemas between 2000 and 2014
+
+-   and, a small revival between 2014 and 2018.
+
+However, when observing the number of cinemas, multiplexes excluded, a different story unfolds before our eyes. The graph below shows the evolution of the number of cinemas, both with and without multiplexes. It appears that multiplexes accounted for most of the growth in the 1990s. Moreover, the number of cinemas has plummeted since 2000 when multiplexes are excluded from the count. Nevertheless, it is important to note that our analysis is limited by an element whose significance remains uncertain. Our data do not allow us to distinguish between the outright closure of cinemas and the transformation of former multiroom cinemas into multiplexes.
+
+```{r}
+
+Multiplex_nat <- Multiplex_nat %>% 
+  mutate(nb_etablissements_no_m = nb_etablissement-nb_multiplex)
+
+
+
+Et_graph1 <- Multiplex_nat %>% 
+  rename ("All cinemas"=nb_etablissement, "Cinemas excluding multiplexes" = nb_etablissements_no_m) %>% 
+  pivot_longer(cols = c(`All cinemas`, `Cinemas excluding multiplexes`),names_to = "Variables",values_to = "Nb") %>% 
+  filter(year<2019) %>% 
+  ggplot(aes(x=year,y=Nb, color=Variables)) +
+  labs(title = "Number of cinemas in France between 1992 and 2018", x="Year", y="Number of cinemas")+
+  geom_line()+
+  theme_minimal()
+
+F_Et_graph1 <- ggplotly(Et_graph1) 
+F_Et_graph1
+  
+#The rename function is used to change (only for the creation of this graphic) the name of the original column which became the values of the column"Variables". The goal behind this transformation is to have more significative name for the two curves in our legend. We also use the layout function to put the legend above the graph because plotly does not take into account theme(legend.position = "top") when it transform the ggplot.
+```
+
+<br>
+
+The share of multiplexes in the total number of movie theaters also grew during this year, gaining 9.5 percentage points between 1993 and 2018. Furthermore, if multiplexes may still be a minority in the overall number of cinemas, this is not the case for the total number of attendance. They accounted for more than half of the entries in 2012 (Blanchard, 2014).
 
 ```{r}
 M_graph2 <- Multiplex_nat %>% 
@@ -658,7 +692,7 @@ F_M_graph3
 
 <br>
 
-The number of screens rose with the development of multiplexes.
+The development of multiplexes coincides with a rise of the number of screens in the French territory.
 
 ```{r}
 Sc_graph <- Equip_nat %>% 
@@ -696,7 +730,7 @@ Se_Growth_rate_1993_2018 <- Equip_nat %>%
   round(.,digits = 0)
 ```
 
-The number of seats started also to grow again. This growth is smaller than the significant decline that marked the second haft of the 20th century - c.f. graph below on the 1962-2022 period. However, it is significant regarding the level observed in 1993 -c.f. graph below on the 1993-2018 period. In total, the numver of seats increased of `r Se_diff_rate_1993_2018` seats, representing an increase of `r Se_Growth_rate_1993_2018` %.
+The number of seats started also to grow again. This growth did not compensante the historical significant decline that marked the second haft of the 20th century - c.f. graph below on the 1962-2018 period. However, it is still highlysignificant regarding the level observed in 1993 -c.f. graph below on the 1993-2018 period. In total, the number of seats increased of `r Se_diff_rate_1993_2018` seats, representing an augmentation of `r Se_Growth_rate_1993_2018` %.
 
 ```{r}
 #Evolution of the number of Seats
