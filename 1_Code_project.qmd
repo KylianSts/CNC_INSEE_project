@@ -816,6 +816,170 @@ F_Att_graph7 <-ggplotly(Att_graph7)
 F_Att_graph7
 ```
 
+## Test on how to make appear evolution by department
+
+## Attendance
+
+### Valeur en base 100 1966
+
+Observation : a global trend but also data shows that some department had a different trajectory (maybe a econometrics model can show if it is become of the department in itselfs or because its socio-demographic characteristics)
+
+```{r}
+Dep_attb100 <- cnc_data_clean %>%  
+  group_by(departement_code) %>% select(year,entrées,departement_code) %>%
+  mutate(Att_b100 = round(entrées / entrées[year == 1966] * 100, digits=0))
+
+Dep_attb100_graph <- Dep_attb100 %>% filter(year<2019) %>% 
+  ggplot(aes(x=year, y=Att_b100, color=departement_code, group=departement_code)) +
+  labs(title = "Attendance by departement base index 100 1966", x="Year",y="Attendance")+
+  geom_line()+
+  theme_minimal()
+
+#group=department_code was necessary to R to display the different graph, a standard color= in ggplot(aes()) did not work
+ 
+F_Dep_att_graph_b100 <- ggplotly(Dep_attb100_graph)
+
+F_Dep_att_graph_b100
+```
+
+### Découpage en période
+
+```{r}
+#1966-1992
+Dep_attb100_graph_1962_1992 <- Dep_attb100 %>% filter(year<1993) %>% 
+  ggplot(aes(x=year, y=Att_b100, color=departement_code, group=departement_code)) +
+  labs(title = "Attendance by departement base index 100 1966[1966-1992]", x="Year",y="Attendance")+
+  geom_line()+
+  theme_minimal()
+ 
+F_Dep_att_graph_b100_1962_1992 <- ggplotly(Dep_attb100_graph_1962_1992)
+
+F_Dep_att_graph_b100_1962_1992
+
+#1993-2018
+Dep_attb100_graph_1993_2018 <- Dep_attb100 %>% 
+  filter(year > 1992 & year <= 2018) %>% 
+  ggplot(aes(x=year, y=Att_b100, color=departement_code, group=departement_code)) +
+  labs(title = "Attendance by departement base index 100 1966 [1993-2018]", x="Year",y="Attendance")+
+  geom_line()+
+  theme_minimal()
+
+ 
+F_Dep_att_graph_b100_1993_2018 <- ggplotly(Dep_attb100_graph_1993_2018)
+
+F_Dep_att_graph_b100_1993_2018
+
+```
+
+### Test : Show example of peculiar trajectory
+
+Some departement seem to have known distinctive trajectories with explosive growth or stronger decline. We can cite for example emphasize the explosive growth of the 77 or the 40.
+
+```{r}
+#Addition of rows giving the base 100 at the national level
+Attendance_nat_b100<- Attendance_nat %>% select(-Growth) %>% rename("entrées"=Attendance) %>% mutate(departement_code="France",Att_b100 = round(entrées / entrées[year == 1966] * 100, digits=0))
+
+Dep_attb100 <-rbind(Dep_attb100, Attendance_nat_b100)
+
+#Graphic of the base 100 for France and some department with peculiar trajectories
+
+##1st graph
+
+Dep_attb100_graph2 <- Dep_attb100 %>% 
+  filter(year<2019) %>% 
+  filter(departement_code  %in% c("France", "77", "40")) %>% 
+  ggplot(aes(x=year, y=Att_b100, color=departement_code,group=departement_code))+
+  geom_line(size=0.3)+
+  geom_line(data = . %>% filter(departement_code == "France"), size = 1, color="navy") + 
+  labs(title = "Example of departement with peculiar trajectory: Attendance (index base 100 1966) - 40 and 77", x="Year", y="Attendance")+
+  theme_minimal()
+
+F_Dep_attb100_graph2 <- ggplotly(Dep_attb100_graph2)
+
+F_Dep_attb100_graph2
+
+
+```
+
+70 and 88 are them opposite example with their attendance that plummeted between 1966 and 1992. 92 knew the most violent that can be observed between 1966 and 1977 with an index that quartered before knowing a strong revival.
+
+```{r}
+#2nd Graph
+
+Dep_attb100_graph3 <- Dep_attb100 %>% 
+  filter(year<2019) %>% 
+  filter(departement_code  %in% c("France", "70","92", "88")) %>% 
+  ggplot(aes(x=year, y=Att_b100, color=departement_code,group=departement_code))+
+  geom_line(size=0.3)+
+  geom_line(data = . %>% filter(departement_code == "France"), size = 1, color="navy") + 
+  labs(title = "Example of departement with peculiar trajectory : Attendance (index base 100 1966) - 78 and 92", x="Year", y="Attendance")+
+  theme_minimal()
+
+
+
+F_Dep_attb100_graph3 <- ggplotly(Dep_attb100_graph3)
+
+F_Dep_attb100_graph3
+```
+
+### ratio b100 France/departement
+
+```{r}
+#Goal : calculation of the ratio between the index of each departement and the equivalent for France (national level)
+Attendance_nat_b100_v2 <- Attendance_nat_b100 %>% 
+  rename(Fr_Att_b100=Att_b100) %>%
+  select(year, Fr_Att_b100)
+
+Dep_attb100 <- Dep_attb100 %>%
+  left_join(Attendance_nat_b100_v2, by="year" ) 
+
+Dep_attb100 <- Dep_attb100 %>%
+  mutate(Att_b100_diff=Att_b100/Fr_Att_b100)
+
+Dep_attb100_graph_ratio <- Dep_attb100 %>% filter(year<2019) %>% 
+  ggplot(aes(x=year, y=Att_b100_ratio, color=departement_code, group=departement_code)) +
+  labs(title = "Attendance by departement base index 100 1966", x="Year",y="Attendance")+
+  geom_line()+
+  theme_minimal()
+
+ 
+F_Dep_att_graph_b100_ratio <- ggplotly(Dep_attb100_graph_ratio)
+
+F_Dep_att_graph_b100_ratio
+```
+
+### Other idea
+
+Put in black all the curve except the peculr one in the graph with all the curves in
+
+### Test : Base 100 + facet_grid
+
+```{r}
+Dep_attb100_graph_grid <- Dep_attb00 %>% mutate(dep_c_group=case_when(departement_code=="01" | departement_code=="02" | departement_code=="03" | departement_code=="04" | departement_code=="05" | departement_code=="06" | departement_code=="07" | departement_code=="08" | departement_code=="09" |departement_code=="2A"|departement_code=="2B" ~"01 to 9",
+departement_code=="10" | departement_code=="11" | departement_code=="12" | departement_code=="13" | departement_code=="14" | departement_code=="15" | departement_code=="16" | departement_code=="17" | departement_code=="18" | departement_code=="19" ~"10 to 19",
+departement_code=="20" | departement_code=="21" | departement_code=="22" | departement_code=="23" | departement_code=="24" | departement_code=="25" | departement_code=="26" | departement_code=="27" | departement_code=="28" | departement_code=="29" ~"20 to 29",
+departement_code=="30" | departement_code=="31" | departement_code=="32" | departement_code=="33" | departement_code=="34" | departement_code=="35" | departement_code=="36" | departement_code=="37" | departement_code=="38" | departement_code=="39" ~"30 to 39",
+departement_code=="40" | departement_code=="41" | departement_code=="42" | departement_code=="43" | departement_code=="44" | departement_code=="45" | departement_code=="46" | departement_code=="47" | departement_code=="48" | departement_code=="49" ~"40 to 49",
+departement_code=="50" | departement_code=="51" | departement_code=="52" | departement_code=="53" | departement_code=="54" | departement_code=="55" | departement_code=="56" | departement_code=="57" | departement_code=="58" | departement_code=="59" ~"50 to 59",
+departement_code=="60" | departement_code=="61" | departement_code=="62" | departement_code=="63" | departement_code=="64" | departement_code=="65" | departement_code=="66" | departement_code=="67" | departement_code=="68" | departement_code=="69" ~"60 to 69",
+departement_code=="70" | departement_code=="71" | departement_code=="72" | departement_code=="73" | departement_code=="74" | departement_code=="75" | departement_code=="76" | departement_code=="77" | departement_code=="78" | departement_code=="79" ~"70 to 79",
+departement_code=="80" | departement_code=="81" | departement_code=="82" | departement_code=="83" | departement_code=="84" | departement_code=="85" | departement_code=="86" | departement_code=="87" | departement_code=="88" | departement_code=="89" ~"80 to 89",
+departement_code=="90" | departement_code=="91" | departement_code=="92" | departement_code=="93" | departement_code=="94" | departement_code=="95" ~"90 to 95")) %>% 
+  ggplot(aes(x=year, y=Att_b100, color=departement_code, group=departement_code)) +
+  labs(title = "Attendance by departement base index 100 1966", x="Year",y="Attendance")+
+  facet_wrap(~dep_c_group)+
+  geom_line()
+
+ 
+F_Dep_att_graph_b100_grid <- ggplotly(Dep_attb100_graph_grid)
+
+F_Dep_att_graph_b100_grid
+```
+
+### Absolute value
+
+### 
+
 # Bibliography
 
 **BLANCHARD Jean-Philippe, 2014.** " Multiplexes, public de banlieue et création cinématographique française : caractère marchand de l'ethnicité sur grand écran ". *Migrations Société*, 151, 153-164. <https://doi.org/10.3917/migra.151.0153>
