@@ -475,7 +475,6 @@ F_Att_graph2
 library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
 
 Att_graph12 <- recette_nat %>% 
-  filter(year < 1993) %>% 
   ggplot(aes(x = year, y = recette_tot)) +
   geom_line(color="skyblue") +
   scale_y_continuous(labels = scales::number_format())+ 
@@ -493,6 +492,53 @@ F_Att_graph12
 <br>
 
 even if attendance decreases, money earned by movie theater increase. due to ...
+
+```{r}
+inflation_fr <- read_excel('Data/inflation_france.xlsx') %>%
+  select(-`Inflateur Cumulé`) %>%
+  filter(Année > 1965) %>%
+  rename(year = Année) %>%
+  arrange(year)
+
+
+cnc_data_clean$recettes_updated <- cnc_data_clean$recettes
+data <- cnc_data_clean %>% 
+
+for (i in 1:length(data)) {
+  for (j in 1:length(2022 - cnc_data_clean$year[i])) {
+    data$recettes_updated[i] <- cnc_data_clean$recettes_updated[i] * (1 + inflation_fr$`Inflation Moyenne Annuelle`[j])
+  }
+ print(length(2022 - cnc_data_clean$year[i]))
+}
+
+cnc_data_clean$recettes_updated - cnc_data_clean$recettes
+
+```
+
+```{r}
+recette_nat <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  summarize(recette_tot = sum(recettes_updated, na.rm = TRUE))
+#Graphic of the evolution of attendance in time
+
+library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
+
+Att_graph12 <- recette_nat %>% 
+  ggplot(aes(x = year, y = recette_tot)) +
+  geom_line(color="skyblue") +
+  scale_y_continuous(labels = scales::number_format())+ 
+  labs(title ="Recette in France by year [1966-1992] - Dynamic graph", x="Year", y="Recette Totale")+
+  theme_minimal()
+
+library(plotly) #plotly will allow us to create interactive graph
+Att_graph1$yaxis$title <- list(tickformat = ",.3s")
+
+F_Att_graph12 <- ggplotly(Att_graph12)
+
+F_Att_graph12
+```
+
+
 
 #### Evolution of the structure of the market
 
