@@ -835,9 +835,9 @@ ggplotly(AE_graph5)
 
 ## Test on how to make appear evolution by department
 
-## Attendance
+### Attendance
 
-### Valeur en base 100 1966
+#### Valeur en base 100 1966
 
 Observation : a global trend but also data shows that some department had a different trajectory (maybe a econometrics model can show if it is become of the department in itselfs or because its socio-demographic characteristics)
 
@@ -857,7 +857,7 @@ Dep_attb100_graph <- Dep_attb100 %>% filter(year<2019) %>%
 ggplotly(Dep_attb100_graph)
 ```
 
-### Découpage en période
+#### Découpage en période
 
 ```{r}
 #1966-1992
@@ -880,7 +880,7 @@ Dep_attb100_graph_1993_2018 <- Dep_attb100 %>%
 ggplotly(Dep_attb100_graph_1993_2018)
 ```
 
-### Test : Show example of peculiar trajectory
+#### Test : Show example of peculiar trajectory
 
 Some departement seem to have known distinctive trajectories with explosive growth or stronger decline. We can cite for example emphasize the explosive growth of the 77 or the 40.
 
@@ -923,7 +923,7 @@ Dep_attb100_graph3 <- Dep_attb100 %>%
 ggplotly(Dep_attb100_graph3)
 ```
 
-### ratio b100 France/departement
+#### ratio b100 France/departement
 
 ```{r}
 #Goal : calculation of the ratio between the index of each departement and the equivalent for France (national level)
@@ -946,34 +946,115 @@ Dep_attb100_graph_ratio <- Dep_attb100 %>% filter(year<2019) %>%
 ggplotly(Dep_attb100_graph_ratio)
 ```
 
+#### Maps for attendance
+
+Relative hétérogénéité - Ecart au niveau de 1966 plus prononcé
+
+-   de façon "Negative" (i.e. décroissance potentiel) : nord est plus touché par les phrases de décroissance
+
+-   Positive : ile de france, ouest et sud est mais aussi certains départements du sud ouest
+
+```{r}
+#We will create an evolutive map to represent the evolution of the index base 100 1966 linked to attendance year after year. To do so, we will combine our statistical data with geographic information obtained from a shapefile downloaded from the IGN website. Then, we will generate several maps and convert them into a GIF that highlights the passage of time, showcasing the evolution of the index year after year. This code draws inspiration from various sources, with particular influence from  an oline book of  HAHN (2020) and the technical explanations in the 'tmap' package by TENNEKES et al. (2023).
+
+
+#Import the shapefile data
+library(sf) #We'll use sf to open shapefile, i.e. cartographic data
+Dep_shp <- st_read(dsn ="Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp")
+
+#Merge with CNC statistics
+
+Dep_shp <- Dep_shp %>% left_join(Dep_attb100, by = c("INSEE_DEP" = "departement_code")) %>% filter(year %in% c(1966,1968,1972,1975,1979,1982,1985,1988,1990,1993,1996,1999,2002,2005,2008,2011,2013,2016,2019))
+
+#Interactive Maps
+
+library(tmap)
+library(tmaptools)
+#Note for Mister Rossy : if you do not have the tmap package, one of the document that we use as inspiration to create the interactive maps recommend to install tmap's development version from the r-universe repository : install.packages("tmap", repos = c("https://r-tmap.r-universe.dev", "https://cloud.r-project.org"))
+
+tmap_mode("view")
+
+chosen_breaks <- c(16, 48, 69, 100, 150, 200, 250, 300, Inf)
+#After testing numerous ways to create classes for the following graph with the style option of tm_fill ("quantile", "pretty", "equal", "headtails") and values for the option n, we chose to define our own classes using the breaks option and style ="fixed". These new classes are inspired by, but diverge from, the values obtained with style="quantile" (while conducting parallel tests with n=) for values under 100. For values above 100, arbitrary classes were created to emphasize the divergence of trajectories of department with positive growth, which quantile had difficulty capturing due to the smaller sample of values above 100.".
+
+Dep_shp_anim <- tm_shape(Dep_shp) +
+  tm_fill(fill="Att_b100", style = "fixed", breaks=chosen_breaks, palette="-RdBu", midpoint=100) +
+  tm_borders() +
+  tm_facets(by = "year", nrow = 1, ncol = 1)+
+  tm_compass(type="8star",position=c("right","top"),size=3,show.labels = 2)+
+  tm_scalebar(position=c("left","bottom"))+
+  tm_title_out(text ="Attendance by year and departement (index base 100 1966)",  position = tm_pos_out("center", "top") )
+
+library(gifski)
+tmap_animation(Dep_shp_anim, filename = "Dep_shp_anim2.gif", delay = 1)
+
+library(magick)
+Gif <- image_read("Dep_shp_anim2.gif")
+image_animate(Gif,fps = 1)
+#We use fps and the number of year in order to reduce the "pace" of the Gif.
+
+```
+
 # Bibliography
 
 **BLANCHARD Jean-Philippe, 2014.** " Multiplexes, public de banlieue et création cinématographique française : caractère marchand de l'ethnicité sur grand écran ". *Migrations Société*, 151, 153-164. <https://doi.org/10.3917/migra.151.0153>
 
+<br>
+
 **CNC, 2008.** " Evolution du public des salles de cinéma 1993-2007 ". *Les études du CNC*
+
+<br>
 
 **CNC, 2013.** " L'évolution du public des salles de cinéma 1993-2012 ". *Les études du CNC*, *septembre 2013*
 
+<br>
+
 **CNC, 2016.** " Les publics du cinéma 1993-2015 ", *Les études du CNC, septembre 2016*
 
-**CNC, 2020.** Observatoire de la diffusion et de la fréquentation cinématographiques - Indicateurs permanents Année 2018
+<br>
+
+**CNC, 2020.** *Observatoire de la diffusion et de la fréquentation cinématographiques - Indicateurs permanents Année 2018*
+
+<br>
 
 **CRETON Laurent, 2011.** " Économie du cinéma et multiplication des supports de diffusion. Le cas français entre exemplarité et incertitude ". *Le cinéma: permanences et métamorphoses*, 180, Raison présente, 2011.
+
+<br>
 
 **DURAND Jacques, 1960.** " Le film et son marché " . *Esprit, Nouvelle série*, No. 285 (6), pp. 1024-1033
 
 URL: <https://www.jstor.org/stable/24255988>
 
-**DUVAL Julien, 2011.** " L'offre et les goûts cinématographiques en France ". *Sociologie*, 2011/1 (Vol. 2), p. 1-18. DOI : 10.3917/socio.021.0001.
+<br>
+
+**DUVAL Julien, 2011.** " L'offre et les goûts cinématographiques en France ". *Sociologie*, 2011/1 (Vol. 2), p. 1-18. DOI : 10.3917/socio.021.0001.
 
 URL : <https://www.cairn.info/revue-sociologie-2011-1-page-1.htm>
 
-**MUHLBERGER David 2013.** Cinema attendance during crises is there a relationship between cinema attendance and the state of the economy in France in the period 1992-2012?
+<br>
+
+**HAHN Nico, 2020.** *Making Maps with R.*
+
+URL : <https://bookdown.org/nicohahn/making_maps_with_r5/docs/introduction.html>
+
+<br>
+
+**MUHLBERGER David 2013.** *Cinema attendance during crises is there a relationship between cinema attendance and the state of the economy in France in the period 1992-2012?*
+
+<br>
 
 **SHUAI Cao, 2020.** " La politique publique du cinéma en France (1981-2012) ". *Territoires contemporains - nouvelle série \[en ligne\]*, 2 septembre 2020,
 
-URL : <http://tristan.u-bourgogne.fr/CGC/prodscientifique/TC.html>
+URL: <http://tristan.u-bourgogne.fr/CGC/prodscientifique/TC.html>
 
-**THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.** L'évolution du secteur de l'exploitation cinématographique, Rapport d'information sénatoriale n°308 (2002-2003)
+<br>
 
-URL : <https://www.senat.fr/rap/r02-308/r02-308_mono.html#toc5>
+**TENNEKES, Martijn; NOWOSAD, Jakub; GOMBIN, Joel; JEWORUTZKI, Sebastian; RUSSELL, Kent; ZIJDEMAN, Richard; CLOUSE, John; LOVELACE, Robin; MUENCHOW, Jannes, 2023.** *Package 'tmap'*
+
+Url: <https://cran.r-project.org/web/packages/tmap/tmap.pdf>
+
+<br>
+
+**THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.** *L'évolution du secteur de l'exploitation cinématographique, Rapport d'information sénatoriale n°308 (2002-2003)*
+
+URL: <https://www.senat.fr/rap/r02-308/r02-308_mono.html#toc5>
