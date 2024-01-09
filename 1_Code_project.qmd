@@ -10,8 +10,6 @@ execute :
 
 <br>
 
-<br>
-
 <center>
 
 ### Github link
@@ -22,13 +20,17 @@ execute :
 
 <br>
 
-```{r Configuration, warning=FALSE, echo=FALSE, message=FALSE}
+```{r Configuration, message=FALSE}
 here::i_am("CNC_INSEE_project.Rproj")
 library(here)
 library(dplyr)
 library(tidyr)
 library(readxl)
 library(ggplot2)
+
+library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
+
+library(plotly) #plotly will allow us to create interactive graph
 ```
 
 # A presentation of the project
@@ -61,9 +63,9 @@ In the execution of its mission, the French agency also collects data regarding 
 
 *Original title : Données harmonisées des recensements de la population à partir de 1968*
 
-The second database was produced by Insee, the french National Institute of Statistics and Economic Studies. Insee is French national bureau and one of its major data providers. The data that will be used for this project has for source demographic information which comes from the different population censuses between 1968 and 2019.
+The second database was produced by Insee, the french National Institute of Statistics and Economic Studies. Insee is French national bureau and one of its major data providers. The data that will be used for this project has for source demographic information which comes from the different population censuses between 1968 and 2019.
 
-```{r Summary_of_the_last_census, echo=FALSE, message = FALSE}
+```{r Summary_of_the_last_census, message = FALSE}
 list_of_census <- data.frame(census = paste0("n°", 1:8),year=c(1968,1975,1982,1990,1999,2008,2013,2019))
 
 list_of_census<- list_of_census |>  pivot_wider(names_from="census",values_from = "year")
@@ -81,17 +83,17 @@ It can be downloaded from the [INSEE website](https://www.insee.fr/fr/statistiqu
 
 <br>
 
-### Modification of the original databases
+## Modification of the original databases
 
-#### Formatting and cleaning the Insee database
+### Formatting and cleaning the Insee database
 
 The two databases underwent transformations to become exploitable for our project. The main problem of the Insee one is that it consumes a lot of RAM because of its size (3GB). Indeed, some categorical variables have a significant number of "categories"/"levels". For example, the variable on the age of the population contains 120 levels, one by each possible year of life of an individual. As a result, the number of potential combinations, and therefore the number of rows, among all variables is impressively large, contributing to the important size of the database.
 
-```{r Calculation_of_the_number_of_rows_in_Insee_cleanv3, echo=FALSE, message = FALSE}
+```{r Calculation_of_the_number_of_rows_in_Insee_cleanv3 , message = FALSE}
 
 insee_data <- read.csv("Data/INSEE_cleanv3.csv")
 
-insee_data <- insee_data %>% select(-X) #we drop X, the column which is an index of each row
+insee_data <- insee_data |> select(-X) #we drop X, the column which is an index of each row
 
 In_nrow <- insee_data |> nrow()
 ```
@@ -102,7 +104,7 @@ The process that we used is detailed in the quarto document entitled "Parallel_c
 
 <br>
 
-#### Formatting and cleaning of the CNC database
+### Formatting and cleaning of the CNC database
 
 The CNC's data was less memory-consuming. However, its format was not convenient for coding with R. Indeed, the original XSLX document put each variable in an independent sheet. In the codes below, we merge all this independent sheets into one uniform database.
 
@@ -148,7 +150,6 @@ cnc_data_clean <- cnc_data_merge |>
 Additionally, each sheet includes a row which represents the total. We preferred to exclude it in order to simplify next statistical treatment.
 
 ```{r replace_NA_by_0_multiplexes, message = FALSE}
-
 multiplexes_with_0 <- cnc_data_clean |> 
   select(multiplexes, year, departement_code) |> 
   pivot_wider(names_from = year, values_from = multiplexes) |> 
@@ -160,9 +161,9 @@ cnc_data_clean <- cnc_data_clean |> select(-multiplexes)
 cnc_data_clean <- left_join(cnc_data_clean, multiplexes_with_0, by = c("departement_code", "year"))
 ```
 
-In the original "Multiplexes" sheet, NA value were assigned when there were 0 multiplexes. We replaced this NA value with 0. and ensured that this replacement only occurs for the year when data had been collected
+In the original "Multiplexes" sheet, NA value were assigned when there were 0 multiplexes. We replaced this NA value with 0. and ensured that this replacement only occurs for the year when data had been collected.
 
-```{r}
+```{r Dropped_redundant_variables}
 rme <- cnc_data_clean |> select(departement_code, year, RME)
 rmeAE <- cnc_data_clean |> select(departement_code, year, RMEAE)
 tmof <- cnc_data_clean |> select(departement_code, year, `taux d'occupation des fauteuils`)
@@ -180,19 +181,25 @@ We exclude redundant variables from the final, cleaned database and retain them 
 
 <br>
 
-### Description of the final bases before merging
+## Description of the final bases before merging
 
 The final result is two modified datasets.
 
 **cnc_data_clean**
 
-```{r}
+```{r size_CNC}
 cnc_data_clean %>%
-  summarize( "Number of rows" = prettyNum(nrow(.), big.mark = " "),  "Number of columns" = ncol(.)) %>%
-  knitr::kable(caption = "Description of the CNC database", format = "html", align = 'c')
+  summarize(
+      "Number of rows" = prettyNum(nrow(.), big.mark = " "),  
+      "Number of columns" = ncol(.)
+      ) %>%
+  
+  knitr::kable(caption = "Description of the CNC database", 
+               format = "html", 
+               align = 'c')
 ```
 
-```{r}
+```{r summary_CNC}
 cnc_data_clean %>% 
   group_by(year) %>% 
   summarize(
@@ -207,16 +214,17 @@ cnc_data_clean %>%
 
 **insee_data (from Insee_cleanv3.csv)**
 
-```{r Nb_rows_and_columns_Insee, echo=FALSE}
+```{r Nb_rows_and_columns_Insee}
 insee_data %>%
   summarize(
     "Number of rows" = prettyNum(nrow(.), big.mark = " "),
     "Number of columns" = ncol(.)
     )%>%
+  
  knitr::kable(caption = "Description of the Insee database", format = "html", align='c')
 ```
 
-```{r}
+```{r summary_INSEE}
 insee_data %>%
   select(-POND2) %>%
   summarize(across(everything(),n_distinct)) %>% 
@@ -226,7 +234,7 @@ insee_data %>%
 
 <br>
 
-#### Description of the variables
+### Description of the variables
 
 We have in the CNC database different variables :
 
@@ -252,7 +260,7 @@ Insee database is a sociodemographic description of each department with variabl
 
 <br>
 
-#### Merging the INSEE and CNC database
+## Merging the INSEE and CNC database
 
 ```{r insee_database}
 insee_data <- insee_data |> rename(departement_code = DEP_RES_21, year =  AN_RECENS)
@@ -277,10 +285,9 @@ A central question will guide our research : **"How has the movie theater landsc
 
 The databases at our disposal will help us to explore this question by looking into the following key aspects:
 
-1.  **Evolution of the Market :** The information provided will help us understand how the movie theater market has evolved in terms of volumes over the last fifty years. One of the key aspects in exploring this question will be to examine the market evolution in terms of venues (établissements). However, the number of movie theaters will not be our sole indicator. Indeed, the number of sessions (séances), seats (fauteuils), and screens (écrans) will be complementary variables that can help us to put under the spotlight potential trends that may not be apparent when solely examining the number of venues.  Employing panel data has a dual utility here. It not only enables us to capture the overall temporal trends but also to observe potential cross-sectional differences. Indeed, one of our key objectives is to comprehend whether divergences in trajectories and characteristics exist among the various French departments.
+1.  **Evolution of the Market :** The information provided will help us understand how the movie theater market has evolved in terms of volumes over the last fifty years. One of the key aspects in exploring this question will be to examine the market evolution in terms of venues (établissements). However, the number of movie theaters will not be our sole indicator. Indeed, the number of sessions (séances), seats (fauteuils), and screens (écrans) will be complementary variables that can help us to put under the spotlight potential trends that may not be apparent when solely examining the number of venues. Employing panel data has a dual utility here. It not only enables us to capture the overall temporal trends but also to observe potential cross-sectional differences. Indeed, one of our key objectives is to comprehend whether divergences in trajectories and characteristics exist among the various French departments.
 
 2.  **Structural Shifts with Multiplexes:** A zoom on the multiplexes permits evaluating a recent structural transformation in the movie theater industry. The first one appears in France during the end of the 1990s and can be arguably seen as a shift in the cinema market. Blanchard ([2014](https://www.cairn.info/revue-migrations-societe-2014-1-page-153.htm)) argues that these facilities "have contributed to the resurgence of attendance, notably by making the cinema more accessible to suburban residents." Furthermore, despite their relative novelty, they represent an important share of the market industry.
-
 
 3.  **Economic Health of the Industry:** Variables such as the number of tickets bought (entrées) and total revenue (recettes) will also be complementary and potentially important information. They will notably be key tools for gauging the economic vitality of the industry and determining if the economic dynamics align with the stock of venues, seats, and their past investments.
 
@@ -291,6 +298,8 @@ The databases at our disposal will help us to explore this question by looking i
 In essence, our research delves into the recent history of movie theaters in France in order to explore the connection between their evolution and sociodemographic factors, while taking into account departmental heterogeneity.
 
 <br>
+
+\newpage
 
 # Evolution of the cinema market in time : a description of the major trend
 
@@ -324,8 +333,7 @@ Nevertheless, as in many stories, the golden age is not eternal. Ours knew its d
 
 #### Evolution of the attendance between 1966 and 1992
 
-```{r}
-#Aggregate of attendance by year 
+```{r Aggregate_of_attendance_by_year}
 Attendance_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
   summarize(Attendance = sum(entrées, na.rm = TRUE))
@@ -334,12 +342,18 @@ Attendance_AE_nat <- cnc_data_clean %>%
   group_by(year) %>% 
   summarize(Attendance = sum(entréesAE, na.rm = TRUE))
 
-
 #Calculation of the growth rate of attendance by year
+
 Attendance_nat <- Attendance_nat %>% 
   arrange(year) %>% 
   mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
 
+Attendance_AE_nat <- Attendance_AE_nat %>% 
+  arrange(year) %>% 
+  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
+```
+
+```{r calculation_of_growth_rates}
 #Calculation of the growth rate between 1966 and 1992
 
 Growth_rate_1966_1992 <- Attendance_nat %>%
@@ -363,7 +377,7 @@ Av_Growth_rate_1966_1992 <- Attendance_nat %>%
   filter(year %in% c(1966,1992)) %>% 
   select(-Growth) %>% 
   mutate(Growth = ((Attendance / lag(Attendance))^(1/nrow_1966_1992) - 1) * 100) %>% 
-  filter(!is.na(Growth))  %>% 
+  filter(!is.na(Growth)) %>% 
   pull(Growth) %>%
   round(., digits=1)
 
@@ -390,27 +404,38 @@ Growth_rate_1982_1992 <-Growth_rate_1982_1992 %>%
   filter(!is.na(Growth)) %>% 
   pull(Growth) %>% 
   round(.,digits = 2)
+```
 
-#Statistics on multiplexes
+```{r Statistics_on_multiplexes}
 Multiplex_nat <- cnc_data_clean %>% 
   filter(year >= 1992) %>% 
   group_by(year) %>% 
-  summarize(nb_multiplex = sum(multiplexes, na.rm = TRUE), 
-            nb_etablissement = sum(établissements, na.rm = TRUE),
-            share_multiplexe = (nb_multiplex /nb_etablissement)*100
+  summarize(
+    nb_multiplex = sum(multiplexes, na.rm = TRUE), 
+    nb_etablissement = sum(établissements, na.rm = TRUE),
+    share_multiplexe = (nb_multiplex /nb_etablissement)*100,
+    nb_etablissements_no_m = nb_etablissement-nb_multiplex
             )
 
+Etablissement_AE <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  summarize(nb_etablissement_AE = sum(étabAE, na.rm = TRUE))
+```
+
+```{r Statistics_on_recettes}
 recette_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
   summarize(recette_tot = sum(recettes, na.rm = TRUE))
+
+recette_AE_nat <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  summarize(recetteAE_tot = sum(recettesAE, na.rm = TRUE))
 ```
 
 Our analytic journey starts in 1966, which is the first availabe year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992` % during the period). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance droped by `r abs(Growth_rate_1966_1969)` %. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
 
 ```{r}
 #Graphic of the evolution of attendance in time
-
-library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
 
 Att_graph1 <- Attendance_nat %>% 
   filter(year < 1993) %>% 
@@ -420,7 +445,6 @@ Att_graph1 <- Attendance_nat %>%
   labs(title ="Attendance in France by year [1966-1992] - Dynamic graph", x="Year", y="Attendance")+
   theme_minimal()
 
-library(plotly) #plotly will allow us to create interactive graph
 Att_graph1$yaxis$title <- list(tickformat = ",.3s")
 
 F_Att_graph1 <- ggplotly(Att_graph1)
@@ -435,8 +459,6 @@ F_Att_graph1
 ```{r}
 #Graphic of the evolution of attendance in time
 
-library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
-
 Att_graph1 <- Attendance_nat %>% 
   filter(year < 1993) %>% 
   ggplot(aes(x = year, y = Attendance)) +
@@ -445,16 +467,15 @@ Att_graph1 <- Attendance_nat %>%
   labs(title ="Attendance in France by year [1966-1992] - Dynamic graph", x="Year", y="Attendance")+
   theme_minimal()
 
-library(plotly) #plotly will allow us to create interactive graph
 Att_graph1$yaxis$title <- list(tickformat = ",.3s")
 
-F_Att_graph1 <- ggplotly(Att_graph1)
+ggplotly(Att_graph1)
 
-F_Att_graph1
 ```
 
 ```{r}
 #Graphic of the Growth by year
+
 Att_graph2 <-Attendance_nat %>% 
   filter(year < 1993 & year>1966) %>% 
   mutate(Growth_rate=ifelse(Growth<0, "Negative", "Positive")) %>% 
@@ -465,93 +486,49 @@ Att_graph2 <-Attendance_nat %>%
   labs(title = "Growth rate by year [1967-1992]", x="Year", y="Growth rate by year", fill="Growth rate") +
   theme_minimal()
 
-F_Att_graph2 <-ggplotly(Att_graph2)
-
-F_Att_graph2
+ggplotly(Att_graph2)
 ```
+
 ```{r}
 #Graphic of the evolution of attendance in time
 
-library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
-
 Att_graph12 <- recette_nat %>% 
+  filter(year < 1993 & year>1966) %>% 
   ggplot(aes(x = year, y = recette_tot)) +
   geom_line(color="skyblue") +
   scale_y_continuous(labels = scales::number_format())+ 
   labs(title ="Recette in France by year [1966-1992] - Dynamic graph", x="Year", y="Recette Totale")+
   theme_minimal()
 
-library(plotly) #plotly will allow us to create interactive graph
 Att_graph1$yaxis$title <- list(tickformat = ",.3s")
 
-F_Att_graph12 <- ggplotly(Att_graph12)
-
-F_Att_graph12
+ggplotly(Att_graph12)
 ```
 
 <br>
 
 even if attendance decreases, money earned by movie theater increase. due to ...
 
-```{r}
-inflation_fr <- read_excel('Data/inflation_france.xlsx') %>%
-  select(-`Inflateur Cumulé`) %>%
-  filter(Année > 1965) %>%
-  rename(year = Année) %>%
-  arrange(year)
-
-
-cnc_data_clean$recettes_updated <- cnc_data_clean$recettes
-data <- cnc_data_clean %>% 
-
-for (i in 1:length(data)) {
-  for (j in 1:length(2022 - cnc_data_clean$year[i])) {
-    data$recettes_updated[i] <- cnc_data_clean$recettes_updated[i] * (1 + inflation_fr$`Inflation Moyenne Annuelle`[j])
-  }
- print(length(2022 - cnc_data_clean$year[i]))
-}
-
-cnc_data_clean$recettes_updated - cnc_data_clean$recettes
-
-```
-
-```{r}
-recette_nat <- cnc_data_clean %>% 
-  group_by(year) %>% 
-  summarize(recette_tot = sum(recettes_updated, na.rm = TRUE))
-#Graphic of the evolution of attendance in time
-
-library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
-
-Att_graph12 <- recette_nat %>% 
-  ggplot(aes(x = year, y = recette_tot)) +
-  geom_line(color="skyblue") +
-  scale_y_continuous(labels = scales::number_format())+ 
-  labs(title ="Recette in France by year [1966-1992] - Dynamic graph", x="Year", y="Recette Totale")+
-  theme_minimal()
-
-library(plotly) #plotly will allow us to create interactive graph
-Att_graph1$yaxis$title <- list(tickformat = ",.3s")
-
-F_Att_graph12 <- ggplotly(Att_graph12)
-
-F_Att_graph12
-```
-
-
-
 #### Evolution of the structure of the market
 
 The number of seats strongly declined during this period. As we can see on the graphic below, while the Hexagon welcomed 2,4 million of cinema seats in 1966, only 93 000 seats characetrized the French market in 1992.
 
-```{r}
-#Aggregation of the number of Seats and screens at the national level
+```{r statistics_on_seats_and_screens}
 Equip_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
-  summarize(Screens = sum(écrans, na.rm = TRUE), Seats=sum(fauteuils, na.rm=TRUE))
+  summarize(Screens = sum(écrans, na.rm = TRUE),
+            Seats = sum(fauteuils, na.rm=TRUE),
+            Seats_by_screens = Seats/Screens)
 
+Equip_AE_nat <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  summarize(Screens_AE = sum(écransAE, na.rm = TRUE),
+            Seats_AE = sum(fauteuilsAE, na.rm=TRUE))
+```
 
+```{r}
 #Evolution of the number of Seats
+
 Se_graph1 <- Equip_nat %>% 
   filter(year<1993) %>% 
   ggplot(aes(x=year, y=Seats)) +
@@ -559,11 +536,7 @@ Se_graph1 <- Equip_nat %>%
   labs(title = "Number of Seats in France", x="Year", y="Number of Seats")+
   theme_minimal()
 
-F_Se_graph1 <- ggplotly(Se_graph1)
-
-
-F_Se_graph1
-
+ggplotly(Se_graph1)
 ```
 
 <br>
@@ -581,7 +554,8 @@ Equip_nat <- Equip_nat %>%  mutate(Screens_b100=Screens/Screens[year==1966]*100,
 
 #Comparaison the number of seats and screens
  ## Pivot
- Equip_nat_b100 <- Equip_nat %>% select(year,Screens_b100,Seats_b100) %>% 
+ Equip_nat_b100 <- Equip_nat %>% 
+   select(year,Screens_b100,Seats_b100) %>% 
    pivot_longer(cols = c(Screens_b100,Seats_b100),names_to = "Variables", values_to =  "Base_index_100")
  
  ##Graphic
@@ -593,10 +567,7 @@ Equip_nat <- Equip_nat %>%  mutate(Screens_b100=Screens/Screens[year==1966]*100,
   labs(title = "Comparaison of the number of seats and screens (base index 100 in 1966)", x="Year", y="Number of seats")+
   theme_minimal()
 
- F_Se_Sc_graph1 <- ggplotly(Se_Sc_graph1)
-
-
- F_Se_Sc_graph1
+ggplotly(Se_Sc_graph1)
 ```
 
 <br>
@@ -604,22 +575,14 @@ Equip_nat <- Equip_nat %>%  mutate(Screens_b100=Screens/Screens[year==1966]*100,
 How can we comprehend these contradictory trends? Thiolliere and Ralite (2003) explained that this paradox can be explained by a structural change of the movie theater market. Prior to the late 60s, a large portion of the cinema market was dominated by single-screen movie halls with a substantial number of seats. Everything changed after the 60s. The second half of the 21st century witnessed a shift from one-room movie halls to halls with fewer seats but a plural number of screens. Thus, some former one-room cinemas repurposed their spaces to welcome more screens, and multiroom setups became predominant among newly constructed cinemas. Thiolliere and Ralite assert that this new structure enabled the industry to intensify its exploitation capabilities in order to offer more choices for its consumers. These new cinemas had better performance than their one-room elders, explaining the latter's gradual disappearance. This shift can be observed in the ratio of chairs to screens, which can be interpreted as an indicator of the size of the screening room in terms of seats.
 
 ```{r}
-#Ratio screen/chair
-Equip_nat <- Equip_nat %>% 
-  mutate(Seats_by_screens = Seats/Screens)
-
-#Graphic
 Se_Sc_graph2 <- Equip_nat %>%
   filter(year<1993) %>% 
   ggplot(aes(x=year,y=Seats_by_screens))+
-  geom_bar(stat="identity",fill="gold")+
+  geom_line(color = "gold")+
   labs(title = "Ratio of Seats by Screens in France by Year", x="Year", y="Seats by Screen")+
   theme_minimal()
 
-F_Se_Sc_graph2 <- ggplotly(Se_Sc_graph2)
-
-
-F_Se_Sc_graph2
+ggplotly(Se_Sc_graph2)
 ```
 
 <br>
@@ -628,7 +591,7 @@ F_Se_Sc_graph2
 
 #### Evolution of the attendance
 
-```{r}
+```{r calculation_growth_rates}
 #Calculation of the growth rate between 1993 and 2018
 
 Growth_rate_1993_2018 <- Attendance_nat %>%
@@ -640,8 +603,7 @@ Growth_rate_1993_2018 <- Attendance_nat %>%
 
 #Calculation of the average growth rate between 1966 and 1992
 
-nrow_1993_2018 <-
-  Attendance_nat %>% 
+nrow_1993_2018 <- Attendance_nat %>% 
   filter(year>1992 & year<2019) %>% 
   nrow()
 
@@ -657,7 +619,6 @@ Av_Growth_rate_1993_2018 <- Attendance_nat %>%
 In many movies, after a tragic downfall, the hero comeback in a flamboyant manner.If this storyline mark movies in theater, it also echoes the history of the industry. The 25 years between 1993 and 2018 are a period of growth for the cinema's market. The attendance went from 130 million to suprass the symbolic bar of the 200 million. If this level is still lower thanwhat was observed during the "golden age", the upturn is still significant with agrowth of `r Growth_rate_1993_2018` % during the period and an average growth of `r Av_Growth_rate_1993_2018` % by year.
 
 ```{r}
-
 Att_graph3 <- Attendance_nat %>% 
   filter(year >1992 & year<2019) %>% 
   ggplot(aes(x = year, y = Attendance)) +
@@ -666,9 +627,7 @@ Att_graph3 <- Attendance_nat %>%
   labs(title ="Attendance in France by year [1993-2018]", x="Year", y="Attendance")+
   theme_minimal()
 
-F_Att_graph3 <-ggplotly(Att_graph3)
-
-F_Att_graph3
+ggplotly(Att_graph3)
 ```
 
 <br>
@@ -684,9 +643,7 @@ Att_graph4 <-Attendance_nat %>%
   labs(title = "Growth rate by year [1993-2018]", x="Year", y="Growth rate by year", fill="Growth rate") +
   theme_minimal()
 
-F_Att_graph4 <-ggplotly(Att_graph4)
-
-F_Att_graph4
+ggplotly(Att_graph4)
 ```
 
 Numerous scientific papers and reports agree that this revival is due to the development of multiplexes (Blanchard, 2014 ; CNC, 2013; Muhlberger, 2013; Thiolliere and Ralite, 2003). Theses structures would have sparked again the interest of the consumers for movie theaters.
@@ -703,13 +660,11 @@ The last three decades are indeed an era of sustained growth for multiplexes. Th
  M_graph1 <- Multiplex_nat %>% 
   filter(year >1992 & year<2019) %>% 
   ggplot(aes(x = year, y = nb_multiplex)) +
-  geom_bar(fill="navy", stat = "identity") + 
+  geom_line(color = "navy") + 
    labs(titre="Number of multiplexes in France between 1993 and 2018", x="Year", y="Number of multiplexes")+
   theme_minimal()
 
-F_M_graph1 <-ggplotly(M_graph1)
-
-F_M_graph1
+ggplotly(M_graph1)
 ```
 
 <br>
@@ -725,13 +680,7 @@ Data on the number of cinemas were not available in the database prior to 1992. 
 However, when observing the number of cinemas, multiplexes excluded, a different story unfolds before our eyes. The graph below shows the evolution of the number of cinemas, both with and without multiplexes. It appears that multiplexes accounted for most of the growth in the 1990s. Moreover, the number of cinemas has plummeted since 2000 when multiplexes are excluded from the count. Nevertheless, it is important to note that our analysis is limited by an element whose significance remains uncertain. Our data do not allow us to distinguish between the outright closure of cinemas and the transformation of former multiroom cinemas into multiplexes.
 
 ```{r}
-
-Multiplex_nat <- Multiplex_nat %>% 
-  mutate(nb_etablissements_no_m = nb_etablissement-nb_multiplex)
-
-
-
-Et_graph1 <- Multiplex_nat %>% 
+Et_graph <- Multiplex_nat %>% 
   rename ("All cinemas"=nb_etablissement, "Cinemas excluding multiplexes" = nb_etablissements_no_m) %>% 
   pivot_longer(cols = c(`All cinemas`, `Cinemas excluding multiplexes`),names_to = "Variables",values_to = "Nb") %>% 
   filter(year<2019) %>% 
@@ -740,8 +689,7 @@ Et_graph1 <- Multiplex_nat %>%
   geom_line()+
   theme_minimal()
 
-F_Et_graph1 <- ggplotly(Et_graph1) 
-F_Et_graph1
+ggplotly(Et_graph) 
   
 #The rename function is used to change (only for the creation of this graphic) the name of the original column which became the values of the column"Variables". The goal behind this transformation is to have more significative name for the two curves in our legend. We also use the layout function to put the legend above the graph because plotly does not take into account theme(legend.position = "top") when it transform the ggplot.
 ```
@@ -759,29 +707,7 @@ M_graph2 <- Multiplex_nat %>%
    labs(title="Share of the multiplexes in the total of movie theater between 1993 and 2018", x="Year", y="Percentage")+
   theme_minimal()
 
-F_M_graph2 <-ggplotly(M_graph2)
-
-F_M_graph2
-
-#Test of an alternative
-M_graph3 <- Multiplex_nat %>% 
-  filter(year >1992 & year<2019) %>% 
-  select(year, share_multiplexe) %>%  
-  rename(Multiplexes=share_multiplexe) %>%  
-  mutate("Other movie theaters" = 100-Multiplexes) %>% 
-  pivot_longer(cols=c(Multiplexes, `Other movie theaters`),names_to = "Type of movie theater",values_to = "percent") %>%  
-  ggplot(aes(x=year, y=percent, fill=`Type of movie theater`))+
-  geom_col(position = position_stack(reverse = TRUE)) +
-  scale_fill_manual(values = c("navy", "darkcyan"))+
-  scale_y_continuous(labels = scales::percent_format(scale = 1))+ 
-   labs(title="Share of the multiplexes in the total of movie theater between 1993 and 2018", x="Year", y="Percentage")+
-  theme_minimal()
-
-#The use  geom_col(position = position_stack(reverse = TRUE)) is to inverse the order of the stacked bar (i.e. to have the statistics of Multiplexes below the ones on the Other Movie theater)
-
-F_M_graph3 <-ggplotly(M_graph3)
-
-F_M_graph3
+ggplotly(M_graph2)
 ```
 
 <br>
@@ -796,11 +722,7 @@ Sc_graph <- Equip_nat %>%
   labs(title = "Number of Screens in France between 1993 and 2018", x = "Year", y = "Number of Screens") +
   theme_minimal()
 
-
-F_Sc_graph <- ggplotly(Sc_graph)
-
-
-F_Sc_graph
+ggplotly(Sc_graph)
 ```
 
 <br>
@@ -836,10 +758,7 @@ Se_graph2 <- Equip_nat %>%
   labs(title = "Number of Seats in France between 1962 and 2018", x="Year", y="Number of Seats")+
   theme_minimal()
 
-F_Se_graph2 <- ggplotly(Se_graph2)
-
-
-F_Se_graph2
+ggplotly(Se_graph2)
 
 #Evolution of the number of Seats
 Se_graph3 <- Equip_nat %>% 
@@ -849,47 +768,7 @@ Se_graph3 <- Equip_nat %>%
   labs(title = "Number of Seats in France between 1993 and 2018", x="Year", y="Number of Seats")+
   theme_minimal()
 
-F_Se_graph3 <- ggplotly(Se_graph3)
-
-
-F_Se_graph3
-
-```
-
-<br>
-
-### "Act 3" - Modern era
-
-```{r}
-Att_graph5 <- Attendance_nat %>% 
-  filter(year >2018) %>% 
-  ggplot(aes(x = year, y = Attendance)) +
-  geom_line(color="orange") +
-  scale_y_continuous(labels = scales::number_format())+ 
-  labs(title ="Attendance in France by year [2019-2022] - Dynamic graph", x="Year", y="Attendance")+
-  theme_minimal()
-
-F_Att_graph5 <-ggplotly(Att_graph5)
-
-F_Att_graph5
-```
-
-<br>
-
-```{r}
-Att_graph6 <-Attendance_nat %>% 
-  filter(year >2018) %>% 
-  mutate(Growth_rate=ifelse(Growth<0, "Negative", "Positive")) %>% 
-  ggplot(aes(x = year, y = Growth, fill=Growth_rate)) +
-  geom_col() +
-  scale_fill_manual(values = c("lightblue", "orange")) +
-  scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
-  labs(title = "Growth rate by year [2019-2022]", x="Year", y="Growth rate by year", fill="Growth rate") +
-  theme_minimal()
-
-F_Att_graph6 <-ggplotly(Att_graph6)
-
-F_Att_graph6
+ggplotly(Se_graph3)
 ```
 
 <br>
@@ -897,17 +776,61 @@ F_Att_graph6
 ### Art et Essaie en hausse
 
 ```{r}
-Att_graph7 <- Attendance_AE_nat %>% 
+AE_graph1 <- Attendance_AE_nat %>% 
   filter(year >2001) %>% 
   ggplot(aes(x = year, y = Attendance)) +
   geom_line(color="orange") +
   scale_y_continuous(labels = scales::number_format())+ 
-  labs(title ="Attendance AE in France by year [2002-2022]", x="Year", y="Attendance")+
+  labs(title ="Attendance AE in France", x="Year", y="Attendance")+
   theme_minimal()
 
-F_Att_graph7 <-ggplotly(Att_graph7)
+ggplotly(AE_graph1)
+```
 
-F_Att_graph7
+
+```{r}
+AE_graph2 <-  Etablissement_AE %>% 
+  filter(year >2001) %>% 
+  ggplot(aes(x = year, y = nb_etablissement_AE)) +
+  geom_line(color = "orange") + 
+  labs(titre="Number of movie thearter in France", x="Year", y="Number of movie thearter")+
+  theme_minimal()
+
+ggplotly(AE_graph2)
+```
+
+```{r}
+AE_graph3 <-  recette_AE_nat %>% 
+  filter(year >2001) %>% 
+  ggplot(aes(x = year, y = recetteAE_tot)) +
+  geom_line(color = "orange") + 
+  labs(titre="Total recettes AE in France", x="Year", y="Total recettes")+
+  theme_minimal()
+
+ggplotly(AE_graph3)
+```
+
+```{r}
+AE_graph4 <- Equip_AE_nat %>% 
+  filter(year >2001) %>% 
+  ggplot(aes(x=year, y=Seats_AE)) +
+  geom_line(color="orange")+
+  labs(title = "Number of Seats in AE in France", x="Year", y="Number of Seats")+
+  theme_minimal()
+
+ggplotly(AE_graph4)
+```
+
+
+```{r}
+AE_graph5 <- Equip_AE_nat %>% 
+  filter(year >2001) %>% 
+  ggplot(aes(x=year, y=Screens_AE)) +
+  geom_line(color="orange")+
+  labs(title = "Number of Seats in AE in France", x="Year", y="Number of Seats")+
+  theme_minimal()
+
+ggplotly(AE_graph5)
 ```
 
 ## Test on how to make appear evolution by department
@@ -931,9 +854,7 @@ Dep_attb100_graph <- Dep_attb100 %>% filter(year<2019) %>%
 
 #group=department_code was necessary to R to display the different graph, a standard color= in ggplot(aes()) did not work
  
-F_Dep_att_graph_b100 <- ggplotly(Dep_attb100_graph)
-
-F_Dep_att_graph_b100
+ggplotly(Dep_attb100_graph)
 ```
 
 ### Découpage en période
@@ -946,9 +867,7 @@ Dep_attb100_graph_1962_1992 <- Dep_attb100 %>% filter(year<1993) %>%
   geom_line()+
   theme_minimal()
  
-F_Dep_att_graph_b100_1962_1992 <- ggplotly(Dep_attb100_graph_1962_1992)
-
-F_Dep_att_graph_b100_1962_1992
+ggplotly(Dep_attb100_graph_1962_1992)
 
 #1993-2018
 Dep_attb100_graph_1993_2018 <- Dep_attb100 %>% 
@@ -958,11 +877,7 @@ Dep_attb100_graph_1993_2018 <- Dep_attb100 %>%
   geom_line()+
   theme_minimal()
 
- 
-F_Dep_att_graph_b100_1993_2018 <- ggplotly(Dep_attb100_graph_1993_2018)
-
-F_Dep_att_graph_b100_1993_2018
-
+ggplotly(Dep_attb100_graph_1993_2018)
 ```
 
 ### Test : Show example of peculiar trajectory
@@ -988,11 +903,7 @@ Dep_attb100_graph2 <- Dep_attb100 %>%
   labs(title = "Example of departement with peculiar trajectory: Attendance (index base 100 1966) - 40 and 77", x="Year", y="Attendance")+
   theme_minimal()
 
-F_Dep_attb100_graph2 <- ggplotly(Dep_attb100_graph2)
-
-F_Dep_attb100_graph2
-
-
+ggplotly(Dep_attb100_graph2)
 ```
 
 70 and 88 are them opposite example with their attendance that plummeted between 1966 and 1992. 92 knew the most violent that can be observed between 1966 and 1977 with an index that quartered before knowing a strong revival.
@@ -1009,11 +920,7 @@ Dep_attb100_graph3 <- Dep_attb100 %>%
   labs(title = "Example of departement with peculiar trajectory : Attendance (index base 100 1966) - 78 and 92", x="Year", y="Attendance")+
   theme_minimal()
 
-
-
-F_Dep_attb100_graph3 <- ggplotly(Dep_attb100_graph3)
-
-F_Dep_attb100_graph3
+ggplotly(Dep_attb100_graph3)
 ```
 
 ### ratio b100 France/departement
@@ -1036,43 +943,8 @@ Dep_attb100_graph_ratio <- Dep_attb100 %>% filter(year<2019) %>%
   geom_line()+
   theme_minimal()
 
- 
-F_Dep_att_graph_b100_ratio <- ggplotly(Dep_attb100_graph_ratio)
-
-F_Dep_att_graph_b100_ratio
+ggplotly(Dep_attb100_graph_ratio)
 ```
-
-### Other idea
-
-Put in black all the curve except the peculr one in the graph with all the curves in
-
-### Test : Base 100 + facet_grid
-
-```{r}
-Dep_attb100_graph_grid <- Dep_attb100 %>% mutate(dep_c_group=case_when(departement_code=="01" | departement_code=="02" | departement_code=="03" | departement_code=="04" | departement_code=="05" | departement_code=="06" | departement_code=="07" | departement_code=="08" | departement_code=="09" |departement_code=="2A"|departement_code=="2B" ~"01 to 9",
-departement_code=="10" | departement_code=="11" | departement_code=="12" | departement_code=="13" | departement_code=="14" | departement_code=="15" | departement_code=="16" | departement_code=="17" | departement_code=="18" | departement_code=="19" ~"10 to 19",
-departement_code=="20" | departement_code=="21" | departement_code=="22" | departement_code=="23" | departement_code=="24" | departement_code=="25" | departement_code=="26" | departement_code=="27" | departement_code=="28" | departement_code=="29" ~"20 to 29",
-departement_code=="30" | departement_code=="31" | departement_code=="32" | departement_code=="33" | departement_code=="34" | departement_code=="35" | departement_code=="36" | departement_code=="37" | departement_code=="38" | departement_code=="39" ~"30 to 39",
-departement_code=="40" | departement_code=="41" | departement_code=="42" | departement_code=="43" | departement_code=="44" | departement_code=="45" | departement_code=="46" | departement_code=="47" | departement_code=="48" | departement_code=="49" ~"40 to 49",
-departement_code=="50" | departement_code=="51" | departement_code=="52" | departement_code=="53" | departement_code=="54" | departement_code=="55" | departement_code=="56" | departement_code=="57" | departement_code=="58" | departement_code=="59" ~"50 to 59",
-departement_code=="60" | departement_code=="61" | departement_code=="62" | departement_code=="63" | departement_code=="64" | departement_code=="65" | departement_code=="66" | departement_code=="67" | departement_code=="68" | departement_code=="69" ~"60 to 69",
-departement_code=="70" | departement_code=="71" | departement_code=="72" | departement_code=="73" | departement_code=="74" | departement_code=="75" | departement_code=="76" | departement_code=="77" | departement_code=="78" | departement_code=="79" ~"70 to 79",
-departement_code=="80" | departement_code=="81" | departement_code=="82" | departement_code=="83" | departement_code=="84" | departement_code=="85" | departement_code=="86" | departement_code=="87" | departement_code=="88" | departement_code=="89" ~"80 to 89",
-departement_code=="90" | departement_code=="91" | departement_code=="92" | departement_code=="93" | departement_code=="94" | departement_code=="95" ~"90 to 95")) %>% 
-  ggplot(aes(x=year, y=Att_b100, color=departement_code, group=departement_code)) +
-  labs(title = "Attendance by departement base index 100 1966", x="Year",y="Attendance")+
-  facet_wrap(~dep_c_group)+
-  geom_line()
-
- 
-F_Dep_att_graph_b100_grid <- ggplotly(Dep_attb100_graph_grid)
-
-F_Dep_att_graph_b100_grid
-```
-
-### Absolute value
-
-### 
 
 # Bibliography
 
