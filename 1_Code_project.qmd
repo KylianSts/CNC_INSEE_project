@@ -336,20 +336,13 @@ Nevertheless, as in many stories, the golden age is not eternal. Ours knew its d
 ```{r Aggregate_of_attendance_by_year}
 Attendance_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
-  summarize(Attendance = sum(entrées, na.rm = TRUE))
+  summarize(Attendance = sum(entrées, na.rm = TRUE)) %>% 
+  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
 
 Attendance_AE_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
-  summarize(Attendance = sum(entréesAE, na.rm = TRUE))
-
-#Calculation of the growth rate of attendance by year
-
-Attendance_nat <- Attendance_nat %>% 
-  arrange(year) %>% 
-  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
-
-Attendance_AE_nat <- Attendance_AE_nat %>% 
-  arrange(year) %>% 
+  filter(!is.na(entréesAE)) %>%
+  summarize(Attendance = sum(entréesAE, na.rm = TRUE)) %>% 
   mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
 ```
 
@@ -419,6 +412,7 @@ Multiplex_nat <- cnc_data_clean %>%
 
 Etablissement_AE <- cnc_data_clean %>% 
   group_by(year) %>% 
+  filter(!is.na(étabAE)) %>%
   summarize(nb_etablissement_AE = sum(étabAE, na.rm = TRUE))
 ```
 
@@ -429,8 +423,34 @@ recette_nat <- cnc_data_clean %>%
 
 recette_AE_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
+  filter(!is.na(recettesAE)) %>%
   summarize(recetteAE_tot = sum(recettesAE, na.rm = TRUE))
 ```
+
+```{r}
+inflation_fr <- read.csv("Data/valeurs_annuelles.csv", sep=";", skip = 3) %>%
+  select(-3) %>%
+  rename(year=1, coef_ratio=2) %>%
+  filter(year > 1965 & year < 2023) %>%
+  mutate(coef_ratio = 100/coef_ratio)
+
+recettes_without_inflation <- cnc_data_clean %>%
+  select(year, recettes, recettesAE) %>%
+  left_join(inflation_fr, by = "year") %>%
+  mutate(
+    recettes = recettes * coef_ratio,
+    recettesAE = recettesAE * coef_ratio
+  )
+```
+
+```{r}
+recette_nat_withou_inf <-recettes_without_inflation %>% 
+  group_by(year) %>% 
+  summarize(recette_tot = sum(recettes, na.rm = TRUE)) %>%
+  mutate(rme_nat_without_inflation = recette_nat_withou_inf$recette_tot/Attendance_nat$Attendance 
+)
+```
+
 
 Our analytic journey starts in 1966, which is the first availabe year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992` % during the period). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance droped by `r abs(Growth_rate_1966_1969)` %. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
 
@@ -445,33 +465,12 @@ Att_graph1 <- Attendance_nat %>%
   labs(title ="Attendance in France by year [1966-1992] - Dynamic graph", x="Year", y="Attendance")+
   theme_minimal()
 
-Att_graph1$yaxis$title <- list(tickformat = ",.3s")
-
-F_Att_graph1 <- ggplotly(Att_graph1)
-
-F_Att_graph1
+ggplotly(Att_graph1)
 ```
 
 <br>
 
 18 of the 26 years between 1966 (not included) and 1992 (included) are thus characterized by a negative attendance's growth rate.The causes of this degrowth are multifactorial. The democratisation of television and of automobile are however presented as one of the the key factors of this decay.
-
-```{r}
-#Graphic of the evolution of attendance in time
-
-Att_graph1 <- Attendance_nat %>% 
-  filter(year < 1993) %>% 
-  ggplot(aes(x = year, y = Attendance)) +
-  geom_line(color="orange") +
-  scale_y_continuous(labels = scales::number_format())+ 
-  labs(title ="Attendance in France by year [1966-1992] - Dynamic graph", x="Year", y="Attendance")+
-  theme_minimal()
-
-Att_graph1$yaxis$title <- list(tickformat = ",.3s")
-
-ggplotly(Att_graph1)
-
-```
 
 ```{r}
 #Graphic of the Growth by year
@@ -490,20 +489,39 @@ ggplotly(Att_graph2)
 ```
 
 ```{r}
-#Graphic of the evolution of attendance in time
-
-Att_graph12 <- recette_nat %>% 
-  filter(year < 1993 & year>1966) %>% 
+Re_graph1 <- recette_nat %>% 
+  filter(year < 1993) %>% 
   ggplot(aes(x = year, y = recette_tot)) +
   geom_line(color="skyblue") +
   scale_y_continuous(labels = scales::number_format())+ 
   labs(title ="Recette in France by year [1966-1992] - Dynamic graph", x="Year", y="Recette Totale")+
   theme_minimal()
 
-Att_graph1$yaxis$title <- list(tickformat = ",.3s")
+ggplotly(Re_graph1)
 
-ggplotly(Att_graph12)
+
+Re_graph2 <- recette_nat_withou_inf %>% 
+  filter(year < 1993) %>% 
+  ggplot(aes(x = year, y = recette_tot)) +
+  geom_line(color="skyblue") +
+  scale_y_continuous(labels = scales::number_format())+ 
+  labs(title ="Recette in France by year [1966-1992] in 2015€ - Dynamic graph", x="Year", y="Recette Totale")+
+  theme_minimal()
+
+ggplotly(Re_graph2)
 ```
+```{r}
+Re_graph2 <- recette_nat_withou_inf %>% 
+  filter(year < 1993) %>% 
+  ggplot(aes(x = year, y = rme_nat_without_inflation)) +
+  geom_line(color="skyblue") +
+  scale_y_continuous(labels = scales::number_format())+ 
+  labs(title ="Average revenue by entry in France by year [1966-1992] in 2015€ - Dynamic graph", x="Year", y="Recette Totale")+
+  theme_minimal()
+
+ggplotly(Re_graph2)
+```
+
 
 <br>
 
@@ -522,6 +540,7 @@ Equip_nat <- cnc_data_clean %>%
 
 Equip_AE_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
+  filter(!is.na(écransAE)) %>%
   summarize(Screens_AE = sum(écransAE, na.rm = TRUE),
             Seats_AE = sum(fauteuilsAE, na.rm=TRUE))
 ```
@@ -667,6 +686,18 @@ The last three decades are indeed an era of sustained growth for multiplexes. Th
 ggplotly(M_graph1)
 ```
 
+```{r}
+Re_graph4 <- recette_nat_withou_inf %>% 
+  filter(year > 1992) %>% 
+  ggplot(aes(x = year, y = rme_nat_without_inflation)) +
+  geom_line(color="skyblue") +
+  scale_y_continuous(labels = scales::number_format())+ 
+  labs(title ="Average revenue by entry in France by year [1993-2022] in 2015€ - Dynamic graph", x="Year", y="Average Revenue")+
+  theme_minimal()
+
+ggplotly(Re_graph4)
+```
+
 <br>
 
 Data on the number of cinemas were not available in the database prior to 1992. The existing data seem to reveal 3 phases :
@@ -777,7 +808,6 @@ ggplotly(Se_graph3)
 
 ```{r}
 AE_graph1 <- Attendance_AE_nat %>% 
-  filter(year >2001) %>% 
   ggplot(aes(x = year, y = Attendance)) +
   geom_line(color="orange") +
   scale_y_continuous(labels = scales::number_format())+ 
@@ -787,10 +817,22 @@ AE_graph1 <- Attendance_AE_nat %>%
 ggplotly(AE_graph1)
 ```
 
+```{r}
+AE_graph <-Attendance_AE_nat %>% 
+  filter(year < 2020 & year> 1966) %>%
+  mutate(Growth_rate=ifelse(Growth<0, "Negative", "Positive")) %>% 
+  ggplot(aes(x = year, y = Growth, fill=Growth_rate)) +
+  geom_col() +
+  scale_fill_manual(values = c("lightblue", "orange")) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
+  labs(title = "Growth rate by year [1993-2018]", x="Year", y="Growth rate by year", fill="Growth rate") +
+  theme_minimal()
+
+ggplotly(AE_graph)
+```
 
 ```{r}
 AE_graph2 <-  Etablissement_AE %>% 
-  filter(year >2001) %>% 
   ggplot(aes(x = year, y = nb_etablissement_AE)) +
   geom_line(color = "orange") + 
   labs(titre="Number of movie thearter in France", x="Year", y="Number of movie thearter")+
@@ -801,7 +843,6 @@ ggplotly(AE_graph2)
 
 ```{r}
 AE_graph3 <-  recette_AE_nat %>% 
-  filter(year >2001) %>% 
   ggplot(aes(x = year, y = recetteAE_tot)) +
   geom_line(color = "orange") + 
   labs(titre="Total recettes AE in France", x="Year", y="Total recettes")+
@@ -812,7 +853,6 @@ ggplotly(AE_graph3)
 
 ```{r}
 AE_graph4 <- Equip_AE_nat %>% 
-  filter(year >2001) %>% 
   ggplot(aes(x=year, y=Seats_AE)) +
   geom_line(color="orange")+
   labs(title = "Number of Seats in AE in France", x="Year", y="Number of Seats")+
@@ -824,7 +864,6 @@ ggplotly(AE_graph4)
 
 ```{r}
 AE_graph5 <- Equip_AE_nat %>% 
-  filter(year >2001) %>% 
   ggplot(aes(x=year, y=Screens_AE)) +
   geom_line(color="orange")+
   labs(title = "Number of Seats in AE in France", x="Year", y="Number of Seats")+
@@ -960,11 +999,13 @@ Relative hétérogénéité - Ecart au niveau de 1966 plus prononcé
 
 #Import the shapefile data
 library(sf) #We'll use sf to open shapefile, i.e. cartographic data
-Dep_shp <- st_read(dsn ="Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp")
+Dep_shp <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
 
 #Merge with CNC statistics
 
-Dep_shp <- Dep_shp %>% left_join(Dep_attb100, by = c("INSEE_DEP" = "departement_code")) %>% filter(year %in% c(1966,1968,1972,1975,1979,1982,1985,1988,1990,1993,1996,1999,2002,2005,2008,2011,2013,2016,2019))
+Dep_shp <- Dep_shp %>% 
+   left_join(Dep_attb100, by = c("INSEE_DEP" = "departement_code"))%>% 
+  filter(year %in% c(1966,1968,1972,1975,1979,1982,1985,1988,1990,1993,1996,1999,2002,2005,2008,2011,2013,2016,2019)) 
 
 #Interactive Maps
 
@@ -992,8 +1033,12 @@ library(magick)
 Gif <- image_read("Dep_shp_anim2.gif")
 image_animate(Gif,fps = 1)
 #We use fps and the number of year in order to reduce the "pace" of the Gif.
-
 ```
+
+
+
+
+
 
 # Bibliography
 
