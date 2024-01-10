@@ -97,7 +97,11 @@ insee_data <- insee_data |> select(-X) #we drop X, the column which is an index 
 
 insee_data <- insee_data |> filter(nchar(DEP_RES_21) != 3) #We drop oversea department
 
-In_nrow <- insee_data |> nrow()
+insee_data <- insee_data |> rename(departement_code = DEP_RES_21, year =  AN_RECENS)
+
+insee_data_clean <- insee_data |> filter(!is.na(AGE_GROUP)
+
+In_nrow <- insee_data_clean |> nrow()
 ```
 
 Our task was to reduce the number of these combinations in order to downsize the database. To do so, we transform the 120 levels of the variable corresponding to the age into 5 age ranges. Furthermore, we get rid of the variables that were not useful to our project using a group_by function. This allows us to go from a database of more than 50 millions rows to a CSV with `r In_nrow` rows.
@@ -217,7 +221,7 @@ cnc_data_clean %>%
 **insee_data (from Insee_cleanv3.csv)**
 
 ```{r Nb_rows_and_columns_Insee}
-insee_data %>%
+insee_data_clean %>%
   summarize(
     "Number of rows" = prettyNum(nrow(.), big.mark = " "),
     "Number of columns" = ncol(.)
@@ -227,7 +231,7 @@ insee_data %>%
 ```
 
 ```{r summary_INSEE}
-insee_data %>%
+insee_data_clean %>%
   select(-POND2) %>%
   summarize(across(everything(),n_distinct)) %>% 
   t() %>% 
@@ -263,12 +267,6 @@ Insee database is a sociodemographic description of each department with variabl
 <br>
 
 ## Merging the INSEE and CNC database
-
-```{r insee_database}
-insee_data <- insee_data |> rename(departement_code = DEP_RES_21, year =  AN_RECENS)
-
-insee_data_clean <- insee_data |> filter(!is.na(AGE_GROUP))
-```
 
 ```{r merging}
 cnc_data_clean$year <- as.integer(cnc_data_clean$year) 
@@ -1131,44 +1129,65 @@ ggplot(merged_data, aes(fill = per_etab_dep_change)) +
 #Note a moi meme --> mauvais raisonnement, ca reveint au meme qu ele premier graphique, ici ce n'ets pas une concentration de vieux mais toujours de population meme si un peu modifier par la vrai concentration de vieux 
 #faire un graphique de nombre d'entrée moyen par vieux, par etudiant, employé ... 
 # pour faire ca : prendre le nombre de vieux dans la pop et le nombre d'entrées et diviser.
-pop_dep_old <- insee_data_clean %>%
+pop_dep_old_now <- insee_data_clean %>%
+  filter(year == 2019) %>%
   filter(AGE_GROUP == '60-74' | AGE_GROUP == '75 and more') %>%
-  group_by(departement_code, year) %>%
+  group_by(departement_code) %>%
+  summarise(population_dep_old = sum(POND2))
+
+pop_dep_now <- insee_data_clean %>%
+  filter(year == 2019) %>%
+  group_by(departement_code) %>%
   summarise(population_dep = sum(POND2))
 
-pop_fr_old<- insee_data_clean %>%
-  filter(AGE_GROUP == '60-74' | AGE_GROUP == '75 and more') %>%
-  group_by(year) %>%
-  summarise(population_fr = sum(POND2))
+pop_dep_old_now <- left_join(pop_dep_old_now, pop_dep_now, by = "departement_code") %>%
+  mutate(percentage_old = population_dep_old/population_dep *100)
 
-pop_dep_old <- left_join(pop_dep_old,pop_fr_old, by= 'year') %>%
-  mutate(per_pop_dep_old = population_dep/population_fr * 100)
+attendance_dep <- cnc_data_clean %>% 
+  filter(year == 2019) %>%
+  group_by(departement_code) %>% 
+  summarise(entrées_dep = sum(entrées))
 
-base_year <- pop_dep_old %>%
+pop_dep_old_now <- left_join(pop_dep_old_now, attendance_dep, by = "departement_code")%>%
+  mutate(entry_for_1000_person = (population_dep*1000)/entrées_dep)
+```
+
+```{r}
+ggplot(pop_dep_old_now, aes(x = percentage_old, y = entry_for_1000_person)) +
+  geom_point() +
+  theme_minimal()
+```
+
+
+```{r}
+pop_dep_etu_now <- insee_data_clean %>%
+  filter(year == 2019) %>%
+  filter(TYP_ACT == 3) %>%
   group_by(departement_code) %>%
-  filter(year == 1990) %>%
-  select(per_pop_dep_old, departement_code) %>%
-  rename(base=per_pop_dep_old)
+  summarise(population_dep_etu = sum(POND2))
 
-pop_dep_old <- left_join(pop_dep_old, base_year, by = "departement_code") %>%
-  mutate(per_pop_dep_old_change = (per_pop_dep_old / base -1)*100)
+pop_dep_now <- insee_data_clean %>%
+  filter(year == 2019) %>%
+  group_by(departement_code) %>%
+  summarise(population_dep = sum(POND2))
+
+pop_dep_etu_now <- left_join(pop_dep_etu_now, pop_dep_now, by = "departement_code") %>%
+  mutate(percentage_etu = population_dep_etu/population_dep *100)
+
+attendance_dep <- cnc_data_clean %>% 
+  filter(year == 2019) %>%
+  group_by(departement_code) %>% 
+  summarise(entrées_dep = sum(entrées))
+
+pop_dep_etu_now <- left_join(pop_dep_etu_now, attendance_dep, by = "departement_code")%>%
+  mutate(entry_for_1000_person = (population_dep*1000)/entrées_dep)
 ```
 
-```{r fig.width=12, fig.height=15}
-france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
-
-france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
-
-merged_data <- merge(france_shape, pop_dep_old, by = "departement_code")
-
-ggplot(merged_data, aes(fill = per_pop_dep_old_change)) +
-  geom_sf() +
-  scale_fill_viridis_c(option = "H") + 
-  labs(title = "Population Map of France", fill = "per_pop_dep_old_change") +
-  theme_minimal() +
-  facet_wrap(~year, ncol = 2)
+```{r}
+ggplot(pop_dep_etu_now, aes(x = percentage_etu, y = entry_for_1000_person)) +
+  geom_point() +
+  theme_minimal()
 ```
-
 
 # Bibliography
 
