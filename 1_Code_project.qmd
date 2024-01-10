@@ -95,6 +95,8 @@ insee_data <- read.csv("Data/INSEE_cleanv3.csv")
 
 insee_data <- insee_data |> select(-X) #we drop X, the column which is an index of each row
 
+insee_data <- insee_data |> filter(nchar(DEP_RES_21) != 3) #We drop oversea department
+
 In_nrow <- insee_data |> nrow()
 ```
 
@@ -444,13 +446,12 @@ recettes_without_inflation <- cnc_data_clean %>%
 ```
 
 ```{r}
-recette_nat_withou_inf <-recettes_without_inflation %>% 
+recette_nat_without_inf <-recettes_without_inflation %>% 
   group_by(year) %>% 
   summarize(recette_tot = sum(recettes, na.rm = TRUE)) %>%
-  mutate(rme_nat_without_inflation = recette_nat_withou_inf$recette_tot/Attendance_nat$Attendance 
+  mutate(rme_nat_without_inflation = recette_tot/Attendance_nat$Attendance 
 )
 ```
-
 
 Our analytic journey starts in 1966, which is the first availabe year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992` % during the period). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance droped by `r abs(Growth_rate_1966_1969)` %. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
 
@@ -510,6 +511,7 @@ Re_graph2 <- recette_nat_withou_inf %>%
 
 ggplotly(Re_graph2)
 ```
+
 ```{r}
 Re_graph2 <- recette_nat_withou_inf %>% 
   filter(year < 1993) %>% 
@@ -521,7 +523,6 @@ Re_graph2 <- recette_nat_withou_inf %>%
 
 ggplotly(Re_graph2)
 ```
-
 
 <br>
 
@@ -861,7 +862,6 @@ AE_graph4 <- Equip_AE_nat %>%
 ggplotly(AE_graph4)
 ```
 
-
 ```{r}
 AE_graph5 <- Equip_AE_nat %>% 
   ggplot(aes(x=year, y=Screens_AE)) +
@@ -882,10 +882,12 @@ Observation : a global trend but also data shows that some department had a diff
 
 ```{r}
 Dep_attb100 <- cnc_data_clean %>%  
-  group_by(departement_code) %>% select(year,entrées,departement_code) %>%
+  group_by(departement_code) %>%
+  select(year,entrées,departement_code) %>%
   mutate(Att_b100 = round(entrées / entrées[year == 1966] * 100, digits=0))
 
-Dep_attb100_graph <- Dep_attb100 %>% filter(year<2019) %>% 
+Dep_attb100_graph <- Dep_attb100 %>% 
+  filter(year<2019) %>% 
   ggplot(aes(x=year, y=Att_b100, color=departement_code, group=departement_code)) +
   labs(title = "Attendance by departement base index 100 1966", x="Year",y="Attendance")+
   geom_line()+
@@ -1035,10 +1037,44 @@ image_animate(Gif,fps = 1)
 #We use fps and the number of year in order to reduce the "pace" of the Gif.
 ```
 
+# Evolution of type of population in France and their impact on cinema industry
 
+```{r}
+pop_dep <- insee_data_clean %>%
+  group_by(departement_code, year) %>%
+  summarise(population_dep = sum(POND2))
 
+pop_fr <- insee_data_clean %>%
+  group_by(year) %>%
+  summarise(population_fr = sum(POND2))
 
+pop_dep <- left_join(pop_dep,pop_fr, by= 'year') %>%
+  mutate(per_pop_dep = population_dep/population_fr * 100)
 
+base_year <- pop_dep %>%
+  group_by(departement_code) %>%
+  filter(year == 1968) %>%
+  select(per_pop_dep, departement_code) %>%
+  rename(base=per_pop_dep)
+
+pop_dep <- left_join(pop_dep, base_year, by = "departement_code") %>%
+  mutate(per_pop_dep_change = (per_pop_dep / base -1)*100)
+```
+
+```{r fig.width=10}
+france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
+
+france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
+
+merged_data <- merge(france_shape, pop_dep, by = "departement_code")
+
+ggplot(merged_data, aes(fill = per_pop_dep_change)) +
+  geom_sf() +
+  scale_fill_viridis_c(option = "B") + 
+  labs(title = "Population Map of France", fill = "per_pop_dep_change") +
+  theme_minimal() +
+  facet_wrap(~year, ncol = 2)
+```
 
 # Bibliography
 
