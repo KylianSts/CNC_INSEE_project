@@ -1053,7 +1053,7 @@ pop_dep <- left_join(pop_dep,pop_fr, by= 'year') %>%
 
 base_year <- pop_dep %>%
   group_by(departement_code) %>%
-  filter(year == 1968) %>%
+  filter(year == 1990) %>%
   select(per_pop_dep, departement_code) %>%
   rename(base=per_pop_dep)
 
@@ -1061,7 +1061,11 @@ pop_dep <- left_join(pop_dep, base_year, by = "departement_code") %>%
   mutate(per_pop_dep_change = (per_pop_dep / base -1)*100)
 ```
 
-```{r fig.width=10}
+```{r fig.width=12, fig.height=15}
+#on regarde l'évolution temporelle de la part de la population de chaque département dans la population pour voir ou se concentre la population dans le temps
+
+#remarque si on prend 1990 comme base, l'echelle de ce qui est avant est inversé. (j'ai fais ca pour comparer avec les établissement)
+
 france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
 
 france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
@@ -1070,11 +1074,101 @@ merged_data <- merge(france_shape, pop_dep, by = "departement_code")
 
 ggplot(merged_data, aes(fill = per_pop_dep_change)) +
   geom_sf() +
-  scale_fill_viridis_c(option = "B") + 
+  scale_fill_viridis_c(option = "H") + 
   labs(title = "Population Map of France", fill = "per_pop_dep_change") +
   theme_minimal() +
   facet_wrap(~year, ncol = 2)
 ```
+
+```{r fig.width=12, fig.height=15}
+#"offre" cinema, on peut aussi mettre fauteuils à la place 
+#Note a moi meme --> faire la meme avec la demande --> variable entrées 
+
+etab_dep <- cnc_data_clean %>%
+  group_by(departement_code, year) %>%
+  summarise(etablissements_dep = sum(établissements)) %>%
+  filter(!is.na(etablissements_dep))
+
+etab_fr <- Multiplex_nat %>%
+  select(year, nb_etablissement)
+
+etab_dep <- left_join(etab_dep, etab_fr, by= 'year') %>%
+  mutate(per_etab_dep = etablissements_dep/nb_etablissement * 100)%>%
+  filter(year == 1992 | year == 1999 | year == 2008 | year == 2013 | year == 2019)
+
+base_year <- etab_dep %>%
+  group_by(departement_code) %>%
+  filter(year == 1992) %>%
+  select(per_etab_dep, departement_code) %>%
+  rename(base=per_etab_dep)
+
+etab_dep <- left_join(etab_dep, base_year, by = "departement_code") %>%
+  mutate(per_etab_dep_change = (per_etab_dep / base -1)*100)
+```
+
+```{r fig.width=12, fig.height=15}
+#Blablabla ... ou se concentre les cinémas dans le temps
+
+france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
+
+france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
+
+merged_data <- merge(france_shape, etab_dep, by = "departement_code")
+
+ggplot(merged_data, aes(fill = per_etab_dep_change)) +
+  geom_sf() +
+  scale_fill_viridis_c(option = "H") + 
+  labs(title = "Population Map of France", fill = "per_etab_dep_change") +
+  theme_minimal() +
+  facet_wrap(~year, ncol = 2)
+```
+
+
+```{r}
+#Blabla ... ou se concentre les vieux dans le temps 
+#on regarde que la population de vieux et on regarde l'évolution de la part de vieux dans le departement par rapport a la population de vieux 
+
+#Note a moi meme --> mauvais raisonnement, ca reveint au meme qu ele premier graphique, ici ce n'ets pas une concentration de vieux mais toujours de population meme si un peu modifier par la vrai concentration de vieux 
+#faire un graphique de nombre d'entrée moyen par vieux, par etudiant, employé ... 
+# pour faire ca : prendre le nombre de vieux dans la pop et le nombre d'entrées et diviser.
+pop_dep_old <- insee_data_clean %>%
+  filter(AGE_GROUP == '60-74' | AGE_GROUP == '75 and more') %>%
+  group_by(departement_code, year) %>%
+  summarise(population_dep = sum(POND2))
+
+pop_fr_old<- insee_data_clean %>%
+  filter(AGE_GROUP == '60-74' | AGE_GROUP == '75 and more') %>%
+  group_by(year) %>%
+  summarise(population_fr = sum(POND2))
+
+pop_dep_old <- left_join(pop_dep_old,pop_fr_old, by= 'year') %>%
+  mutate(per_pop_dep_old = population_dep/population_fr * 100)
+
+base_year <- pop_dep_old %>%
+  group_by(departement_code) %>%
+  filter(year == 1990) %>%
+  select(per_pop_dep_old, departement_code) %>%
+  rename(base=per_pop_dep_old)
+
+pop_dep_old <- left_join(pop_dep_old, base_year, by = "departement_code") %>%
+  mutate(per_pop_dep_old_change = (per_pop_dep_old / base -1)*100)
+```
+
+```{r fig.width=12, fig.height=15}
+france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
+
+france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
+
+merged_data <- merge(france_shape, pop_dep_old, by = "departement_code")
+
+ggplot(merged_data, aes(fill = per_pop_dep_old_change)) +
+  geom_sf() +
+  scale_fill_viridis_c(option = "H") + 
+  labs(title = "Population Map of France", fill = "per_pop_dep_old_change") +
+  theme_minimal() +
+  facet_wrap(~year, ncol = 2)
+```
+
 
 # Bibliography
 
