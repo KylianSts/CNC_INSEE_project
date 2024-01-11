@@ -418,7 +418,7 @@ ggplotly(Att_graph2)
 ```{r}
 att_dep_1 <- cnc_data_clean %>%
   group_by(departement_code, year) %>%
-  filter(year == 1966 | year == 1970 | year == 1974 | year == 1978 | year == 1982 | year == 1986 |year == 1990 | year == 1992) %>%
+  filter(year == 1966 | year == 1972 | year == 1977 | year == 1982 | year == 1988 | year == 1992) %>%
   summarise(attendance_dep = sum(entrées))
 
 base_year <- att_dep_1 %>%
@@ -438,12 +438,12 @@ merged_data <- merge(france_shape, att_dep_1, by = "departement_code")
 
 ggplot(merged_data, aes(fill = attendance_evolution)) +
   geom_sf() +
-  scale_fill_viridis_c(option = "H") + 
+  scale_fill_viridis_c(option = "C") + 
   labs(title = "Evolution of attendance by departement from 1966 to 1992 compare to 1966", fill = "Evolution of the attendance") +
   theme_minimal() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  facet_wrap(~year, ncol = 2)+
+  facet_wrap(~year, ncol = 3)+
   theme(legend.position = "bottom",
         legend.title = element_text(hjust = 0.5))
 ```
@@ -657,7 +657,7 @@ Numerous scientific papers and reports agree that this revival is due to the dev
 ```{r}
 att_dep_2 <- cnc_data_clean %>%
   group_by(departement_code, year) %>%
-  filter(year == 1993 | year == 1996 | year == 2000 | year == 2004 | year == 2008 | year == 2012 |year == 2016 | year == 2019) %>%
+  filter(year == 1993 | year == 1998 | year == 2004 | year == 2009 | year == 2014 | year == 2019) %>%
   summarise(attendance_dep = sum(entrées))
 
 base_year <- att_dep_2 %>%
@@ -683,7 +683,7 @@ ggplot(merged_data, aes(fill = attendance_evolution)) +
   theme_minimal() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  facet_wrap(~year, ncol = 2)+
+  facet_wrap(~year, ncol = 3)+
   theme(legend.position = "bottom",
         legend.title = element_text(hjust = 0.5))
 ```
@@ -897,38 +897,6 @@ ggplotly(AE_graph2)
 ```
 
 ```{r}
-attAE_dep_now <- cnc_data_clean %>%
-  group_by(departement_code) %>%
-  filter(year == 2019) %>%
-  summarise(attendanceAE_dep = sum(entréesAE))
-
-attAE_fr <- att_dep_2 %>%
-  filter(year == 2019) %>%
-  select(departement_code, attendance_dep)
-
-attAE_dep_now <- left_join(attAE_dep_now,attAE_fr, by= 'departement_code') %>%
-  mutate(part_AE = attendanceAE_dep/attendance_dep * 100)
-```
-
-```{r fig.width=8, fig.height=10}
-france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
-
-france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
-
-merged_data <- merge(france_shape, attAE_dep_now, by = "departement_code")
-
-ggplot(merged_data, aes(fill = part_AE)) +
-  geom_sf() +
-  scale_fill_viridis_c(option = "H") + 
-  labs(title = "Where do we consume the most arthouse cinema ?", fill = "Part of the arthouse cinema in totale attendance") +
-  theme_minimal() +
-  annotation_scale()+
-  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  theme(legend.position = "bottom",
-        legend.title = element_text(hjust = 0.5))
-```
-
-```{r}
 AE_graph3 <-  recette_AE_nat %>% 
   ggplot(aes(x = year, y = recetteAE_tot)) +
   geom_line(color = "skyblue", linewidth = 0.75) + 
@@ -1000,7 +968,7 @@ ggplot(merged_data, aes(fill = per_pop_dep_change)) +
   theme_minimal() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  facet_wrap(~year, ncol = 2)+
+  facet_wrap(~year, ncol = 3)+
   theme(legend.position = "bottom",
         legend.title = element_text(hjust = 0.5))
 ```
@@ -1043,7 +1011,7 @@ ggplot(merged_data, aes(fill = per_seats_dep_change)) +
   theme_classic() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  facet_wrap(~year, ncol = 2)+
+  facet_wrap(~year, ncol = 3)+
   theme(legend.position = "bottom",
         legend.title = element_text(hjust = 0.5))
 
