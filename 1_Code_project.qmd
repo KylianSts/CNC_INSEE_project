@@ -443,7 +443,9 @@ ggplot(merged_data, aes(fill = attendance_evolution)) +
   theme_minimal() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  facet_wrap(~year, ncol = 2)
+  facet_wrap(~year, ncol = 2)+
+  theme(legend.position = "bottom",
+        legend.title = element_text(hjust = 0.5))
 ```
 
 
@@ -681,7 +683,9 @@ ggplot(merged_data, aes(fill = attendance_evolution)) +
   theme_minimal() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  facet_wrap(~year, ncol = 2)
+  facet_wrap(~year, ncol = 2)+
+  theme(legend.position = "bottom",
+        legend.title = element_text(hjust = 0.5))
 ```
 
 ```{r}
@@ -916,10 +920,12 @@ merged_data <- merge(france_shape, attAE_dep_now, by = "departement_code")
 ggplot(merged_data, aes(fill = part_AE)) +
   geom_sf() +
   scale_fill_viridis_c(option = "H") + 
-  labs(title = "Where do we consume arthouse cinema ?", fill = "Part of the arthouse cinema in totale attendance") +
+  labs(title = "Where do we consume the most arthouse cinema ?", fill = "Part of the arthouse cinema in totale attendance") +
   theme_minimal() +
   annotation_scale()+
-  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")
+  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
+  theme(legend.position = "bottom",
+        legend.title = element_text(hjust = 0.5))
 ```
 
 ```{r}
@@ -994,7 +1000,9 @@ ggplot(merged_data, aes(fill = per_pop_dep_change)) +
   theme_minimal() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  facet_wrap(~year, ncol = 2)
+  facet_wrap(~year, ncol = 2)+
+  theme(legend.position = "bottom",
+        legend.title = element_text(hjust = 0.5))
 ```
 
 ```{r}
@@ -1028,16 +1036,16 @@ france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
 
 merged_data <- merge(france_shape, seats_dep, by = "departement_code")
 
-library(ggspatial)
-
 ggplot(merged_data, aes(fill = per_seats_dep_change)) +
   geom_sf() +
   scale_fill_viridis_c(option = "H") + 
   labs(title = "Population Map of France", fill = "Evolution of the relative concentration of the offer of seats by department") +
-  theme_minimal() +
+  theme_classic() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  facet_wrap(~year, ncol = 2)
+  facet_wrap(~year, ncol = 2)+
+  theme(legend.position = "bottom",
+        legend.title = element_text(hjust = 0.5))
 
 ```
 
@@ -1072,7 +1080,9 @@ pop_dep_old_now <- left_join(pop_dep_old_now, attendance_dep, by = "departement_
 ```{r}
 demand_scatter1 <- ggplot(pop_dep_old_now, aes(x = percentage_old, y = entry_for_1000_person)) +
   geom_point() +
-  theme_minimal()
+  geom_smooth(method = "lm",formula = y ~ x, se = FALSE, color = "gray") +
+  labs(titre="Number of entry every 1000 person depending on the percentage of the 60+ in each department", x="Percentage of 60+", y="Number of Entry for 1000 person") +
+  theme_classic()
 
 ggplotly(demand_scatter1)
 ```
@@ -1104,7 +1114,9 @@ pop_dep_etu_now <- left_join(pop_dep_etu_now, attendance_dep, by = "departement_
 ```{r}
 demand_scatter2 <- ggplot(pop_dep_etu_now, aes(x = percentage_etu, y = entry_for_1000_person)) +
   geom_point() +
-  theme_minimal()
+  geom_smooth(method = "lm",formula = y ~ x, se = FALSE, color = "gray") +
+  labs(titre="Number of entry every 1000 person depending on the percentage of student in each department", x="Percentage of student", y="Number of Entry for 1000 person") +
+  theme_classic()
 
 ggplotly(demand_scatter2)
 ```
