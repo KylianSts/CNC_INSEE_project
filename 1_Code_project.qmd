@@ -336,6 +336,13 @@ Nevertheless, as in many stories, the golden age is not eternal. Ours knew its d
 
 #### Evolution of the attendance and revenue 
 
+```{r Aggregate_of_attendance_by_year}
+Attendance_nat <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  summarize(Attendance = sum(entrées, na.rm = TRUE)) %>% 
+  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
+```
+
 ```{r}
 # Function to calculate growth rate
 calculate_growth_rate <- function(data, start_year, end_year) {
@@ -373,14 +380,6 @@ Av_Growth_rate_1966_1992 <- Attendance_nat %>%
 ```
 
 Our analytic journey starts in 1966, which is the first availabe year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992` % during the period). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance droped by `r abs(Growth_rate_1966_1969)` %. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
-
-
-```{r Aggregate_of_attendance_by_year}
-Attendance_nat <- cnc_data_clean %>% 
-  group_by(year) %>% 
-  summarize(Attendance = sum(entrées, na.rm = TRUE)) %>% 
-  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
-```
 
 ```{r}
 #Graphic of the evolution of attendance in time
@@ -891,6 +890,36 @@ AE_graph2 <-Attendance_AE_nat %>%
   theme_minimal()
 
 ggplotly(AE_graph2)
+```
+
+```{r}
+attAE_dep_now <- cnc_data_clean %>%
+  group_by(departement_code) %>%
+  filter(year == 2019) %>%
+  summarise(attendanceAE_dep = sum(entréesAE))
+
+attAE_fr <- att_dep_2 %>%
+  filter(year == 2019) %>%
+  select(departement_code, attendance_dep)
+
+attAE_dep_now <- left_join(attAE_dep_now,attAE_fr, by= 'departement_code') %>%
+  mutate(part_AE = attendanceAE_dep/attendance_dep * 100)
+```
+
+```{r fig.width=8, fig.height=10}
+france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
+
+france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
+
+merged_data <- merge(france_shape, attAE_dep_now, by = "departement_code")
+
+ggplot(merged_data, aes(fill = part_AE)) +
+  geom_sf() +
+  scale_fill_viridis_c(option = "H") + 
+  labs(title = "Where do we consume arthouse cinema ?", fill = "Part of the arthouse cinema in totale attendance") +
+  theme_minimal() +
+  annotation_scale()+
+  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")
 ```
 
 ```{r}
