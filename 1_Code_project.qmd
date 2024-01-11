@@ -325,39 +325,33 @@ Nevertheless, as in many stories, the golden age is not eternal. Ours knew its d
 
 <br>
 
-## Evolution of cinema in France from 1966 to 2018 : a global perspective
+## Evolution of cinema in France from 1966 to 2022 : a global perspective
 
 <br>
 
-### "Act 1, Scene 1" - The decline continues
+### "Act 1, Scene 1" - The decline continues [1966-1992]
 
-#### Evolution of the attendance between 1966 and 1992
+#### Evolution of the attendance and revenue 
 
-```{r Aggregate_of_attendance_by_year}
-Attendance_nat <- cnc_data_clean %>% 
-  group_by(year) %>% 
-  summarize(Attendance = sum(entrées, na.rm = TRUE)) %>% 
-  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
+```{r}
+# Function to calculate growth rate
+calculate_growth_rate <- function(data, start_year, end_year) {
+  subset_data <- data %>%
+    filter(year %in% c(start_year, end_year)) %>%
+    select(-Growth)
 
-Attendance_AE_nat <- cnc_data_clean %>% 
-  group_by(year) %>% 
-  filter(!is.na(entréesAE)) %>%
-  summarize(Attendance = sum(entréesAE, na.rm = TRUE)) %>% 
-  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
-```
+  growth_rate <- subset_data %>%
+    reframe(Growth = (Attendance - lag(Attendance)) / lag(Attendance) * 100) %>%
+    filter(!is.na(Growth)) %>%
+    pull(Growth) %>%
+    round(digits = 2)
 
-```{r calculation_of_growth_rates}
-#Calculation of the growth rate between 1966 and 1992
+  return(growth_rate)
+}
 
-Growth_rate_1966_1992 <- Attendance_nat %>%
-  filter(year %in% c(1966, 1992)) %>%  
-  select(-Growth)
-
-Growth_rate_1966_1992 <-Growth_rate_1966_1992 %>% 
-  reframe(Growth=(Attendance-lag(Attendance))/lag(Attendance)*100) %>% 
-  filter(!is.na(Growth)) %>% 
-  pull(Growth) %>% 
-  round(.,digits = 2)
+Growth_rate_1966_1992 <- calculate_growth_rate(Attendance_nat, 1966, 1992)
+Growth_rate_1982_1992 <- calculate_growth_rate(Attendance_nat, 1982, 1992)
+Growth_rate_1966_1969 <- calculate_growth_rate(Attendance_nat, 1966, 1969)
 
 #Calculation of the average growth rate between 1966 and 1992
 
@@ -373,85 +367,17 @@ Av_Growth_rate_1966_1992 <- Attendance_nat %>%
   filter(!is.na(Growth)) %>% 
   pull(Growth) %>%
   round(., digits=1)
-
-#Calculation of the growth rate between 1966 and 1969
-
-Growth_rate_1966_1969 <- Attendance_nat %>%
-  filter(year %in% c(1966, 1969)) %>%  
-  select(-Growth)
-
-Growth_rate_1966_1969 <-Growth_rate_1966_1969 %>% 
-  reframe(Growth=(Attendance-lag(Attendance))/lag(Attendance)*100) %>% 
-  filter(!is.na(Growth)) %>% 
-  pull(Growth) %>% 
-  round(.,digits = 2)
-
-#Calculation of the growth rate between 1982 and 1992
-
-Growth_rate_1982_1992 <- Attendance_nat %>%
-  filter(year %in% c(1982, 1992)) %>%  
-  select(-Growth)
-
-Growth_rate_1982_1992 <-Growth_rate_1982_1992 %>% 
-  reframe(Growth=(Attendance-lag(Attendance))/lag(Attendance)*100) %>% 
-  filter(!is.na(Growth)) %>% 
-  pull(Growth) %>% 
-  round(.,digits = 2)
-```
-
-```{r Statistics_on_multiplexes}
-Multiplex_nat <- cnc_data_clean %>% 
-  filter(year >= 1992) %>% 
-  group_by(year) %>% 
-  summarize(
-    nb_multiplex = sum(multiplexes, na.rm = TRUE), 
-    nb_etablissement = sum(établissements, na.rm = TRUE),
-    share_multiplexe = (nb_multiplex /nb_etablissement)*100,
-    nb_etablissements_no_m = nb_etablissement-nb_multiplex
-            )
-
-Etablissement_AE <- cnc_data_clean %>% 
-  group_by(year) %>% 
-  filter(!is.na(étabAE)) %>%
-  summarize(nb_etablissement_AE = sum(étabAE, na.rm = TRUE))
-```
-
-```{r Statistics_on_recettes}
-recette_nat <- cnc_data_clean %>% 
-  group_by(year) %>% 
-  summarize(recette_tot = sum(recettes, na.rm = TRUE))
-
-recette_AE_nat <- cnc_data_clean %>% 
-  group_by(year) %>% 
-  filter(!is.na(recettesAE)) %>%
-  summarize(recetteAE_tot = sum(recettesAE, na.rm = TRUE))
-```
-
-```{r}
-inflation_fr <- read.csv("Data/valeurs_annuelles.csv", sep=";", skip = 3) %>%
-  select(-3) %>%
-  rename(year=1, coef_ratio=2) %>%
-  filter(year > 1965 & year < 2023) %>%
-  mutate(coef_ratio = 100/coef_ratio)
-
-recettes_without_inflation <- cnc_data_clean %>%
-  select(year, recettes, recettesAE) %>%
-  left_join(inflation_fr, by = "year") %>%
-  mutate(
-    recettes = recettes * coef_ratio,
-    recettesAE = recettesAE * coef_ratio
-  )
-```
-
-```{r}
-recette_nat_without_inf <-recettes_without_inflation %>% 
-  group_by(year) %>% 
-  summarize(recette_tot = sum(recettes, na.rm = TRUE)) %>%
-  mutate(rme_nat_without_inflation = recette_tot/Attendance_nat$Attendance 
-)
 ```
 
 Our analytic journey starts in 1966, which is the first availabe year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992` % during the period). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance droped by `r abs(Growth_rate_1966_1969)` %. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
+
+
+```{r Aggregate_of_attendance_by_year}
+Attendance_nat <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  summarize(Attendance = sum(entrées, na.rm = TRUE)) %>% 
+  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
+```
 
 ```{r}
 #Graphic of the evolution of attendance in time
@@ -459,7 +385,7 @@ Our analytic journey starts in 1966, which is the first availabe year in our use
 Att_graph1 <- Attendance_nat %>% 
   filter(year < 1993) %>% 
   ggplot(aes(x = year, y = Attendance)) +
-  geom_line(color="orange") +
+  geom_line(color="orange", linewidth = 0.75) +
   scale_y_continuous(labels = scales::number_format())+ 
   labs(title ="Attendance in France by year [1966-1992] - Dynamic graph", x="Year", y="Attendance")+
   theme_minimal()
@@ -487,13 +413,52 @@ Att_graph2 <-Attendance_nat %>%
 ggplotly(Att_graph2)
 ```
 
+
+```{r Statistics_on_recettes}
+recette_nat <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  summarize(recette_tot = sum(recettes, na.rm = TRUE))
+
+recette_AE_nat <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  filter(!is.na(recettesAE)) %>%
+  summarize(recetteAE_tot = sum(recettesAE, na.rm = TRUE))
+```
+
+```{r}
+# Load and preprocess an inflation database to adjust monetary values to the year 2015,
+# ensuring proper comparison of financial data across different years.
+
+inflation_fr <- read.csv("Data/valeurs_annuelles.csv", sep=";", skip = 3) %>%
+  select(-3) %>%
+  rename(year=1, coef_ratio=2) %>%
+  filter(year > 1965 & year < 2023) %>%
+  mutate(coef_ratio = 100/coef_ratio)
+
+recettes_without_inflation <- cnc_data_clean %>%
+  select(year, recettes, recettesAE) %>%
+  left_join(inflation_fr, by = "year") %>%
+  mutate(
+    recettes = recettes * coef_ratio,
+    recettesAE = recettesAE * coef_ratio
+  )
+```
+
+```{r}
+recette_nat_without_inf <-recettes_without_inflation %>% 
+  group_by(year) %>% 
+  summarize(recette_tot = sum(recettes, na.rm = TRUE)) %>%
+  mutate(rme_nat_without_inflation = recette_tot/Attendance_nat$Attendance 
+)
+```
+
 ```{r}
 Re_graph1 <- recette_nat %>% 
   filter(year < 1993) %>% 
   ggplot(aes(x = year, y = recette_tot)) +
-  geom_line(color="skyblue") +
+  geom_line(color="skyblue", linewidth = 0.75) +
   scale_y_continuous(labels = scales::number_format())+ 
-  labs(title ="Recette in France by year [1966-1992] - Dynamic graph", x="Year", y="Recette Totale")+
+  labs(title ="Revenue of movie theater in France by year [1966-1992]", x="Year", y="Totale Revenue")+
   theme_minimal()
 
 ggplotly(Re_graph1)
@@ -502,29 +467,28 @@ ggplotly(Re_graph1)
 Re_graph2 <- recette_nat_without_inf %>% 
   filter(year < 1993) %>% 
   ggplot(aes(x = year, y = recette_tot)) +
-  geom_line(color="skyblue") +
+  geom_line(color="skyblue", linewidth = 0.75) +
   scale_y_continuous(labels = scales::number_format())+ 
-  labs(title ="Recette in France by year [1966-1992] in 2015€ - Dynamic graph", x="Year", y="Recette Totale")+
+  labs(title ="Revenue of movie theater in France by year [1966-1992] (in 2015€)", x="Year", y="Totale Revenue")+
   theme_minimal()
 
 ggplotly(Re_graph2)
 ```
+Despite a decrease in attendance, we have from 1966 to 1982 increasing revenue (if we look at actualized revenue) due to increasing of price --> see revenue by ticket.
 
 ```{r}
-Re_graph2 <- recette_nat_without_inf %>% 
+Re_graph3 <- recette_nat_without_inf %>% 
   filter(year < 1993) %>% 
   ggplot(aes(x = year, y = rme_nat_without_inflation)) +
-  geom_line(color="skyblue") +
+  geom_line(color="skyblue", linewidth = 0.75) +
   scale_y_continuous(labels = scales::number_format())+ 
-  labs(title ="Average revenue by entry in France by year [1966-1992] in 2015€ - Dynamic graph", x="Year", y="Recette Totale")+
+  labs(title ="Average revenue by ticket sold in France by year [1966-1992] (in 2015€)", x="Year", y="Revenue by Ticket")+
   theme_minimal()
 
-ggplotly(Re_graph2)
+ggplotly(Re_graph3)
 ```
 
 <br>
-
-even if attendance decreases, money earned by movie theater increase. due to ...
 
 #### Evolution of the structure of the market
 
@@ -536,12 +500,6 @@ Equip_nat <- cnc_data_clean %>%
   summarize(Screens = sum(écrans, na.rm = TRUE),
             Seats = sum(fauteuils, na.rm=TRUE),
             Seats_by_screens = Seats/Screens)
-
-Equip_AE_nat <- cnc_data_clean %>% 
-  group_by(year) %>% 
-  filter(!is.na(écransAE)) %>%
-  summarize(Screens_AE = sum(écransAE, na.rm = TRUE),
-            Seats_AE = sum(fauteuilsAE, na.rm=TRUE))
 ```
 
 ```{r}
@@ -550,8 +508,8 @@ Equip_AE_nat <- cnc_data_clean %>%
 Se_graph1 <- Equip_nat %>% 
   filter(year<1993) %>% 
   ggplot(aes(x=year, y=Seats)) +
-  geom_line(color="brown")+
-  labs(title = "Number of Seats in France", x="Year", y="Number of Seats")+
+  geom_line(color="red", linewidth = 0.75)+
+  labs(title = "Evolution of the number of Seats in France by year [1966-1992]", x="Year", y="Number of Seats")+
   theme_minimal()
 
 ggplotly(Se_graph1)
@@ -580,8 +538,8 @@ Equip_nat <- Equip_nat %>%  mutate(Screens_b100=Screens/Screens[year==1966]*100,
  Se_Sc_graph1 <- Equip_nat_b100 %>% 
    filter(year<1993) %>% 
   ggplot(aes(x=year, y=Base_index_100, color=Variables)) +
-  geom_line() +
-  scale_color_manual(values = c("red", "brown")) +
+  geom_line(linewidth = 0.75) +
+  scale_color_manual(values = c("blue", "red")) +
   labs(title = "Comparaison of the number of seats and screens (base index 100 in 1966)", x="Year", y="Number of seats")+
   theme_minimal()
 
@@ -596,8 +554,8 @@ How can we comprehend these contradictory trends? Thiolliere and Ralite (2003) e
 Se_Sc_graph2 <- Equip_nat %>%
   filter(year<1993) %>% 
   ggplot(aes(x=year,y=Seats_by_screens))+
-  geom_line(color = "gold")+
-  labs(title = "Ratio of Seats by Screens in France by Year", x="Year", y="Seats by Screen")+
+  geom_line(color = "turquoise", linewidth = 0.75)+
+  labs(title = "Ratio of Seats by Screens in France by year [1966-1992]", x="Year", y="Seats by Screen")+
   theme_minimal()
 
 ggplotly(Se_Sc_graph2)
@@ -605,44 +563,39 @@ ggplotly(Se_Sc_graph2)
 
 <br>
 
-### "Act 2" - The resurgence
+### "Act 2" - The resurgence [1993-2022]
 
-#### Evolution of the attendance
+#### Evolution of the attendance and revenue 
 
 ```{r calculation_growth_rates}
-#Calculation of the growth rate between 1993 and 2018
 
-Growth_rate_1993_2018 <- Attendance_nat %>%
-  filter(year %in% c(1993, 2018)) %>%
-  reframe(Growth=(Attendance-lag(Attendance))/lag(Attendance)*100) %>% 
-  filter(!is.na(Growth)) %>% 
-  pull(Growth) %>% 
-  round(.,digits = 2)
+Growth_rate_1993_2019 <- calculate_growth_rate(Attendance_nat, 1993, 2019)
+
 
 #Calculation of the average growth rate between 1966 and 1992
 
-nrow_1993_2018 <- Attendance_nat %>% 
-  filter(year>1992 & year<2019) %>% 
+nrow_1993_2019 <- Attendance_nat %>% 
+  filter(year>1992 & year<2020) %>% 
   nrow()
 
-Av_Growth_rate_1993_2018 <- Attendance_nat %>% 
-  filter(year %in% c(1993,2018)) %>% 
+Av_Growth_rate_1993_2019 <- Attendance_nat %>% 
+  filter(year %in% c(1993,2019)) %>% 
   select(-Growth) %>% 
-  mutate(Growth = ((Attendance / lag(Attendance))^(1/nrow_1993_2018) - 1) * 100) %>% 
+  mutate(Growth = ((Attendance / lag(Attendance))^(1/nrow_1993_2019) - 1) * 100) %>% 
   filter(!is.na(Growth))  %>% 
   pull(Growth) %>%
   round(., digits=1)
 ```
 
-In many movies, after a tragic downfall, the hero comeback in a flamboyant manner.If this storyline mark movies in theater, it also echoes the history of the industry. The 25 years between 1993 and 2018 are a period of growth for the cinema's market. The attendance went from 130 million to suprass the symbolic bar of the 200 million. If this level is still lower thanwhat was observed during the "golden age", the upturn is still significant with agrowth of `r Growth_rate_1993_2018` % during the period and an average growth of `r Av_Growth_rate_1993_2018` % by year.
+In many movies, after a tragic downfall, the hero comeback in a flamboyant manner.If this storyline mark movies in theater, it also echoes the history of the industry. The 25 years between 1993 and 2019 are a period of growth for the cinema's market. The attendance went from 130 million to suprass the symbolic bar of the 200 million. If this level is still lower thanwhat was observed during the "golden age", the upturn is still significant with agrowth of `r Growth_rate_1993_2019` % during the period and an average growth of `r Av_Growth_rate_1993_2019` % by year.
 
 ```{r}
 Att_graph3 <- Attendance_nat %>% 
-  filter(year >1992 & year<2019) %>% 
+  filter(year >1992) %>% 
   ggplot(aes(x = year, y = Attendance)) +
-  geom_line(color="orange") +
+  geom_line(color="orange", linewidth = 0.75) +
   scale_y_continuous(labels = scales::number_format())+ 
-  labs(title ="Attendance in France by year [1993-2018]", x="Year", y="Attendance")+
+  labs(title ="Attendance in France by year [1993-2022]", x="Year", y="Attendance")+
   theme_minimal()
 
 ggplotly(Att_graph3)
@@ -652,19 +605,44 @@ ggplotly(Att_graph3)
 
 ```{r}
 Att_graph4 <-Attendance_nat %>% 
-  filter(year >1992 & year<2019) %>% 
+  filter(year >1992 & year<2020) %>% 
   mutate(Growth_rate=ifelse(Growth<0, "Negative", "Positive")) %>% 
   ggplot(aes(x = year, y = Growth, fill=Growth_rate)) +
   geom_col() +
   scale_fill_manual(values = c("lightblue", "orange")) +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
-  labs(title = "Growth rate by year [1993-2018]", x="Year", y="Growth rate by year", fill="Growth rate") +
+  labs(title = "Growth rate by year [1993-2019]", x="Year", y="Growth rate by year", fill="Growth rate") +
   theme_minimal()
 
 ggplotly(Att_graph4)
 ```
 
 Numerous scientific papers and reports agree that this revival is due to the development of multiplexes (Blanchard, 2014 ; CNC, 2013; Muhlberger, 2013; Thiolliere and Ralite, 2003). Theses structures would have sparked again the interest of the consumers for movie theaters.
+
+```{r}
+Re_graph4 <- recette_nat_without_inf %>% 
+  filter(year > 1992) %>% 
+  ggplot(aes(x = year, y = recette_tot)) +
+  geom_line(color="skyblue", linewidth = 0.75) +
+  scale_y_continuous(labels = scales::number_format())+ 
+  labs(title ="Revenue of movie theater in France by year [1993-2022] (in 2015€)", x="Year", y="Totale Revenue")+
+  theme_minimal()
+
+ggplotly(Re_graph4)
+```
+
+```{r}
+Re_graph5 <- recette_nat_without_inf %>% 
+  filter(year > 1992) %>% 
+  ggplot(aes(x = year, y = rme_nat_without_inflation)) +
+  geom_line(color="skyblue", linewidth = 0.75) +
+  scale_y_continuous(labels = scales::number_format())+ 
+  labs(title ="Average revenue by ticket sold in France by year [1993-2022] (in 2015€)", x="Year", y="Revenue by Ticket")+
+  theme_minimal()
+
+ggplotly(Re_graph5)
+```
+NOTE A CEDRIC : tu peux mettre cette partie si tu la trouve mieux placé apres tout ce qui est multiplex et changement du marché
 
 <br>
 
@@ -674,27 +652,27 @@ Several concurrent definitions exist for the term 'multiplex.' A broad one can c
 
 The last three decades are indeed an era of sustained growth for multiplexes. Their numbers have multiplied by seven between 1993 and 2022.
 
-```{r}
- M_graph1 <- Multiplex_nat %>% 
-  filter(year >1992 & year<2019) %>% 
-  ggplot(aes(x = year, y = nb_multiplex)) +
-  geom_line(color = "navy") + 
-   labs(titre="Number of multiplexes in France between 1993 and 2018", x="Year", y="Number of multiplexes")+
-  theme_minimal()
-
-ggplotly(M_graph1)
+```{r Statistics_on_etablissement}
+Etablissement_nat <- cnc_data_clean %>% 
+  filter(!is.na(multiplexes)) %>% 
+  group_by(year) %>% 
+  summarize(
+    nb_multiplex = sum(multiplexes, na.rm = TRUE), 
+    nb_etablissement = sum(établissements, na.rm = TRUE),
+    share_multiplexe = (nb_multiplex /nb_etablissement)*100,
+    nb_etablissements_no_m = nb_etablissement-nb_multiplex
+            )
 ```
 
 ```{r}
-Re_graph4 <- recette_nat_without_inf %>% 
-  filter(year > 1992) %>% 
-  ggplot(aes(x = year, y = rme_nat_without_inflation)) +
-  geom_line(color="skyblue") +
-  scale_y_continuous(labels = scales::number_format())+ 
-  labs(title ="Average revenue by entry in France by year [1993-2022] in 2015€ - Dynamic graph", x="Year", y="Average Revenue")+
+ M_graph1 <- Etablissement_nat %>% 
+  filter(year >1992) %>% 
+  ggplot(aes(x = year, y = nb_multiplex)) +
+  geom_line(color = "purple", linewidth = 0.75) + 
+  labs(title ="Number of multiplexes in France between 1993 and 2022", x="Year", y="Number of Multiplexes")+
   theme_minimal()
 
-ggplotly(Re_graph4)
+ggplotly(M_graph1)
 ```
 
 <br>
@@ -710,13 +688,13 @@ Data on the number of cinemas were not available in the database prior to 1992. 
 However, when observing the number of cinemas, multiplexes excluded, a different story unfolds before our eyes. The graph below shows the evolution of the number of cinemas, both with and without multiplexes. It appears that multiplexes accounted for most of the growth in the 1990s. Moreover, the number of cinemas has plummeted since 2000 when multiplexes are excluded from the count. Nevertheless, it is important to note that our analysis is limited by an element whose significance remains uncertain. Our data do not allow us to distinguish between the outright closure of cinemas and the transformation of former multiroom cinemas into multiplexes.
 
 ```{r}
-Et_graph <- Multiplex_nat %>% 
-  rename ("All cinemas"=nb_etablissement, "Cinemas excluding multiplexes" = nb_etablissements_no_m) %>% 
-  pivot_longer(cols = c(`All cinemas`, `Cinemas excluding multiplexes`),names_to = "Variables",values_to = "Nb") %>% 
-  filter(year<2019) %>% 
+Et_graph <- Etablissement_nat %>% 
+  rename ("All movie theater"=nb_etablissement, "Movie theater excluding multiplexes" = nb_etablissements_no_m) %>% 
+  pivot_longer(cols = c(`All movie theater`, `Movie theater excluding multiplexes`),names_to = "Variables",values_to = "Nb") %>% 
+  filter(year<2022) %>% 
   ggplot(aes(x=year,y=Nb, color=Variables)) +
-  labs(title = "Number of cinemas in France between 1992 and 2018", x="Year", y="Number of cinemas")+
-  geom_line()+
+  labs(title = "Number of movie theater in France between 1992 and 2022", x="Year", y="Number of cinemas")+
+  geom_line(linewidth = 0.75)+
   theme_minimal()
 
 ggplotly(Et_graph) 
@@ -729,12 +707,12 @@ ggplotly(Et_graph)
 The share of multiplexes in the total number of movie theaters also grew during this year, gaining 9.5 percentage points between 1993 and 2018. Furthermore, if multiplexes may still be a minority in the overall number of cinemas, this is not the case for the total number of attendance. They accounted for more than half of the entries in 2012 (Blanchard, 2014).
 
 ```{r}
-M_graph2 <- Multiplex_nat %>% 
-  filter(year >1992 & year<2019) %>% 
+M_graph2 <- Etablissement_nat %>% 
+  filter(year >1992) %>% 
   ggplot(aes(x = year, y = share_multiplexe)) +
-  geom_line(color="navy") +
+  geom_line(color="purple", linewidth = 0.75) +
   scale_y_continuous(labels = scales::percent_format(scale = 1))+ 
-   labs(title="Share of the multiplexes in the total of movie theater between 1993 and 2018", x="Year", y="Percentage")+
+   labs(title="Share of the multiplexes in the total of movie theater between 1993 and 2022", x="Year", y="Percentage")+
   theme_minimal()
 
 ggplotly(M_graph2)
@@ -746,10 +724,10 @@ The development of multiplexes coincides with a rise of the number of screens in
 
 ```{r}
 Sc_graph <- Equip_nat %>% 
-  filter(year > 1992 & year < 2019) %>% 
+  filter(year > 1992) %>% 
   ggplot(aes(x = year, y = Screens)) +
-  geom_line(color = "red") +
-  labs(title = "Number of Screens in France between 1993 and 2018", x = "Year", y = "Number of Screens") +
+  geom_line(color = "blue", linewidth = 0.75) +
+  labs(title = "Number of Screens in France between 1993 and 2022", x = "Year", y = "Number of Screens") +
   theme_minimal()
 
 ggplotly(Sc_graph)
@@ -758,17 +736,17 @@ ggplotly(Sc_graph)
 <br>
 
 ```{r}
-Se_diff_rate_1993_2018 <- Equip_nat %>%
-  filter(year %in% c(1993, 2018)) %>%  
+Se_diff_rate_1993_2022 <- Equip_nat %>%
+  filter(year %in% c(1993, 2022)) %>%  
   select(-Screens) %>% 
   reframe(Growth=(Seats-lag(Seats))) %>% 
   filter(!is.na(Growth)) %>% 
   pull(Growth)
 
-Se_diff_rate_1993_2018 <- format(Se_diff_rate_1993_2018, big.mark = " ") 
+Se_diff_rate_1993_2022 <- format(Se_diff_rate_1993_2022, big.mark = " ") 
 
-Se_Growth_rate_1993_2018 <- Equip_nat %>%
-  filter(year %in% c(1993, 2018)) %>%  
+Se_Growth_rate_1993_2022 <- Equip_nat %>%
+  filter(year %in% c(1993, 2022)) %>%  
   select(-Screens) %>% 
   reframe(Growth=(Seats-lag(Seats))/lag(Seats)*100) %>% 
   filter(!is.na(Growth)) %>% 
@@ -776,26 +754,26 @@ Se_Growth_rate_1993_2018 <- Equip_nat %>%
   round(.,digits = 0)
 ```
 
-The number of seats started also to grow again. This growth did not compensante the historical significant decline that marked the second haft of the 20th century - c.f. graph below on the 1962-2018 period. However, it is still highlysignificant regarding the level observed in 1993 -c.f. graph below on the 1993-2018 period. In total, the number of seats increased of `r Se_diff_rate_1993_2018` seats, representing an augmentation of `r Se_Growth_rate_1993_2018` %.
+The number of seats started also to grow again. This growth did not compensante the historical significant decline that marked the second haft of the 20th century - c.f. graph below on the 1962-2022 period. However, it is still highlysignificant regarding the level observed in 1993 -c.f. graph below on the 1993-2022 period. In total, the number of seats increased of `r Se_diff_rate_1993_2022` seats, representing an augmentation of `r Se_Growth_rate_1993_2022` %.
 
 ```{r}
 #Evolution of the number of Seats
 Se_graph2 <- Equip_nat %>% 
-  filter(year<2019) %>% 
+  filter(year<2022) %>% 
   ggplot(aes(x=year, y=Seats)) +
-  geom_line(color="brown")+
-  geom_vline(xintercept = 1993, linetype = "dashed", color = "pink")+
-  labs(title = "Number of Seats in France between 1962 and 2018", x="Year", y="Number of Seats")+
+  geom_line(color="red", linewidth = 0.75)+
+  geom_vline(xintercept = 1993, linetype = "dotted", color = "black")+
+  labs(title = "Number of Seats in France between 1962 and 2022", x="Year", y="Number of Seats")+
   theme_minimal()
 
 ggplotly(Se_graph2)
 
 #Evolution of the number of Seats
 Se_graph3 <- Equip_nat %>% 
-  filter(year>1992 & year<2019) %>% 
+  filter(year>1992 & year<2022) %>% 
   ggplot(aes(x=year, y=Seats)) +
-  geom_line(color="brown")+
-  labs(title = "Number of Seats in France between 1993 and 2018", x="Year", y="Number of Seats")+
+  geom_line(color="red", linewidth = 0.75)+
+  labs(title = "Number of Seats in France between 1993 and 2022", x="Year", y="Number of Seats")+
   theme_minimal()
 
 ggplotly(Se_graph3)
@@ -803,38 +781,47 @@ ggplotly(Se_graph3)
 
 <br>
 
-### Art et Essaie en hausse
+### Rising of the arthouse
+
+def doc excel 
+
+Classement des établissements " Art et Essai "
+Le classement Art et Essai des lieux de projection cinématographiques a fait l'objet d'une réforme qui s'applique depuis 2002.
+Le classement Art et Essai d'un lieu de projection cinématographique repose désormais :
+- sur un indice automatique indiquant la proportion de séances réalisées avec des films recommandés Art et Essai par rapport au total des séances offertes ;
+- sur une pondération de cet indice automatique par deux coefficients. D'une part, un coefficient majorateur qui apprécie le nombre de films proposés, la politique d'animation, l'environnement sociologique et l'environnement cinématographique, d'autre part un coefficient minorateur qui prend en compte l'état de l'établissement, la diversité des films Art et Essai proposés, l'insuffisance de fonctionnement (nombre de semaines et de séances hors période de travaux).
+Le classement se fait désormais par établissement et la référence géographique est l'unité urbaine dans laquelle est situé l'établissement. Le classement est effectué par la Directrice générale du CNC, après avis de la commission du cinéma d'Art et Essai, qui examine les dossiers de demande de classement des établissements pour une année au début de cette même année. Le montant des subventions est fixé en fonction de l'indice résultant des calculs exposés ci-dessus.
+
+
+```{r}
+Attendance_AE_nat <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  filter(!is.na(entréesAE)) %>%
+  summarize(Attendance = sum(entréesAE, na.rm = TRUE)) %>% 
+  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
+```
 
 ```{r}
 AE_graph1 <- Attendance_AE_nat %>% 
   ggplot(aes(x = year, y = Attendance)) +
-  geom_line(color="orange") +
+  geom_line(color="orange", linewidth = 0.75) +
   scale_y_continuous(labels = scales::number_format())+ 
-  labs(title ="Attendance AE in France", x="Year", y="Attendance")+
+  labs(title ="Attendance arthouse cinema in France", x="Year", y="Attendance")+
   theme_minimal()
 
 ggplotly(AE_graph1)
 ```
+Peaople get more interested in arthouse cinema
 
 ```{r}
-AE_graph <-Attendance_AE_nat %>% 
-  filter(year < 2020 & year> 1966) %>%
+AE_graph2 <-Attendance_AE_nat %>% 
+  filter(year < 2020 & year > 2002) %>%
   mutate(Growth_rate=ifelse(Growth<0, "Negative", "Positive")) %>% 
   ggplot(aes(x = year, y = Growth, fill=Growth_rate)) +
   geom_col() +
   scale_fill_manual(values = c("lightblue", "orange")) +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
-  labs(title = "Growth rate by year [1993-2018]", x="Year", y="Growth rate by year", fill="Growth rate") +
-  theme_minimal()
-
-ggplotly(AE_graph)
-```
-
-```{r}
-AE_graph2 <-  Etablissement_AE %>% 
-  ggplot(aes(x = year, y = nb_etablissement_AE)) +
-  geom_line(color = "orange") + 
-  labs(titre="Number of movie thearter in France", x="Year", y="Number of movie thearter")+
+  labs(title = "Growth rate by year [2002-2019]", x="Year", y="Growth rate", fill="Growth rate") +
   theme_minimal()
 
 ggplotly(AE_graph2)
@@ -843,32 +830,33 @@ ggplotly(AE_graph2)
 ```{r}
 AE_graph3 <-  recette_AE_nat %>% 
   ggplot(aes(x = year, y = recetteAE_tot)) +
-  geom_line(color = "orange") + 
-  labs(titre="Total recettes AE in France", x="Year", y="Total recettes")+
+  geom_line(color = "skyblue", linewidth = 0.75) + 
+  labs(titre="Totale revenue arthouse cinema in France", x="Year", y="Totale Revenue")+
   theme_minimal()
 
 ggplotly(AE_graph3)
 ```
 
 ```{r}
-AE_graph4 <- Equip_AE_nat %>% 
-  ggplot(aes(x=year, y=Seats_AE)) +
-  geom_line(color="orange")+
-  labs(title = "Number of Seats in AE in France", x="Year", y="Number of Seats")+
+Etablissement_AE <- cnc_data_clean %>% 
+  group_by(year) %>% 
+  filter(!is.na(étabAE)) %>%
+  summarize(nb_etablissement_AE = sum(étabAE, na.rm = TRUE),
+            nb_etablissement = sum(établissements, na.rm = TRUE),
+            part_AE = nb_etablissement_AE/nb_etablissement*100)
+```
+
+```{r}
+AE_graph4 <-  Etablissement_AE %>% 
+  ggplot(aes(x = year, y = part_AE)) +
+  geom_line(color = "purple", linewidth = 0.75) + 
+  labs(titre="Number of arthouse cinema in France", x="Year", y="Number of arthouse cinema")+
   theme_minimal()
 
 ggplotly(AE_graph4)
 ```
 
-```{r}
-AE_graph5 <- Equip_AE_nat %>% 
-  ggplot(aes(x=year, y=Screens_AE)) +
-  geom_line(color="orange")+
-  labs(title = "Number of Seats in AE in France", x="Year", y="Number of Seats")+
-  theme_minimal()
-
-ggplotly(AE_graph5)
-```
+More and more movie theater are considered arthouse cinema.
 
 ## Test on how to make appear evolution by department
 
