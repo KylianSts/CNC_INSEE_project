@@ -1080,7 +1080,7 @@ pop_dep_old_now <- left_join(pop_dep_old_now, attendance_dep, by = "departement_
 ```{r}
 demand_scatter1 <- ggplot(pop_dep_old_now, aes(x = percentage_old, y = entry_for_1000_person)) +
   geom_point() +
-  geom_smooth(method = "lm", se = FALSE, color = "gray") +
+  geom_smooth(method = "lm",formula = y ~ x, se = FALSE, color = "gray") +
   labs(titre="Number of entry every 1000 person depending on the percentage of the 60+ in each department", x="Percentage of 60+", y="Number of Entry for 1000 person") +
   theme_classic()
 
@@ -1114,7 +1114,7 @@ pop_dep_etu_now <- left_join(pop_dep_etu_now, attendance_dep, by = "departement_
 ```{r}
 demand_scatter2 <- ggplot(pop_dep_etu_now, aes(x = percentage_etu, y = entry_for_1000_person)) +
   geom_point() +
-  geom_smooth(method = "lm", se = FALSE, color = "gray") +
+  geom_smooth(method = "lm",formula = y ~ x, se = FALSE, color = "gray") +
   labs(titre="Number of entry every 1000 person depending on the percentage of student in each department", x="Percentage of student", y="Number of Entry for 1000 person") +
   theme_classic()
 
