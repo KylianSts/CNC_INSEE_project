@@ -108,18 +108,21 @@ table_stat %>%
 
 ```
 
-We have two goals for reducing our database
+We have two goals for reducing our database :
 
-1.  Simplify AGE_REV by replacing its 120 levels with 5 that are age ranges. The use of 5 age ranges corresponding to 15-year interval is inspired by Insee's work. The institute often used this interval as a convention when it writes its "Dossier complet", an annual report individually dedicated to each French township.
+1.  Simplify AGE_REV by replacing its 120 levels with 6 that are age ranges. The use of 5 age ranges corresponding to 15-year interval is inspired by Insee's work. The institute often used this interval as a convention when it writes its "Dossier complet", an annual report individually dedicated to each French township, department and region.
 
 2.  Use the "group_by" function to keep the information of the values contains in the variable "POND" with the variables that are of interest to us uniquely
 
 <br>
 
+We also create a second dataset with the same goals but with another division in the ages in 5 age ranges. It corresponds to a specific division that was needed for an econometric model.
+
 ### Main codes in themselves
 
 ```{r Creation_of_our_new_database}
-insee <- insee |> 
+#Division in age range with a range interval of 15 year
+Insee_cleanv3 <- insee |> 
   mutate(AGE_GROUP = case_when( AGE_REV < 15 ~ "<15", 
                                 between(AGE_REV, 15, 29) ~ "15-29", 
                                 between(AGE_REV, 30, 44) ~ "30-44", 
@@ -127,10 +130,22 @@ insee <- insee |>
                                 between(AGE_REV, 60, 74) ~ "60-74", 
                                 AGE_REV > 75 ~ "75 and more")) 
 
-Insee_cleanv3 <- insee |> 
+Insee_cleanv3 <- Insee_cleanv3 |> 
   group_by(AN_RECENS,DEP_RES_21,AGE_GROUP,TYP_ACT,CSP) |>
-  summarize( POND2 = sum(POND, na.rm = TRUE)) 
+  summarize( POND2 = sum(POND, na.rm = TRUE))
 
+
+#Specific division of Age range and CSP for an econometrics model
+Insee_clean_econ <- insee |> 
+  mutate(AGE_GROUP = case_when( AGE_REV < 6 ~ "<6", 
+                                between(AGE_REV, 6, 24) ~ "6-24", 
+                                between(AGE_REV, 25, 42) ~ "25-42", 
+                                between(AGE_REV, 42, 60) ~ "42-60", 
+                                AGE_REV > 60 ~ "60 and more")) 
+
+Insee_clean_econ <- Insee_clean_econ  |> 
+  group_by(AN_RECENS,DEP_RES_21,AGE_GROUP,TYP_ACT,CSP) |>
+  summarize( POND2 = sum(POND, na.rm = TRUE))
 ```
 
 <br>
@@ -139,4 +154,5 @@ Insee_cleanv3 <- insee |>
 
 ```{r Export_to_csv}
 write.csv(Insee_cleanv3, file = "Data/INSEE_cleanv3.csv")
+write.csv(Insee_clean_econ, file = "Data/INSEE_clean_econ.csv")
 ```
