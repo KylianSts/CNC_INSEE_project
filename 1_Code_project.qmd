@@ -31,6 +31,9 @@ library(ggplot2)
 library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
 
 library(plotly) #plotly will allow us to create interactive graph
+
+library(sf) #We'll use sf to open shapefile, i.e. cartographic data
+library(ggspatial)
 ```
 
 # A presentation of the project
@@ -413,6 +416,37 @@ Att_graph2 <-Attendance_nat %>%
 ggplotly(Att_graph2)
 ```
 
+```{r}
+att_dep_1 <- cnc_data_clean %>%
+  group_by(departement_code, year) %>%
+  filter(year == 1966 | year == 1970 | year == 1974 | year == 1978 | year == 1982 | year == 1986 |year == 1990 | year == 1992) %>%
+  summarise(attendance_dep = sum(entrées))
+
+base_year <- att_dep_1 %>%
+  filter(year == 1966) %>%
+  select(-year) %>%
+  rename(base=attendance_dep)
+
+att_dep_1 <- left_join(att_dep_1,base_year, by= 'departement_code') %>%
+  mutate(attendance_evolution = (attendance_dep/base - 1)*100)
+```
+```{r fig.width=12, fig.height=15}
+france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
+
+france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
+
+merged_data <- merge(france_shape, att_dep_1, by = "departement_code")
+
+ggplot(merged_data, aes(fill = attendance_evolution)) +
+  geom_sf() +
+  scale_fill_viridis_c(option = "H") + 
+  labs(title = "Evolution of attendance by departement from 1966 to 1992 compare to 1966", fill = "Evolution of the attendance") +
+  theme_minimal() +
+  annotation_scale()+
+  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
+  facet_wrap(~year, ncol = 2)
+```
+
 
 ```{r Statistics_on_recettes}
 recette_nat <- cnc_data_clean %>% 
@@ -618,6 +652,38 @@ ggplotly(Att_graph4)
 ```
 
 Numerous scientific papers and reports agree that this revival is due to the development of multiplexes (Blanchard, 2014 ; CNC, 2013; Muhlberger, 2013; Thiolliere and Ralite, 2003). Theses structures would have sparked again the interest of the consumers for movie theaters.
+
+```{r}
+att_dep_2 <- cnc_data_clean %>%
+  group_by(departement_code, year) %>%
+  filter(year == 1993 | year == 1996 | year == 2000 | year == 2004 | year == 2008 | year == 2012 |year == 2016 | year == 2019) %>%
+  summarise(attendance_dep = sum(entrées))
+
+base_year <- att_dep_2 %>%
+  filter(year == 1993) %>%
+  select(-year) %>%
+  rename(base=attendance_dep)
+
+att_dep_2 <- left_join(att_dep_2,base_year, by= 'departement_code') %>%
+  mutate(attendance_evolution = (attendance_dep/base - 1)*100)
+```
+
+```{r fig.width=12, fig.height=15}
+france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
+
+france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
+
+merged_data <- merge(france_shape, att_dep_2, by = "departement_code")
+
+ggplot(merged_data, aes(fill = attendance_evolution)) +
+  geom_sf() +
+  scale_fill_viridis_c(option = "H") + 
+  labs(title = "Evolution of attendance by departement from 1993 to 2019 compare to 1993", fill = "Evolution of the attendance") +
+  theme_minimal() +
+  annotation_scale()+
+  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
+  facet_wrap(~year, ncol = 2)
+```
 
 ```{r}
 Re_graph4 <- recette_nat_without_inf %>% 
@@ -858,171 +924,6 @@ ggplotly(AE_graph4)
 
 More and more movie theater are considered arthouse cinema.
 
-## Test on how to make appear evolution by department
-
-### Attendance
-
-#### Valeur en base 100 1966
-
-Observation : a global trend but also data shows that some department had a different trajectory (maybe a econometrics model can show if it is become of the department in itselfs or because its socio-demographic characteristics)
-
-```{r}
-Dep_attb100 <- cnc_data_clean %>%  
-  group_by(departement_code) %>%
-  select(year,entrées,departement_code) %>%
-  mutate(Att_b100 = round(entrées / entrées[year == 1966] * 100, digits=0))
-
-Dep_attb100_graph <- Dep_attb100 %>% 
-  filter(year<2019) %>% 
-  ggplot(aes(x=year, y=Att_b100, color=departement_code, group=departement_code)) +
-  labs(title = "Attendance by departement base index 100 1966", x="Year",y="Attendance")+
-  geom_line()+
-  theme_minimal()
-
-#group=department_code was necessary to R to display the different graph, a standard color= in ggplot(aes()) did not work
- 
-ggplotly(Dep_attb100_graph)
-```
-
-#### Découpage en période
-
-```{r}
-#1966-1992
-Dep_attb100_graph_1962_1992 <- Dep_attb100 %>% filter(year<1993) %>% 
-  ggplot(aes(x=year, y=Att_b100, color=departement_code, group=departement_code)) +
-  labs(title = "Attendance by departement base index 100 1966[1966-1992]", x="Year",y="Attendance")+
-  geom_line()+
-  theme_minimal()
- 
-ggplotly(Dep_attb100_graph_1962_1992)
-
-#1993-2018
-Dep_attb100_graph_1993_2018 <- Dep_attb100 %>% 
-  filter(year > 1992 & year <= 2018) %>% 
-  ggplot(aes(x=year, y=Att_b100, color=departement_code, group=departement_code)) +
-  labs(title = "Attendance by departement base index 100 1966 [1993-2018]", x="Year",y="Attendance")+
-  geom_line()+
-  theme_minimal()
-
-ggplotly(Dep_attb100_graph_1993_2018)
-```
-
-#### Test : Show example of peculiar trajectory
-
-Some departement seem to have known distinctive trajectories with explosive growth or stronger decline. We can cite for example emphasize the explosive growth of the 77 or the 40.
-
-```{r}
-#Addition of rows giving the base 100 at the national level
-Attendance_nat_b100<- Attendance_nat %>% select(-Growth) %>% rename("entrées"=Attendance) %>% mutate(departement_code="France",Att_b100 = round(entrées / entrées[year == 1966] * 100, digits=0))
-
-Dep_attb100 <-rbind(Dep_attb100, Attendance_nat_b100)
-
-#Graphic of the base 100 for France and some department with peculiar trajectories
-
-##1st graph
-
-Dep_attb100_graph2 <- Dep_attb100 %>% 
-  filter(year<2019) %>% 
-  filter(departement_code  %in% c("France", "77", "40")) %>% 
-  ggplot(aes(x=year, y=Att_b100, color=departement_code,group=departement_code))+
-  geom_line(size=0.3)+
-  geom_line(data = . %>% filter(departement_code == "France"), size = 1, color="navy") + 
-  labs(title = "Example of departement with peculiar trajectory: Attendance (index base 100 1966) - 40 and 77", x="Year", y="Attendance")+
-  theme_minimal()
-
-ggplotly(Dep_attb100_graph2)
-```
-
-70 and 88 are them opposite example with their attendance that plummeted between 1966 and 1992. 92 knew the most violent that can be observed between 1966 and 1977 with an index that quartered before knowing a strong revival.
-
-```{r}
-#2nd Graph
-
-Dep_attb100_graph3 <- Dep_attb100 %>% 
-  filter(year<2019) %>% 
-  filter(departement_code  %in% c("France", "70","92", "88")) %>% 
-  ggplot(aes(x=year, y=Att_b100, color=departement_code,group=departement_code))+
-  geom_line(size=0.3)+
-  geom_line(data = . %>% filter(departement_code == "France"), size = 1, color="navy") + 
-  labs(title = "Example of departement with peculiar trajectory : Attendance (index base 100 1966) - 78 and 92", x="Year", y="Attendance")+
-  theme_minimal()
-
-ggplotly(Dep_attb100_graph3)
-```
-
-#### ratio b100 France/departement
-
-```{r}
-#Goal : calculation of the ratio between the index of each departement and the equivalent for France (national level)
-Attendance_nat_b100_v2 <- Attendance_nat_b100 %>% 
-  rename(Fr_Att_b100=Att_b100) %>%
-  select(year, Fr_Att_b100)
-
-Dep_attb100 <- Dep_attb100 %>%
-  left_join(Attendance_nat_b100_v2, by="year" ) 
-
-Dep_attb100 <- Dep_attb100 %>%
-  mutate(Att_b100_ratio = Att_b100/Fr_Att_b100)
-
-Dep_attb100_graph_ratio <- Dep_attb100 %>% filter(year<2019) %>% 
-  ggplot(aes(x=year, y=Att_b100_ratio, color=departement_code, group=departement_code)) +
-  labs(title = "Attendance by departement base index 100 1966", x="Year",y="Attendance")+
-  geom_line()+
-  theme_minimal()
-
-ggplotly(Dep_attb100_graph_ratio)
-```
-
-#### Maps for attendance
-
-Relative hétérogénéité - Ecart au niveau de 1966 plus prononcé
-
--   de façon "Negative" (i.e. décroissance potentiel) : nord est plus touché par les phrases de décroissance
-
--   Positive : ile de france, ouest et sud est mais aussi certains départements du sud ouest
-
-```{r}
-#We will create an evolutive map to represent the evolution of the index base 100 1966 linked to attendance year after year. To do so, we will combine our statistical data with geographic information obtained from a shapefile downloaded from the IGN website. Then, we will generate several maps and convert them into a GIF that highlights the passage of time, showcasing the evolution of the index year after year. This code draws inspiration from various sources, with particular influence from  an oline book of  HAHN (2020) and the technical explanations in the 'tmap' package by TENNEKES et al. (2023).
-
-
-#Import the shapefile data
-library(sf) #We'll use sf to open shapefile, i.e. cartographic data
-Dep_shp <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
-
-#Merge with CNC statistics
-
-Dep_shp <- Dep_shp %>% 
-   left_join(Dep_attb100, by = c("INSEE_DEP" = "departement_code"))%>% 
-  filter(year %in% c(1966,1968,1972,1975,1979,1982,1985,1988,1990,1993,1996,1999,2002,2005,2008,2011,2013,2016,2019)) 
-
-#Interactive Maps
-
-library(tmap)
-library(tmaptools)
-#Note for Mister Rossy : if you do not have the tmap package, one of the document that we use as inspiration to create the interactive maps recommend to install tmap's development version from the r-universe repository : install.packages("tmap", repos = c("https://r-tmap.r-universe.dev", "https://cloud.r-project.org"))
-
-tmap_mode("view")
-
-chosen_breaks <- c(16, 48, 69, 100, 150, 200, 250, 300, Inf)
-#After testing numerous ways to create classes for the following graph with the style option of tm_fill ("quantile", "pretty", "equal", "headtails") and values for the option n, we chose to define our own classes using the breaks option and style ="fixed". These new classes are inspired by, but diverge from, the values obtained with style="quantile" (while conducting parallel tests with n=) for values under 100. For values above 100, arbitrary classes were created to emphasize the divergence of trajectories of department with positive growth, which quantile had difficulty capturing due to the smaller sample of values above 100.".
-
-Dep_shp_anim <- tm_shape(Dep_shp) +
-  tm_fill(fill="Att_b100", style = "fixed", breaks=chosen_breaks, palette="-RdBu", midpoint=100) +
-  tm_borders() +
-  tm_facets(by = "year", nrow = 1, ncol = 1)+
-  tm_compass(type="8star",position=c("right","top"),size=3,show.labels = 2)+
-  tm_scalebar(position=c("left","bottom"))+
-  tm_title_out(text ="Attendance by year and departement (index base 100 1966)",  position = tm_pos_out("center", "top") )
-
-library(gifski)
-tmap_animation(Dep_shp_anim, filename = "Dep_shp_anim2.gif", delay = 1)
-
-library(magick)
-Gif <- image_read("Dep_shp_anim2.gif")
-image_animate(Gif,fps = 1)
-#We use fps and the number of year in order to reduce the "pace" of the Gif.
-```
-
 # Evolution of type of population in France and their impact on cinema industry
 
 ```{r}
@@ -1050,8 +951,6 @@ pop_dep <- left_join(pop_dep, base_year, by = "departement_code") %>%
 ```{r fig.width=12, fig.height=15}
 #on regarde l'évolution temporelle de la part de la population de chaque département dans la population pour voir ou se concentre la population dans le temps
 
-#remarque si on prend 1990 comme base, l'echelle de ce qui est avant est inversé. (j'ai fais ca pour comparer avec les établissement)
-
 france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
 
 france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
@@ -1070,7 +969,6 @@ ggplot(merged_data, aes(fill = per_pop_dep_change)) +
 
 ```{r fig.width=12, fig.height=15}
 #"offre" cinema, on peut aussi mettre fauteuils à la place 
-#Note a moi meme --> faire la meme avec la demande --> variable entrées 
 
 etab_dep <- cnc_data_clean %>%
   group_by(departement_code, year) %>%
