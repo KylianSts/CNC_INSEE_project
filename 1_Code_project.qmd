@@ -924,8 +924,9 @@ ggplotly(AE_graph4)
 
 More and more movie theater are considered arthouse cinema.
 
-# Evolution of type of population in France and their impact on cinema industry
+# Evolution of population in France and their impact on cinema industry
 
+## How population and offer of seats by department had evolved
 ```{r}
 pop_dep <- insee_data_clean %>%
   group_by(departement_code, year) %>%
@@ -940,7 +941,7 @@ pop_dep <- left_join(pop_dep,pop_fr, by= 'year') %>%
 
 base_year <- pop_dep %>%
   group_by(departement_code) %>%
-  filter(year == 1990) %>%
+  filter(year == 1968) %>%
   select(per_pop_dep, departement_code) %>%
   rename(base=per_pop_dep)
 
@@ -949,7 +950,7 @@ pop_dep <- left_join(pop_dep, base_year, by = "departement_code") %>%
 ```
 
 ```{r fig.width=12, fig.height=15}
-#on regarde l'évolution temporelle de la part de la population de chaque département dans la population pour voir ou se concentre la population dans le temps
+#On regarde l'évolution temporelle de la part de la population de chaque département dans la population pour voir ou se concentre la population dans le temps
 
 france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
 
@@ -960,53 +961,50 @@ merged_data <- merge(france_shape, pop_dep, by = "departement_code")
 ggplot(merged_data, aes(fill = per_pop_dep_change)) +
   geom_sf() +
   scale_fill_viridis_c(option = "H") + 
-  labs(title = "Population Map of France", fill = "per_pop_dep_change") +
+  labs(title = "Population Map of France", fill = "Evolution of the relative concentration of the population by department") +
   theme_minimal() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
   facet_wrap(~year, ncol = 2)
 ```
 
-```{r fig.width=12, fig.height=15}
-#"offre" cinema, on peut aussi mettre fauteuils à la place 
-
-etab_dep <- cnc_data_clean %>%
+```{r}
+seats_dep <- cnc_data_clean %>%
   group_by(departement_code, year) %>%
-  summarise(etablissements_dep = sum(établissements)) %>%
-  filter(!is.na(etablissements_dep))
+  summarise(capacité_dep = sum(fauteuils))
 
-etab_fr <- Multiplex_nat %>%
-  select(year, nb_etablissement)
+seats_fr <- Equip_nat %>%
+  select(year, Seats)
 
-etab_dep <- left_join(etab_dep, etab_fr, by= 'year') %>%
-  mutate(per_etab_dep = etablissements_dep/nb_etablissement * 100)%>%
-  filter(year == 1992 | year == 1999 | year == 2008 | year == 2013 | year == 2019)
-
-base_year <- etab_dep %>%
+seats_dep <- left_join(seats_dep, seats_fr, by= 'year') %>%
+  filter(year == 1968 | year == 1975 | year == 1982 | year == 1990 | year == 1999 | year == 2008 | year == 2013  | year == 2019) %>%
+  mutate(per_seats_dep = capacité_dep/Seats * 100)
+  
+base_year <- seats_dep %>%
   group_by(departement_code) %>%
-  filter(year == 1992) %>%
-  select(per_etab_dep, departement_code) %>%
-  rename(base=per_etab_dep)
+  filter(year == 1968) %>%
+  select(per_seats_dep, departement_code) %>%
+  rename(base=per_seats_dep)
 
-etab_dep <- left_join(etab_dep, base_year, by = "departement_code") %>%
-  mutate(per_etab_dep_change = (per_etab_dep / base -1)*100)
+seats_dep <- left_join(seats_dep, base_year, by = "departement_code") %>%
+  mutate(per_seats_dep_change = (per_seats_dep / base -1)*100)
 ```
 
 ```{r fig.width=12, fig.height=15}
-#Blablabla ... ou se concentre les cinémas dans le temps
+#Évolution de la part de la capacité d'accueil du département par rapport à la capacité d'accueil national pour voir où se concentre "l'offre" dans le temps
 
 france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
 
 france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
 
-merged_data <- merge(france_shape, etab_dep, by = "departement_code")
+merged_data <- merge(france_shape, seats_dep, by = "departement_code")
 
 library(ggspatial)
 
-ggplot(merged_data, aes(fill = per_etab_dep_change)) +
+ggplot(merged_data, aes(fill = per_seats_dep_change)) +
   geom_sf() +
   scale_fill_viridis_c(option = "H") + 
-  labs(title = "Population Map of France", fill = "per_etab_dep_change") +
+  labs(title = "Population Map of France", fill = "Evolution of the relative concentration of the offer of seats by department") +
   theme_minimal() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
@@ -1014,6 +1012,7 @@ ggplot(merged_data, aes(fill = per_etab_dep_change)) +
 
 ```
 
+## The demand ...
 ```{r}
 #Blabla ... ou se concentre les vieux dans le temps 
 #on regarde que la population de vieux et on regarde l'évolution de la part de vieux dans le departement par rapport a la population de vieux 
