@@ -1149,13 +1149,15 @@ attendance_dep <- cnc_data_clean %>%
   summarise(entrées_dep = sum(entrées))
 
 pop_dep_old_now <- left_join(pop_dep_old_now, attendance_dep, by = "departement_code")%>%
-  mutate(entry_for_1000_person = (population_dep*1000)/entrées_dep)
+  mutate(entry_for_1000_person = (population_dep*1000)/entrées_dep))
 ```
 
 ```{r}
-ggplot(pop_dep_old_now, aes(x = percentage_old, y = entry_for_1000_person)) +
+demand_scatter1 <- ggplot(pop_dep_old_now, aes(x = percentage_old, y = entry_for_1000_person)) +
   geom_point() +
   theme_minimal()
+
+ggplotly(demand_scatter1)
 ```
 
 
@@ -1184,10 +1186,13 @@ pop_dep_etu_now <- left_join(pop_dep_etu_now, attendance_dep, by = "departement_
 ```
 
 ```{r}
-ggplot(pop_dep_etu_now, aes(x = percentage_etu, y = entry_for_1000_person)) +
+demand_scatter2 <- ggplot(pop_dep_etu_now, aes(x = percentage_etu, y = entry_for_1000_person)) +
   geom_point() +
   theme_minimal()
+
+ggplotly(demand_scatter2)
 ```
+
 
 # Bibliography
 
