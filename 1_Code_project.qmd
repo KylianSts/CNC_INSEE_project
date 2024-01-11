@@ -99,7 +99,7 @@ insee_data <- insee_data |> filter(nchar(DEP_RES_21) != 3) #We drop oversea depa
 
 insee_data <- insee_data |> rename(departement_code = DEP_RES_21, year =  AN_RECENS)
 
-insee_data_clean <- insee_data |> filter(!is.na(AGE_GROUP)
+insee_data_clean <- insee_data |> filter(!is.na(AGE_GROUP))
 
 In_nrow <- insee_data_clean |> nrow()
 ```
@@ -499,7 +499,7 @@ Re_graph1 <- recette_nat %>%
 ggplotly(Re_graph1)
 
 
-Re_graph2 <- recette_nat_withou_inf %>% 
+Re_graph2 <- recette_nat_without_inf %>% 
   filter(year < 1993) %>% 
   ggplot(aes(x = year, y = recette_tot)) +
   geom_line(color="skyblue") +
@@ -511,7 +511,7 @@ ggplotly(Re_graph2)
 ```
 
 ```{r}
-Re_graph2 <- recette_nat_withou_inf %>% 
+Re_graph2 <- recette_nat_without_inf %>% 
   filter(year < 1993) %>% 
   ggplot(aes(x = year, y = rme_nat_without_inflation)) +
   geom_line(color="skyblue") +
@@ -686,7 +686,7 @@ ggplotly(M_graph1)
 ```
 
 ```{r}
-Re_graph4 <- recette_nat_withou_inf %>% 
+Re_graph4 <- recette_nat_without_inf %>% 
   filter(year > 1992) %>% 
   ggplot(aes(x = year, y = rme_nat_without_inflation)) +
   geom_line(color="skyblue") +
@@ -1075,6 +1075,8 @@ ggplot(merged_data, aes(fill = per_pop_dep_change)) +
   scale_fill_viridis_c(option = "H") + 
   labs(title = "Population Map of France", fill = "per_pop_dep_change") +
   theme_minimal() +
+  annotation_scale()+
+  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
   facet_wrap(~year, ncol = 2)
 ```
 
@@ -1113,22 +1115,23 @@ france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
 
 merged_data <- merge(france_shape, etab_dep, by = "departement_code")
 
+library(ggspatial)
+
 ggplot(merged_data, aes(fill = per_etab_dep_change)) +
   geom_sf() +
   scale_fill_viridis_c(option = "H") + 
   labs(title = "Population Map of France", fill = "per_etab_dep_change") +
   theme_minimal() +
+  annotation_scale()+
+  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
   facet_wrap(~year, ncol = 2)
-```
 
+```
 
 ```{r}
 #Blabla ... ou se concentre les vieux dans le temps 
 #on regarde que la population de vieux et on regarde l'évolution de la part de vieux dans le departement par rapport a la population de vieux 
 
-#Note a moi meme --> mauvais raisonnement, ca reveint au meme qu ele premier graphique, ici ce n'ets pas une concentration de vieux mais toujours de population meme si un peu modifier par la vrai concentration de vieux 
-#faire un graphique de nombre d'entrée moyen par vieux, par etudiant, employé ... 
-# pour faire ca : prendre le nombre de vieux dans la pop et le nombre d'entrées et diviser.
 pop_dep_old_now <- insee_data_clean %>%
   filter(year == 2019) %>%
   filter(AGE_GROUP == '60-74' | AGE_GROUP == '75 and more') %>%
@@ -1149,7 +1152,7 @@ attendance_dep <- cnc_data_clean %>%
   summarise(entrées_dep = sum(entrées))
 
 pop_dep_old_now <- left_join(pop_dep_old_now, attendance_dep, by = "departement_code")%>%
-  mutate(entry_for_1000_person = (population_dep*1000)/entrées_dep))
+  mutate(entry_for_1000_person = (population_dep*1000)/entrées_dep)
 ```
 
 ```{r}
@@ -1159,7 +1162,6 @@ demand_scatter1 <- ggplot(pop_dep_old_now, aes(x = percentage_old, y = entry_for
 
 ggplotly(demand_scatter1)
 ```
-
 
 ```{r}
 pop_dep_etu_now <- insee_data_clean %>%
@@ -1196,7 +1198,53 @@ ggplotly(demand_scatter2)
 
 # Bibliography
 
+## Econometrics Model : potentiel démarche
+
+```{r}
+library(plm) 
+
+#For fixed effect
+f_eff <-plm(y ~ x1, data=Panel, index=c("dep", "year"), model="within") > summary(fixed)
+
+#For random effect
+r_eff <-plm(y ~ x1, data=Panel, index=c("dep", "year"), model="random") > summary(random)
+
+#Haussman test to determine between fixed and random effect
+phtest(f_eff, r_eff)
+
+#Test r_eff-sectional dependence
+pcdtest(r_eff, test = c("lm"))
+pcdtest(r_eff, test = c("cd"))
+ 
+# Test time-fixed effects.
+r_eff_time<-plm(y ~ x1 + factor(year), data=Panel, index=c("country", "year"), model="random")
+pFtest(r_eff_time, r_eff)
+plmtest(fixed, c("time"), type=("bp"))
+
+#Test for serial correlation
+pbgtest(r_eff)
+
+#Test for heteroscedasticity
+library(lmtest) 
+
+bptest(y ~ x1 + factor(country), data = Panel, studentize=F)
+
+#Test for unit roots
+ Panel.set<- plm.data(Panel, index = c("country", "year")) 
+ library(tseries) 
+ adf.test(Panel.set$y, k=2)
+
+```
+
+# References
+
 **BLANCHARD Jean-Philippe, 2014.** " Multiplexes, public de banlieue et création cinématographique française : caractère marchand de l'ethnicité sur grand écran ". *Migrations Société*, 151, 153-164. <https://doi.org/10.3917/migra.151.0153>
+
+<br>
+
+**BOURBONNAIS Régis, 2020.** " Chapitre 13. Introduction à l’économétrie des données de panel ", dans : ,*Économétrie.* Paris, Dunod, «Éco Sup», 2018, p. 371-387.
+
+URL : <https://www.cairn.info/econometrie--9782100773459-page-371.htm>
 
 <br>
 
@@ -1242,13 +1290,19 @@ URL : <https://bookdown.org/nicohahn/making_maps_with_r5/docs/introduction.html>
 
 <br>
 
+**TORRES-REYNA Oscar**, 2010. Getting Started in Fixed/Random Effects Models using R/RStudio (v. 1.0)
+
+URL : <https://www.princeton.edu/~otorres/Panel101R.pdf>
+
+<br>
+
 **SHUAI Cao, 2020.** " La politique publique du cinéma en France (1981-2012) ". *Territoires contemporains - nouvelle série \[en ligne\]*, 2 septembre 2020,
 
 URL: <http://tristan.u-bourgogne.fr/CGC/prodscientifique/TC.html>
 
 <br>
 
-**TENNEKES, Martijn; NOWOSAD, Jakub; GOMBIN, Joel; JEWORUTZKI, Sebastian; RUSSELL, Kent; ZIJDEMAN, Richard; CLOUSE, John; LOVELACE, Robin; MUENCHOW, Jannes, 2023.** *Package 'tmap'*
+**TENNEKES Martijn, NOWOSAD Jakub, GOMBIN Joel, JEWORUTZKI Sebastian, RUSSELL Kent, ZIJDEMAN Richard, CLOUSE John, LOVELACE Robin, MUENCHOW Jannes, 2023.** *Package 'tmap'*
 
 Url: <https://cran.r-project.org/web/packages/tmap/tmap.pdf>
 
@@ -1257,3 +1311,9 @@ Url: <https://cran.r-project.org/web/packages/tmap/tmap.pdf>
 **THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.** *L'évolution du secteur de l'exploitation cinématographique, Rapport d'information sénatoriale n°308 (2002-2003)*
 
 URL: <https://www.senat.fr/rap/r02-308/r02-308_mono.html#toc5>
+
+<br>
+
+**WAGLE Manil, 2021.** *How to deal with Panel Data - Practical Application using R.* Medium.com
+
+URL : [https://medium.com/\@manilwagle/how-to-deal-with-panel-data-practical-application-using-r-18ef95ae99c6](https://medium.com/@manilwagle/how-to-deal-with-panel-data-practical-application-using-r-18ef95ae99c6)
