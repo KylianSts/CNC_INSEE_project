@@ -1349,6 +1349,34 @@ glance(f_eff_time_2, f_eff_time_3, f_eff_time_4)
 anova(f_eff_time_2, f_eff_time_3, f_eff_time_4)
 ```
 
+# Map for comparaison
+
+```{r}
+library(tmap)
+library(tmaptools)
+#Note for Mister Rossy : if you do not have the tmap package, one of the document that we use as inspiration to create the interactive maps recommend to install tmap's development version from the r-universe repository : install.packages("tmap", repos = c("https://r-tmap.r-universe.dev", "https://cloud.r-project.org"))
+
+chosen_breaks <- c(-Inf, -50, -25, 0, 25, 50, Inf)
+#After testing numerous ways to create classes for the following graph with the style option of tm_fill ("quantile", "pretty", "equal", "headtails") and values for the option n, we chose to define our own classes using the breaks option and style ="fixed". These new classes are inspired by, but diverge from, the values obtained with style="quantile" (while conducting parallel tests with n=) for values under 100. For values above 100, arbitrary classes were created to emphasize the divergence of trajectories of department with positive growth, which quantile had difficulty capturing due to the smaller sample of values above 100.".
+
+  tmap_mode("plot")
+  
+  tm_shape(merged_data) +
+  tm_fill(fill="attendance_evolution", style = "fixed", breaks=chosen_breaks, palette="cividis", midpoint=0) +
+  tm_borders() +
+  tm_facets(by = "year", nrow = 2, ncol = 3)+
+  tm_compass(type="arrow",position=c("RIGHT","TOP"),show.labels = 0, size=0.5)+
+  tm_scalebar(position=c("left","bottom"))+
+  tm_title_out(text ="Evolution of the attendance relatively to 1966 in percentage",  position = tm_pos_out("center", "top"))
+
+
+```
+
+```{r}
+#Palette
+  tmaptools::palette_explorer()
+```
+
 # References
 
 **BLANCHARD Jean-Philippe, 2014.** " Multiplexes, public de banlieue et création cinématographique française : caractère marchand de l'ethnicité sur grand écran ". *Migrations Société*, 151, 153-164. <https://doi.org/10.3917/migra.151.0153>
