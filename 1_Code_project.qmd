@@ -345,7 +345,8 @@ Nevertheless, as in many stories, the golden age is not eternal. Ours knew its d
 Attendance_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
   summarize(Attendance = sum(entrées, na.rm = TRUE)) %>% 
-  mutate(Growth = c(NA, ((Attendance[2:n()]/Attendance[1:(n()-1)]) - 1) * 100))
+  mutate(Growth = c(NA, ((Attendance[2:n()]/Attendance[1:(n()-1)]) - 1) * 100)) %>%
+  round(digits = 2)
 ```
 
 ```{r}
@@ -889,7 +890,9 @@ Attendance_AE_nat <- cnc_data_clean %>%
   group_by(year) %>% 
   filter(!is.na(entréesAE)) %>%
   summarize(Attendance = sum(entréesAE, na.rm = TRUE)) %>% 
-  mutate(Growth = c(NA, ((Attendance[2:n()]/Attendance[1:(n()-1)]) - 1) * 100))
+  mutate(Growth = c(NA, ((Attendance[2:n()]/Attendance[1:(n()-1)]) - 1) * 100)) %>%
+  round(digits = 2)
+
 ```
 
 ```{r}
@@ -1122,7 +1125,9 @@ Our aim here will be to study if we can link the heterogeneity regarding the evo
 # Importation of the database
 insee_econ <- read.csv("Data/INSEE_clean_econ.csv")
 
-insee_econ <- insee_econ  %>%  select(-X) %>% filter(nchar(DEP_RES_21) != 3) %>%  rename(departement_code = DEP_RES_21, year =  AN_RECENS)
+insee_econ <- insee_econ  %>%  
+  select(-X) %>% filter(nchar(DEP_RES_21) != 3) %>%  
+  rename(departement_code = DEP_RES_21, year =  AN_RECENS) 
 
 # Fusion with CNC Data
 
@@ -1130,7 +1135,6 @@ Econ_data <- left_join(cnc_data_clean, insee_econ, by = c("departement_code", "y
 
 Econ_data <- Econ_data %>% 
   filter(!is.na(POND2))
-
 
 
 # Number of inhabitant by age range
@@ -1152,15 +1156,19 @@ Econ_data_CSP <- Econ_data %>%
 
 #Number of inhabitant by CSP (without unemployed person)
   ## Number of unemployed person by CSP
-  Econ_data_CSP_wo <- Econ_data %>% 
+  Econ_data_CSP_wo <- insee_econ %>% 
     filter(TYP_ACT == 2) %>%
     group_by(departement_code, year, CSP) %>% 
-    summarise(POND_UNEMP = sum(POND2, na.rm = TRUE))
+    summarise(POND_UNEMP = sum(POND2, na.rm = TRUE)) %>%
+    pivot_wider(names_from = "CSP", values_from = "POND_UNEMP") %>%
+    mutate(across(c("1", "2"), ~replace_na(., 0))) %>%
+    pivot_longer(cols = -c(departement_code, year), names_to = "CSP", values_to = "POND_UNEMP")%>%
+    mutate(CSP = as.integer(CSP))
   
 
   Econ_data_CSP2 <- Econ_data %>%
     group_by(departement_code, year, CSP) %>% 
-    summarise(POND2=sum(POND2, na.rm = TRUE)) 
+    summarise(POND2=sum(POND2, na.rm = TRUE))
   
   Econ_data_CSP_wu <- left_join(Econ_data_CSP2, Econ_data_CSP_wo, by = c("departement_code", "year", "CSP")) %>%
     mutate(POND_UNEMP = replace(POND_UNEMP, is.na(POND_UNEMP), 0), POND3=POND2-POND_UNEMP) %>% 
@@ -1223,7 +1231,13 @@ pcdtest(f_eff, test = c("lm"))
 pcdtest(f_eff, test = c("cd"))
  
 # Test time-fixed effects.
-f_eff_time<-plm(entrées~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+f_eff_time<-plm(
+  entrées~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + factor(year),
+  data=Econ_data_v2, 
+  index=c("departement_code", "year"), 
+  model="within"
+  )
+
 pFtest(f_eff_time, f_eff)
 plmtest(f_eff, c("time"), type=("bp"))
 
@@ -1234,8 +1248,9 @@ pbgtest(f_eff)
 bptest(entrées~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more, data = Econ_data_v2, studentize=F)
 
 #Test for unit roots
- Panel.set<- plm.data(Econ_data_v2, index = c("departement_code", "year")) 
- adf.test(Econ_data_v2$entrées, k=2)
+Panel.set<- plm.data(Econ_data_v2, index = c("departement_code", "year")) 
+adf.test(Econ_data_v2$entrées, k=2)
+
 ```
 
 Modèle économétrique avec uniquement CSP
@@ -1266,7 +1281,6 @@ pbgtest(f_eff_2)
 
 #Test for heteroscedasticity
  
-
 bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
 
 #Test for unit roots
@@ -1337,7 +1351,6 @@ plmtest(f_eff_4, c("time"), type=("bp"))
 pbgtest(f_eff_4)
 
 #Test for heteroscedasticity
- 
 
 bptest(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data = Econ_data_v3, studentize=F)
 
@@ -1346,6 +1359,97 @@ bptest(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu 
 
  adf.test(Econ_data_v3$entrées, k=2)
 ```
+Preparation de la base de donnée pour le modele 
+```{r}
+CSP_young_and_old <- insee_econ %>%
+  filter(AGE_GROUP %in% c('a_less_than_6', 'a_6_to_24', 'a_60_and_more')) %>%
+  filter(CSP != 8) %>%
+  group_by(year, departement_code, CSP) %>%
+  summarise(POND2 = sum(POND2, na.rm = TRUE)) %>%
+  mutate_all(~ replace_na(., 0))%>%
+  rename(POND_young_old = "POND2")
+
+Econ_data_v4 <- left_join(Econ_data_CSP_wo, Econ_data_CSP2, by = c("year", "departement_code", "CSP"))
+
+Econ_data_v4 <- left_join(Econ_data_v4,CSP_young_and_old, by = c("year", "departement_code", "CSP")) %>%
+  mutate(POND_UNEMP = replace(POND_UNEMP, is.na(POND_UNEMP), 0),POND = POND2 - POND_young_old - POND_UNEMP) %>%
+  select(-POND_UNEMP, -POND_young_old, -POND2) %>%
+  pivot_wider(names_from = "CSP", values_from = "POND" ) %>% 
+  rename( Farm_25_59 = "1", Craf_sh_head_25_59 = "2", Ex_intel_25_59 = "3", Int_prof_25_59 = "4", Employees_25_59 = "5", Workers_25_59 = "6", Ina_25_59 = "9")
+
+Econ_data_etu <- insee_econ %>%
+  filter(TYP_ACT == 3) %>%
+  group_by(year, departement_code) %>%
+  summarize(Student = sum(POND2, na.rm = TRUE))
+
+Econ_data_v4 <- left_join(Econ_data_v4, Econ_data_etu, by = c("year", "departement_code"))
+
+NE_6_24 <- insee_econ %>%
+  filter(AGE_GROUP == 'a_6_to_24') %>%
+  filter(TYP_ACT != 3) %>%
+  group_by(year, departement_code) %>%
+  summarize(not_student_6_24 = sum(POND2))
+
+Econ_data_v4 <- left_join(Econ_data_v4, NE_6_24, by = c("year", "departement_code"))
+
+NR_60_and_more  <- insee_econ %>%
+  filter(AGE_GROUP == 'a_60_and_more') %>%
+  filter(CSP != 8) %>%
+  group_by(year, departement_code) %>%
+  summarize(not_retirees_60_and_more = sum(POND2))
+
+Econ_data_v4 <- left_join(Econ_data_v4, NR_60_and_more, by = c("year", "departement_code"))
+
+Remaning_variables <- Econ_data_v3 %>%
+  select(departement_code, year, Retirees_wu, entrées, Unemployed)
+
+Econ_data_v4 <- left_join(Econ_data_v4, Retirees, by = c("year", "departement_code"))
+
+```
+
+modele avec retraité, 60+ non retraité, etudiant/eleve, 6-24 non etudiant, chomeur et CSP 24-59 ans
+```{r}
+X <- Econ_data_v4 %>% ungroup() %>% select(-departement_code, -year, -entrées)
+X_names <- paste(colnames(X), collapse = " + ")
+X_Y <- paste("entrées ~ ",X_names)
+
+f_eff_5 <-plm(X_Y, data=Econ_data_v4, index=c("departement_code", "year"), model="within")
+summary(f_eff_5)
+
+#For random effect
+r_eff_5 <-plm(X_Y, data=Econ_data_v4, index=c("departement_code", "year"), model="random")
+summary(r_eff_5)
+
+
+#Haussman test to determine between fixed and random effect
+phtest(f_eff_5, r_eff_5)
+
+#Test r_eff-sectional dependence
+pcdtest(f_eff_5, test = c("lm"))
+pcdtest(f_eff_5, test = c("cd"))
+ 
+# Test time-fixed effects.
+f_eff_time_5<-plm(paste(X_Y ," + factor(year)"), 
+                  data=Econ_data_v4, 
+                  index=c("departement_code", "year"), 
+                  model="within")
+
+pFtest(f_eff_time_5, f_eff_5)
+plmtest(f_eff_5, c("time"), type=("bp"))
+
+#Test for serial correlation
+pbgtest(f_eff_5)
+
+#Test for heteroscedasticity
+
+bptest(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data = Econ_data_v4, studentize=F)
+
+#Test for unit roots
+ Panel.set<- pdata.frame(Econ_data_v4, index = c("departement_code", "year")) 
+
+ adf.test(Econ_data_v4$entrées, k=2)
+```
+
 
 AIC and BIC comparaison
 
