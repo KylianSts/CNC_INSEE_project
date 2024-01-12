@@ -345,7 +345,7 @@ Nevertheless, as in many stories, the golden age is not eternal. Ours knew its d
 Attendance_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
   summarize(Attendance = sum(entrées, na.rm = TRUE)) %>% 
-  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
+  mutate(Growth = c(NA, ((Attendance[2:n()]/Attendance[1:(n()-1)]) - 1) * 100))
 ```
 
 ```{r}
@@ -868,7 +868,7 @@ Attendance_AE_nat <- cnc_data_clean %>%
   group_by(year) %>% 
   filter(!is.na(entréesAE)) %>%
   summarize(Attendance = sum(entréesAE, na.rm = TRUE)) %>% 
-  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
+  mutate(Growth = c(NA, ((Attendance[2:n()]/Attendance[1:(n()-1)]) - 1) * 100))
 ```
 
 ```{r}
