@@ -34,6 +34,11 @@ library(plotly) #plotly will allow us to create interactive graph
 
 library(sf) #We'll use sf to open shapefile, i.e. cartographic data
 library(ggspatial)
+
+#Package pour économétrie
+library(plm) 
+library(lmtest)
+library(tseries)
 ```
 
 # A presentation of the project
@@ -332,9 +337,9 @@ Nevertheless, as in many stories, the golden age is not eternal. Ours knew its d
 
 <br>
 
-### "Act 1, Scene 1" - The decline continues [1966-1992]
+### "Act 1, Scene 1" - The decline continues \[1966-1992\]
 
-#### Evolution of the attendance and revenue 
+#### Evolution of the attendance and revenue
 
 ```{r Aggregate_of_attendance_by_year}
 Attendance_nat <- cnc_data_clean %>% 
@@ -429,6 +434,7 @@ base_year <- att_dep_1 %>%
 att_dep_1 <- left_join(att_dep_1,base_year, by= 'departement_code') %>%
   mutate(attendance_evolution = (attendance_dep/base - 1)*100)
 ```
+
 ```{r fig.width=12, fig.height=15}
 france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
 
@@ -447,7 +453,6 @@ ggplot(merged_data, aes(fill = attendance_evolution)) +
   theme(legend.position = "bottom",
         legend.title = element_text(hjust = 0.5))
 ```
-
 
 ```{r Statistics_on_recettes}
 recette_nat <- cnc_data_clean %>% 
@@ -509,7 +514,8 @@ Re_graph2 <- recette_nat_without_inf %>%
 
 ggplotly(Re_graph2)
 ```
-Despite a decrease in attendance, we have from 1966 to 1982 increasing revenue (if we look at actualized revenue) due to increasing of price --> see revenue by ticket.
+
+Despite a decrease in attendance, we have from 1966 to 1982 increasing revenue (if we look at actualized revenue) due to increasing of price --\> see revenue by ticket.
 
 ```{r}
 Re_graph3 <- recette_nat_without_inf %>% 
@@ -598,9 +604,9 @@ ggplotly(Se_Sc_graph2)
 
 <br>
 
-### "Act 2" - The resurgence [1993-2022]
+### "Act 2" - The resurgence \[1993-2022\]
 
-#### Evolution of the attendance and revenue 
+#### Evolution of the attendance and revenue
 
 ```{r calculation_growth_rates}
 
@@ -711,6 +717,7 @@ Re_graph5 <- recette_nat_without_inf %>%
 
 ggplotly(Re_graph5)
 ```
+
 NOTE A CEDRIC : tu peux mettre cette partie si tu la trouve mieux placé apres tout ce qui est multiplex et changement du marché
 
 <br>
@@ -852,15 +859,9 @@ ggplotly(Se_graph3)
 
 ### Rising of the arthouse
 
-def doc excel 
+def doc excel
 
-Classement des établissements " Art et Essai "
-Le classement Art et Essai des lieux de projection cinématographiques a fait l'objet d'une réforme qui s'applique depuis 2002.
-Le classement Art et Essai d'un lieu de projection cinématographique repose désormais :
-- sur un indice automatique indiquant la proportion de séances réalisées avec des films recommandés Art et Essai par rapport au total des séances offertes ;
-- sur une pondération de cet indice automatique par deux coefficients. D'une part, un coefficient majorateur qui apprécie le nombre de films proposés, la politique d'animation, l'environnement sociologique et l'environnement cinématographique, d'autre part un coefficient minorateur qui prend en compte l'état de l'établissement, la diversité des films Art et Essai proposés, l'insuffisance de fonctionnement (nombre de semaines et de séances hors période de travaux).
-Le classement se fait désormais par établissement et la référence géographique est l'unité urbaine dans laquelle est situé l'établissement. Le classement est effectué par la Directrice générale du CNC, après avis de la commission du cinéma d'Art et Essai, qui examine les dossiers de demande de classement des établissements pour une année au début de cette même année. Le montant des subventions est fixé en fonction de l'indice résultant des calculs exposés ci-dessus.
-
+Classement des établissements " Art et Essai " Le classement Art et Essai des lieux de projection cinématographiques a fait l'objet d'une réforme qui s'applique depuis 2002. Le classement Art et Essai d'un lieu de projection cinématographique repose désormais : - sur un indice automatique indiquant la proportion de séances réalisées avec des films recommandés Art et Essai par rapport au total des séances offertes ; - sur une pondération de cet indice automatique par deux coefficients. D'une part, un coefficient majorateur qui apprécie le nombre de films proposés, la politique d'animation, l'environnement sociologique et l'environnement cinématographique, d'autre part un coefficient minorateur qui prend en compte l'état de l'établissement, la diversité des films Art et Essai proposés, l'insuffisance de fonctionnement (nombre de semaines et de séances hors période de travaux). Le classement se fait désormais par établissement et la référence géographique est l'unité urbaine dans laquelle est situé l'établissement. Le classement est effectué par la Directrice générale du CNC, après avis de la commission du cinéma d'Art et Essai, qui examine les dossiers de demande de classement des établissements pour une année au début de cette même année. Le montant des subventions est fixé en fonction de l'indice résultant des calculs exposés ci-dessus.
 
 ```{r}
 Attendance_AE_nat <- cnc_data_clean %>% 
@@ -880,6 +881,7 @@ AE_graph1 <- Attendance_AE_nat %>%
 
 ggplotly(AE_graph1)
 ```
+
 Peaople get more interested in arthouse cinema
 
 ```{r}
@@ -930,6 +932,7 @@ More and more movie theater are considered arthouse cinema.
 # Evolution of population in France and their impact on cinema industry
 
 ## How population and offer of seats by department had evolved
+
 ```{r}
 pop_dep <- insee_data_clean %>%
   group_by(departement_code, year) %>%
@@ -1018,6 +1021,7 @@ ggplot(merged_data, aes(fill = per_seats_dep_change)) +
 ```
 
 ## The demand ...
+
 ```{r}
 #Blabla ... ou se concentre les vieux dans le temps 
 #on regarde que la population de vieux et on regarde l'évolution de la part de vieux dans le departement par rapport a la population de vieux 
@@ -1089,45 +1093,260 @@ demand_scatter2 <- ggplot(pop_dep_etu_now, aes(x = percentage_etu, y = entry_for
 ggplotly(demand_scatter2)
 ```
 
-
-# Bibliography
-
 ## Econometrics Model : potentiel démarche
 
-```{r}
-library(plm) 
+Our aim here will be to study if we can link the heterogeneity regarding the evolution of attendance with the evolution of the CSP and Age-group by department.
+
+```{r Creation_of_the_specific_database_for_the_econometrics_model}
+
+# Importation of the database
+insee_econ <- read.csv("Data/INSEE_clean_econ.csv")
+
+insee_econ <- insee_econ  %>%  select(-X) %>% filter(nchar(DEP_RES_21) != 3) %>%  rename(departement_code = DEP_RES_21, year =  AN_RECENS)
+
+# Fusion with CNC Data
+
+Econ_data <- left_join(cnc_data_clean, insee_econ, by = c("departement_code", "year"))
+
+Econ_data <- Econ_data %>% 
+  filter(!is.na(POND2))
+
+
+
+# Number of inhabitant by age range
+
+Econ_data_AG <- Econ_data %>% 
+  group_by(departement_code, year, AGE_GROUP) %>% 
+  summarise(POND2=sum(POND2)) %>% pivot_wider(names_from = "AGE_GROUP", values_from = "POND2") %>% 
+  select(departement_code, year,a_less_than_6, a_6_to_24, a_25_to_42, a_43_to_59, a_60_and_more)
+
+# Number of inhabitant by CSP
+
+
+Econ_data_CSP <- Econ_data %>%
+  group_by(departement_code, year, CSP) %>% 
+  summarise(POND2=sum(POND2, na.rm = TRUE)) %>% 
+  pivot_wider(names_from = "CSP", values_from = "POND2" ) %>% 
+  rename( Farm = "1", Craf_sh_head = "2", Ex_intel = "3", Int_prof = "4", Employees = "5", Workers = "6", Retirees = "8", Ina = "9")
+
+
+#Number of inhabitant by CSP (without unemployed person)
+  ## Number of unemployed person by CSP
+  Econ_data_CSP_wo <- Econ_data %>% 
+    filter(TYP_ACT == 2) %>%
+    group_by(departement_code, year, CSP) %>% 
+    summarise(POND_UNEMP = sum(POND2, na.rm = TRUE))
+  
+
+  Econ_data_CSP2 <- Econ_data %>%
+    group_by(departement_code, year, CSP) %>% 
+    summarise(POND2=sum(POND2, na.rm = TRUE)) 
+  
+  Econ_data_CSP_wu <- left_join(Econ_data_CSP2, Econ_data_CSP_wo, by = c("departement_code", "year", "CSP")) %>%
+    mutate(POND_UNEMP = replace(POND_UNEMP, is.na(POND_UNEMP), 0), POND3=POND2-POND_UNEMP) %>% 
+    select(-POND2, -POND_UNEMP) %>% 
+    pivot_wider(names_from = "CSP", values_from = "POND3" ) %>% 
+  rename(Farm_wu = "1", Craf_sh_head_wu = "2", Ex_intel_wu = "3", Int_prof_wu = "4", Employees_wu = "5", Workers_wu = "6", Retirees_wu = "8", Ina_wu = "9")
+
+# Number of inhabitant by type of activity
+
+Econ_data_TYP <- Econ_data %>%  
+  group_by(departement_code, year, TYP_ACT) %>%
+  summarize(POND2=sum(POND2)) %>% 
+  pivot_wider(names_from = "TYP_ACT", values_from = "POND2") %>% 
+  rename( Employed = "1", Unemployed = "2", Stud_pup = "3", Milit = "4", Form_Act="5", Oth_Ina="6") %>% 
+  mutate(Milit = replace(Milit, is.na(Milit), 0))
+
+#Final database with AGE_GROUP and CSP
+Econ_data_v2 <- Econ_data %>% 
+  select(departement_code, year, entrées) %>%
+  distinct() %>%  
+  left_join(Econ_data_AG, by = c("departement_code", "year"))
+
+Econ_data_v2 <- Econ_data_v2  %>% 
+  left_join(Econ_data_CSP, by = c("departement_code", "year"))
+
+#Final database with AGE_GROUP, CSP(without unemployment) & TUnemployed
+Econ_data_v3 <- Econ_data %>% 
+  select(departement_code, year, entrées) %>%
+  distinct() %>% 
+  left_join(Econ_data_AG, by = c("departement_code", "year"))
+
+Econ_data_v3 <- Econ_data_v3 %>% 
+  left_join(Econ_data_CSP_wu, by = c("departement_code", "year"))
+
+Econ_unemp <- Econ_data_TYP %>% 
+  select(departement_code,year,Unemployed)
+
+Econ_data_v3 <- Econ_data_v3 %>% 
+  left_join(Econ_unemp, by = c("departement_code", "year"))
+
+```
+
+Modèle économétrique avec juste les tranches d'âge
+
+```{r Econometrics_Model}
 
 #For fixed effect
-f_eff <-plm(y ~ x1, data=Panel, index=c("dep", "year"), model="within") > summary(fixed)
+f_eff <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more, data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+summary(f_eff)
 
 #For random effect
-r_eff <-plm(y ~ x1, data=Panel, index=c("dep", "year"), model="random") > summary(random)
+r_eff <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more, data=Econ_data_v2, index=c("departement_code", "year"), model="random") 
+summary(r_eff )
 
 #Haussman test to determine between fixed and random effect
 phtest(f_eff, r_eff)
 
 #Test r_eff-sectional dependence
-pcdtest(r_eff, test = c("lm"))
-pcdtest(r_eff, test = c("cd"))
+pcdtest(f_eff, test = c("lm"))
+pcdtest(f_eff, test = c("cd"))
  
 # Test time-fixed effects.
-r_eff_time<-plm(y ~ x1 + factor(year), data=Panel, index=c("country", "year"), model="random")
-pFtest(r_eff_time, r_eff)
-plmtest(fixed, c("time"), type=("bp"))
+f_eff_time<-plm(entrées~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+pFtest(f_eff_time, f_eff)
+plmtest(f_eff, c("time"), type=("bp"))
 
 #Test for serial correlation
-pbgtest(r_eff)
+pbgtest(f_eff)
 
 #Test for heteroscedasticity
-library(lmtest) 
-
-bptest(y ~ x1 + factor(country), data = Panel, studentize=F)
+bptest(entrées~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more, data = Econ_data_v2, studentize=F)
 
 #Test for unit roots
- Panel.set<- plm.data(Panel, index = c("country", "year")) 
- library(tseries) 
- adf.test(Panel.set$y, k=2)
+ Panel.set<- plm.data(Econ_data_v2, index = c("departement_code", "year")) 
+ adf.test(Econ_data_v2$entrées, k=2)
+```
 
+Modèle économétrique avec uniquement CSP
+
+```{r}
+#For fixed effect
+f_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+summary(f_eff_2)
+
+#For random effect
+r_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="random") 
+summary(r_eff_2 )
+
+#Haussman test to determine between fixed and random effect
+phtest(f_eff_2, r_eff_2)
+
+#Test r_eff-sectional dependence
+pcdtest(f_eff_2, test = c("lm"))
+pcdtest(f_eff_2, test = c("cd"))
+ 
+# Test time-fixed effects.
+f_eff_time_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+pFtest(f_eff_time_2, f_eff_2)
+plmtest(f_eff_2, c("time"), type=("bp"))
+
+#Test for serial correlation
+pbgtest(f_eff_2)
+
+#Test for heteroscedasticity
+ 
+
+bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
+
+#Test for unit roots
+ Panel.set<- plm.data(Econ_data_v2, index = c("departement_code", "year")) 
+
+ adf.test(Econ_data_v2$entrées, k=2)
+```
+
+Modèle Econométrique avec Groupe d'Age et CSP mais sans retraité et en remplaçant la CSP sur les inactifs par Unemployed
+
+```{r}
+f_eff_3 <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data=Econ_data_v3, index=c("departement_code", "year"), model="within")
+summary(f_eff_3)
+
+#For random effect
+r_eff_3 <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data=Econ_data_v3, index=c("departement_code", "year"), model="random") 
+summary(r_eff_3)
+
+#Haussman test to determine between fixed and random effect
+phtest(f_eff_3, r_eff_3)
+
+#Test r_eff-sectional dependence
+pcdtest(f_eff_3, test = c("lm"))
+pcdtest(f_eff_3, test = c("cd"))
+ 
+# Test time-fixed effects.
+f_eff_time_3<-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed + factor(year), data=Econ_data_v3, index=c("departement_code", "year"), model="within")
+pFtest(f_eff_time_3, f_eff_3)
+plmtest(f_eff_3, c("time"), type=("bp"))
+
+#Test for serial correlation
+pbgtest(f_eff_3)
+
+#Test for heteroscedasticity
+ 
+
+bptest(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data = Econ_data_v3, studentize=F)
+
+#Test for unit roots
+ Panel.set<- pdata.frame(Econ_data_v3, index = c("departement_code", "year")) 
+
+ adf.test(Econ_data_v3$entrées, k=2)
+```
+
+Modèle Econométrique avec Groupe d'Age et CSP mais sans retraité, sans enfant de moins de 6 ans et en remplaçant la CSP sur les inactifs par Unemployed
+
+```{r}
+f_eff_4 <-plm(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data=Econ_data_v3, index=c("departement_code", "year"), model="within")
+summary(f_eff_4)
+
+#For random effect
+r_eff_4 <-plm(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data=Econ_data_v3, index=c("departement_code", "year"), model="random") 
+summary(r_eff_4)
+
+#Haussman test to determine between fixed and random effect
+phtest(f_eff_4, r_eff_4)
+
+#Test r_eff-sectional dependence
+pcdtest(f_eff_4, test = c("lm"))
+pcdtest(f_eff_4, test = c("cd"))
+ 
+# Test time-fixed effects.
+f_eff_time_4<-plm(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed + factor(year), data=Econ_data_v3, index=c("departement_code", "year"), model="within")
+pFtest(f_eff_time_4, f_eff_4)
+plmtest(f_eff_4, c("time"), type=("bp"))
+
+#Test for serial correlation
+pbgtest(f_eff_4)
+
+#Test for heteroscedasticity
+ 
+
+bptest(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data = Econ_data_v3, studentize=F)
+
+#Test for unit roots
+ Panel.set<- pdata.frame(Econ_data_v3, index = c("departement_code", "year")) 
+
+ adf.test(Econ_data_v3$entrées, k=2)
+```
+
+AIC and BIC comparaison
+
+```{r}
+#Method of https://www.statology.org/aic-in-r/
+library(AICcmodavg)
+
+models <- list(f_eff_time, f_eff_time_2, f_eff_time_3, f_eff_time_4)
+mod_names <- c("AGE", "CSP", "Age + CSP - retiree - Ina + Un", "Age + CSP - retiree - Ina + Un")
+aictab(cand.set = models)
+
+# https://bookdown.org/animestina/intro_stats_rms/model-selection.html
+AIC(f_eff_time, f_eff_time_2, f_eff_time_3, f_eff_time_4)
+BIC(f_eff_time, f_eff_time_2, f_eff_time_3, f_eff_time_4)
+
+#
+library(broom)
+glance(f_eff_time)
+glance(f_eff_time_2, f_eff_time_3, f_eff_time_4)
+
+anova(f_eff_time_2, f_eff_time_3, f_eff_time_4)
 ```
 
 # References

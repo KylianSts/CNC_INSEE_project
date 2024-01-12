@@ -137,11 +137,11 @@ Insee_cleanv3 <- Insee_cleanv3 |>
 
 #Specific division of Age range and CSP for an econometrics model
 Insee_clean_econ <- insee |> 
-  mutate(AGE_GROUP = case_when( AGE_REV < 6 ~ "<6", 
-                                between(AGE_REV, 6, 24) ~ "6-24", 
-                                between(AGE_REV, 25, 42) ~ "25-42", 
-                                between(AGE_REV, 42, 60) ~ "42-60", 
-                                AGE_REV > 60 ~ "60 and more")) 
+  mutate(AGE_GROUP = case_when( AGE_REV < 6 ~ "a_less_than_6", 
+                                between(AGE_REV, 6, 24) ~ "a_6_to_24", 
+                                between(AGE_REV, 25, 42) ~ "a_25_to_42", 
+                                between(AGE_REV, 43, 59) ~ "a_43_to_59", 
+                                AGE_REV > 59 ~ "a_60_and_more")) 
 
 Insee_clean_econ <- Insee_clean_econ  |> 
   group_by(AN_RECENS,DEP_RES_21,AGE_GROUP,TYP_ACT,CSP) |>
