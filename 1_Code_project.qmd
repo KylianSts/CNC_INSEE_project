@@ -345,7 +345,7 @@ Nevertheless, as in many stories, the golden age is not eternal. Ours knew its d
 Attendance_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
   summarize(Attendance = sum(entrées, na.rm = TRUE)) %>% 
-  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
+  mutate(Growth = c(NA, ((Attendance[2:n()]/Attendance[1:(n()-1)]) - 1) * 100))
 ```
 
 ```{r}
@@ -435,7 +435,7 @@ att_dep_1 <- left_join(att_dep_1,base_year, by= 'departement_code') %>%
   mutate(attendance_evolution = (attendance_dep/base - 1)*100)
 ```
 
-```{r fig.width=12, fig.height=15}
+```{r fig.width=10, fig.height=12}
 france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
 
 france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
@@ -446,7 +446,7 @@ ggplot(merged_data, aes(fill = attendance_evolution)) +
   geom_sf() +
   scale_fill_viridis_c(option = "C") + 
   labs(title = "Evolution of attendance by departement from 1966 to 1992 compare to 1966", fill = "Evolution of the attendance") +
-  theme_minimal() +
+  theme_classic() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
   facet_wrap(~year, ncol = 3)+
@@ -675,7 +675,7 @@ att_dep_2 <- left_join(att_dep_2,base_year, by= 'departement_code') %>%
   mutate(attendance_evolution = (attendance_dep/base - 1)*100)
 ```
 
-```{r fig.width=12, fig.height=15}
+```{r fig.width=10, fig.height=12}
 france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
 
 france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
@@ -684,9 +684,9 @@ merged_data <- merge(france_shape, att_dep_2, by = "departement_code")
 
 ggplot(merged_data, aes(fill = attendance_evolution)) +
   geom_sf() +
-  scale_fill_viridis_c(option = "H") + 
+  scale_fill_viridis_c(option = "C") + 
   labs(title = "Evolution of attendance by departement from 1993 to 2019 compare to 1993", fill = "Evolution of the attendance") +
-  theme_minimal() +
+  theme_classic() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
   facet_wrap(~year, ncol = 3)+
@@ -857,6 +857,27 @@ ggplotly(Se_graph3)
 
 <br>
 
+```{r}
+seance_nat <- cnc_data_clean %>%
+  group_by(year) %>%
+  filter(!is.na(séances)) %>%
+  summarize(nb_seances = sum(séances, na.rm = TRUE),
+            nb_etab = sum(établissements, na.rm = TRUE),
+            seance_by_etab = nb_seances/nb_etab)
+```
+
+```{r}
+Seances_graph <- seance_nat %>%
+  filter(year > 1992) %>% 
+  ggplot(aes(x = year, y = seance_by_etab)) +
+  geom_line(color="purple", linewidth = 0.75) +
+  labs(title="Number of seances by movie theater between 1993 and 2022", x="Year", y="Seances")+
+  theme_minimal()
+
+ggplotly(Seances_graph)
+```
+
+
 ### Rising of the arthouse
 
 def doc excel
@@ -868,7 +889,7 @@ Attendance_AE_nat <- cnc_data_clean %>%
   group_by(year) %>% 
   filter(!is.na(entréesAE)) %>%
   summarize(Attendance = sum(entréesAE, na.rm = TRUE)) %>% 
-  mutate(Growth = (Attendance -lag(Attendance))/lag(Attendance)*100)
+  mutate(Growth = c(NA, ((Attendance[2:n()]/Attendance[1:(n()-1)]) - 1) * 100))
 ```
 
 ```{r}
@@ -955,7 +976,7 @@ pop_dep <- left_join(pop_dep, base_year, by = "departement_code") %>%
   mutate(per_pop_dep_change = (per_pop_dep / base -1)*100)
 ```
 
-```{r fig.width=12, fig.height=15}
+```{r fig.width=10, fig.height=12}
 #On regarde l'évolution temporelle de la part de la population de chaque département dans la population pour voir ou se concentre la population dans le temps
 
 france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
@@ -966,9 +987,9 @@ merged_data <- merge(france_shape, pop_dep, by = "departement_code")
 
 ggplot(merged_data, aes(fill = per_pop_dep_change)) +
   geom_sf() +
-  scale_fill_viridis_c(option = "H") + 
+  scale_fill_viridis_c(option = "C") + 
   labs(title = "Population Map of France", fill = "Evolution of the relative concentration of the population by department") +
-  theme_minimal() +
+  theme_classic() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
   facet_wrap(~year, ncol = 3)+
@@ -998,7 +1019,7 @@ seats_dep <- left_join(seats_dep, base_year, by = "departement_code") %>%
   mutate(per_seats_dep_change = (per_seats_dep / base -1)*100)
 ```
 
-```{r fig.width=12, fig.height=15}
+```{r fig.width=10, fig.height=12}
 #Évolution de la part de la capacité d'accueil du département par rapport à la capacité d'accueil national pour voir où se concentre "l'offre" dans le temps
 
 france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
@@ -1009,7 +1030,7 @@ merged_data <- merge(france_shape, seats_dep, by = "departement_code")
 
 ggplot(merged_data, aes(fill = per_seats_dep_change)) +
   geom_sf() +
-  scale_fill_viridis_c(option = "H") + 
+  scale_fill_viridis_c(option = "C") + 
   labs(title = "Population Map of France", fill = "Evolution of the relative concentration of the offer of seats by department") +
   theme_classic() +
   annotation_scale()+
@@ -1023,7 +1044,6 @@ ggplot(merged_data, aes(fill = per_seats_dep_change)) +
 ## The demand ...
 
 ```{r}
-#Blabla ... ou se concentre les vieux dans le temps 
 #on regarde que la population de vieux et on regarde l'évolution de la part de vieux dans le departement par rapport a la population de vieux 
 
 pop_dep_old_now <- insee_data_clean %>%
