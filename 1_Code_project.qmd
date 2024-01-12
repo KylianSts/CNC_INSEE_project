@@ -27,18 +27,18 @@ library(dplyr)
 library(tidyr)
 library(readxl)
 library(ggplot2)
-
 library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
-
 library(plotly) #plotly will allow us to create interactive graph
 
+#Package for maps
 library(sf) #We'll use sf to open shapefile, i.e. cartographic data
 library(ggspatial)
 
-#Package pour économétrie
+#Package for econometrics
 library(plm) 
 library(lmtest)
 library(tseries)
+library(sandwich)
 ```
 
 # A presentation of the project
@@ -1580,11 +1580,11 @@ The relationship between the sociodemographic characteristics of departments and
 
 \<br\>
 
-However, we quickly realized that this project was ambitious. At this stage of our academic journey, our technical knowledge of econometrics is not sufficient to perform a solid panel regression that would address all the needs of our dataset. There are notions that are beyond our current grasp and knowledge such as how to correct serial correlation in panel data, to deal with potential non-linearity or the use of more complex models such as dynamic models. Nevertheless, we used this assignment as a training ground to familiarize ourselves with the procedures for performing an econometrics analysis on panel data.
+However, we quickly realized that this project was ambitious. At this stage of our academic journey, our technical knowledge of econometrics is not sufficient to perform a solid panel regression that would address all the needs of our dataset. The use of panel data is beyond our current training and knowledge and such issue such as how to correct serial correlation in panel data, to deal with potential non-linearity or the use of dynamic models for example woul have been challenging. Nevertheless, we used this assignment as a training ground to familiarize ourselves with the procedures for performing an econometrics analysis on panel data.
 
 \<br\>
 
-After looking into various sources, our final procedure drew inspiration from Altaf Ali (2017). The codes and the process were also influenced by a document by Torres-Reyna (2010) for Princeton University, as well as insights from articles by Schmidheiny (2023) and Wagle (2021). Bourbonnais (2020) also played a role in our understanding part of the theory behind the use of panel data.
+After looking into various sources, our final procedure drew inspiration from Altaf Ali (2017) and a document by Torres-Reyna (2010) for Princeton University. The codes and the process were also influenced by Schmidheiny (2023) and Wagle (2021). Bourbonnais (2020) also played a role in our understanding part of the theory behind the use of panel data.
 
 \<br\>
 
@@ -1616,7 +1616,7 @@ We only used basics technics for econometric analysis of panel data. 3 simple an
 
 3.  Random effect model
 
-An early step consists to analyze which technis fits the most the dataset. The F Test for Individual and/or Time Effects of the plm package (pFtest) enable to arbitrate between the used of a fixed effect model a simple OLS. The decision rule is that if the p-value is below the significance level of 0.05, the fixed effect model is preferred. Here our p-value is, then we will prefered the fixed model.
+An early step consists to analyze which technic fits the most the dataset. The F Test for Individual and/or Time Effects of the plm package (pFtest) enable to arbitrate between the used of a fixed effect model a simple OLS. The decision rule is that if the p-value is below the significance level of 0.05, the fixed effect model is preferred. Here our p-value is, then we will prefered the fixed model.
 
 ```{r Test_between_fixed_effect_and_OLS}
 
@@ -1648,10 +1648,27 @@ The fixed effect model being chosen, the next step was to identify if the additi
 
 We used TORRES-REYNA (2010)'s method which consist to add dummy variable to create our two new models. An alternative methode exist that consist to use the effect argument of the plm package with code such that code ' effect ="time" 'or effect = "individual" '(Wagle, 2021; Croissant et al., 2023; Hanck et al., 2023). However, nous avons du en écarter l'usage parce qu it gave us results that seems incoherent with too big regressor.
 
-With a p value below 0.05, the XXXX test support the hypothesis of the use of time-fixed effect.
+With a p value below 0.05, the Brehsch-Pagan test support the hypothesis of the use of time-fixed effect but the Honda test reject it.
 
 ```{r}
+f_eff_time_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+plmtest(f_eff_time_2, effect="time", type="bp")
+plmtest(f_eff_time_2, effect="time", type="honda")
 
+```
+
+The Lagrange multiplier test emphasized the paralell use of individual effect.
+
+```{r}
+f_eff_ind_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(departement_code), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+plmtest(f_eff_time_2, effect="individual", type="bp")
+plmtest(f_eff_time_2, effect="individual", type="honda")
+```
+
+We will then used a two way model that combined time-fixed and individual effect.
+
+```{r}
+f_eff_2ways_2 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year) + factor(departement_code), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
 ```
 
 It can be noted that if it gave us different coefficient, the use of the argument effect arrived at the same conclusion of the usage of a two-way model :
@@ -1660,12 +1677,11 @@ It can be noted that if it gave us different coefficient, the use of the argumen
 
 ```{r}
 #Model with time-fixed effects.
-f_eff_time_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "time")
+f_eff_time_2_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "time")
 
 #PLM test
-plmtest(f_eff_time_2, effect="time")
-
-
+plmtest(f_eff_time_2_2, effect="time", type="bp")
+plmtest(f_eff_time_2_2, effect="time", type="honda")
 
 ```
 
@@ -1673,31 +1689,53 @@ plmtest(f_eff_time_2, effect="time")
 
 ```{r}
 #Model with individual effects
-f_eff_ind_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "individual")
+f_eff_ind_2_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "individual")
 
 # PLM test
-plmtest(f_eff_ind_2, effect="individual")
+plmtest(f_eff_ind_2_2, effect="individual", type="bp")
+plmtest(f_eff_time_2_2, effect="individual", type="honda")
 ```
 
-##### aada
 
-```{r}
-#Test r_eff-sectional dependence
-pcdtest(f_eff_2, test = c("lm"))
-pcdtest(f_eff_2, test = c("cd"))
- 
 
-#Test for serial correlation
-pbgtest(f_eff_2)
+#### Test for unit roots
 
-#Test for heteroscedasticity
- 
-bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
-
-#Test for unit roots
- Panel.set<- plm.data(Econ_data_v2, index = c("departement_code", "year")) 
+```{r Test_for_unit_roots}
+Panel.set<- plm.data(Econ_data_v2, index = c("departement_code", "year")) 
 
  adf.test(Econ_data_v2$entrées, k=2)
+```
+
+#### Test for serial correlation
+
+```{r Test_for_serial_correlation}
+pbgtest(f_eff_2ways_2)
+```
+
+
+##### Test of Heterosedasticity
+
+With a p-value below 0.05, our model encounter heteroscedasticity.
+```{r #Test_for_heteroscedasticity}
+bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
+```
+
+ However, the use of the vcovHC function for the sandwich package compute heteroskedasticity-consistent covariance estimators using White and Arellano method (White 1980, 1984; Arellano 1987). Moreover, it can be used to correct simultaneously both heteroskedasticity and serial correlation with the code ' method = "arellano" '.
+ 
+##### Test for cross-sectional dependence 
+A last issue is common with panel data, and ours is not an exception. This issue is the cross-sectiona dependance. As we can see on the Breusch-Pagan and Pesaran tests below, our model suffers of this issue Beck and Katz method. To do so, we will finally not used the vcovHC function but do a similar work with the cvocBK which also tackles cross-sectional dependence
+
+```{r Test_for_cross_sectional_dependence}
+#Breusch-Pagan LM test for cross-sectional dependence
+pcdtest(f_eff_2, test = c("lm"))
+
+#Pesaran test for cross-sectional dependence
+pcdtest(f_eff_2, test = c("cd"))
+```
+
+### Outcome
+```{r Coefficient_with_correction_of_the_different_issues}
+coeftest(f_eff_2ways_2, vcov = vcovBK(f_eff_2ways_2, method = "arellano", cluster = "group"))
 ```
 
 ### Limitation
