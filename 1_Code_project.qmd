@@ -1401,7 +1401,9 @@ f_eff_time_4_lag<-plm(entrées ~ entrées_l1 + a_6_to_24 + a_25_to_42 + a_43_to_
 
 pbgtest(f_eff_time_4_lag)
 ```
-Preparation de la base de donnée pour le modele 
+
+Preparation de la base de donnée pour le modele
+
 ```{r}
 CSP_young_and_old <- insee_econ %>%
   filter(AGE_GROUP %in% c('a_less_than_6', 'a_6_to_24', 'a_60_and_more')) %>%
@@ -1450,6 +1452,7 @@ Econ_data_v4 <- left_join(Econ_data_v4, Retirees, by = c("year", "departement_co
 ```
 
 modele avec retraité, 60+ non retraité, etudiant/eleve, 6-24 non etudiant, chomeur et CSP 24-59 ans
+
 ```{r}
 X <- Econ_data_v4 %>% ungroup() %>% select(-departement_code, -year, -entrées)
 X_names <- paste(colnames(X), collapse = " + ")
@@ -1491,7 +1494,6 @@ bptest(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu 
 
  adf.test(Econ_data_v4$entrées, k=2)
 ```
-
 
 ### Age range and CSP
 
@@ -1572,6 +1574,125 @@ glance(f_eff_time_2, f_eff_time_3, f_eff_time_4)
 anova(f_eff_time_2, f_eff_time_3, f_eff_time_4)
 ```
 
+## Potential final procedure
+
+The relationship between the sociodemographic characteristics of departments and the evolution of movie theaters' attendance can be tricky to analyze through the unique use of graphics. On one hand, because the variables in the dataset can be affected by complex interactions, relying solely on graphics can lead to spurious conclusions. On the other hand, graphics also have strong limitations when the number of variables of interest increases. That’s why econometric models can be useful to delve into a thorough analysis of the link between variables. This section is dedicated to employing econometric methodologies to find answers that address our research question. Specifically, we will attempt to understand which sociodemographic characteristics had a positive or negative influence on the heterogeneous evolution of attendance in French departments. To do so, we will employ a panel data econometric model that utilizes both the cross-sectional and longitudinal characteristics of our dataset.
+
+\<br\>
+
+However, we quickly realized that this project was ambitious. At this stage of our academic journey, our technical knowledge of econometrics is not sufficient to perform a solid panel regression that would address all the needs of our dataset. There are notions that are beyond our current grasp and knowledge such as how to correct serial correlation in panel data, to deal with potential non-linearity or the use of more complex models such as dynamic models. Nevertheless, we used this assignment as a training ground to familiarize ourselves with the procedures for performing an econometrics analysis on panel data.
+
+\<br\>
+
+After looking into various sources, our final procedure drew inspiration from Altaf Ali (2017). The codes and the process were also influenced by a document by Torres-Reyna (2010) for Princeton University, as well as insights from articles by Schmidheiny (2023) and Wagle (2021). Bourbonnais (2020) also played a role in our understanding part of the theory behind the use of panel data.
+
+\<br\>
+
+This section is divided into three parts:
+
+1.  The first part is dedicated to the tests and corrections that we used for our model,
+
+2.  The second part discusses the obtained outcomes,
+
+3.  We conclude by emphasizing some limitations that our approach encounters.
+
+#### Procedure
+
+##### Presentation of the original models
+
+Présenter les modèles calculées : possible de les écrire mathématiquement avec latex ou un autre truc
+
+```{r Creatation_of_the_needed_datasets_for the models}
+
+```
+
+##### Choice of the type of model
+
+We only used basics technics for econometric analysis of panel data. 3 simple and standards models are often used for panel data :
+
+1.  Regular OLS
+
+2.  Fixed effect model
+
+3.  Random effect model
+
+An early step consists to analyze which technis fits the most the dataset. The F Test for Individual and/or Time Effects of the plm package (pFtest) enable to arbitrate between the used of a fixed effect model a simple OLS. The decision rule is that if the p-value is below the significance level of 0.05, the fixed effect model is preferred. Here our p-value is, then we will prefered the fixed model.
+
+```{r Test_between_fixed_effect_and_OLS}
+
+#OLS Model
+ols_2 <- plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="pooling")
+
+#Fixed effect model
+f_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+
+# F Test for Individual and/or Time Effects test
+pFtest(f_eff_2, ols_2)
+```
+
+The Haussman test continue our analysis by analysing which of the fixed effect model and the random one is the best fit for the model. Here, our p-value is below 0.05, the random effect model is choosen.
+
+```{r Test_between_fixed_and_random_effect}
+#Random effect model
+r_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="random") 
+
+
+#Haussman test to determine between fixed and random effect
+phtest(f_eff_2, r_eff_2)
+
+```
+
+##### 2nd step : Test for time-fixed effect
+
+```{r}
+
+
+#Model with time-fixed effects.
+f_eff_time_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "time")
+pFtest(f_eff_time_2, f_eff_2)
+plmtest(time_effects, effect="time")
+
+
+#Model with individual effects
+
+pFtest(f_eff_time_2, f_eff_2)
+plmtest(f_eff_2, c("time"), type=("bp"))
+
+```
+
+```{r}
+f_eff_individual_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "individual")
+pFtest(f_eff_time_2, f_eff_2)
+plmtest(time_effects, effect="individual")
+```
+
+##### aada
+
+```{r}
+#Test r_eff-sectional dependence
+pcdtest(f_eff_2, test = c("lm"))
+pcdtest(f_eff_2, test = c("cd"))
+ 
+
+#Test for serial correlation
+pbgtest(f_eff_2)
+
+#Test for heteroscedasticity
+ 
+bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
+
+#Test for unit roots
+ Panel.set<- plm.data(Econ_data_v2, index = c("departement_code", "year")) 
+
+ adf.test(Econ_data_v2$entrées, k=2)
+```
+
+### Limitation
+
+Variable de controle : télévision
+
+Non linéarité
+
 # Map for comparaison
 
 ```{r}
@@ -1632,6 +1753,12 @@ URL : <https://www.cairn.info/econometrie--9782100773459-page-371.htm>
 
 <br>
 
+**CROISSANT Yves, MILLO Giovanni, TAPPE Kevin, TOOMET Ott, KLEIBER Christian, ZEILEIS Achim, HENNINGSEN Arne, ANDRONIC Liviu & SCHOENFELDER Nina, 2023.** *Package 'plm'*
+
+URL : <https://cran.r-project.org/web/packages/plm/plm.pdf>
+
+<br>
+
 **DURAND Jacques, 1960.** " Le film et son marché " . *Esprit, Nouvelle série*, No. 285 (6), pp. 1024-1033
 
 URL: <https://www.jstor.org/stable/24255988>
@@ -1654,15 +1781,25 @@ URL : <https://bookdown.org/nicohahn/making_maps_with_r5/docs/introduction.html>
 
 <br>
 
-**TORRES-REYNA Oscar**, 2010. Getting Started in Fixed/Random Effects Models using R/RStudio (v. 1.0)
+**Rstudio-pub-static.s3.amazonaws.com, unknown date of publication \[last consultation : 12/01/2024\]**. *Getting started in fixed/random effects models using r*
 
-URL : <https://www.princeton.edu/~otorres/Panel101R.pdf>
+URL : <https://rstudio-pubs-static.s3.amazonaws.com/372492_3e05f38dd3f248e89cdedd317d603b9a.html>
+
+<br>
+
+**SCHMIDEINY Kurt, 2023.** *Panel data : Fixed and random effects*
 
 <br>
 
 **SHUAI Cao, 2020.** " La politique publique du cinéma en France (1981-2012) ". *Territoires contemporains - nouvelle série \[en ligne\]*, 2 septembre 2020,
 
 URL: <http://tristan.u-bourgogne.fr/CGC/prodscientifique/TC.html>
+
+<br>
+
+**TORRES-REYNA Oscar**, 2010. Getting Started in Fixed/Random Effects Models using R/RStudio (v. 1.0)
+
+URL : <https://www.princeton.edu/~otorres/Panel101R.pdf>
 
 <br>
 
