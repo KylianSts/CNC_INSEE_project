@@ -1644,26 +1644,39 @@ phtest(f_eff_2, r_eff_2)
 
 ##### 2nd step : Test for time-fixed effect
 
+The fixed effect model being chosen, the next step was to identify if the addition of individual or time-fixed effects improve the quality of the model.
+
+We used TORRES-REYNA (2010)'s method which consist to add dummy variable to create our two new models. An alternative methode exist that consist to use the effect argument of the plm package with code such that code ' effect ="time" 'or effect = "individual" '(Wagle, 2021; Croissant et al., 2023; Hanck et al., 2023). However, nous avons du en écarter l'usage parce qu it gave us results that seems incoherent with too big regressor.
+
+With a p value below 0.05, the XXXX test support the hypothesis of the use of time-fixed effect.
+
 ```{r}
-
-
-#Model with time-fixed effects.
-f_eff_time_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "time")
-pFtest(f_eff_time_2, f_eff_2)
-plmtest(time_effects, effect="time")
-
-
-#Model with individual effects
-
-pFtest(f_eff_time_2, f_eff_2)
-plmtest(f_eff_2, c("time"), type=("bp"))
 
 ```
 
+It can be noted that if it gave us different coefficient, the use of the argument effect arrived at the same conclusion of the usage of a two-way model :
+
+*Test for time-fixed effect*
+
 ```{r}
-f_eff_individual_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "individual")
-pFtest(f_eff_time_2, f_eff_2)
-plmtest(time_effects, effect="individual")
+#Model with time-fixed effects.
+f_eff_time_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "time")
+
+#PLM test
+plmtest(f_eff_time_2, effect="time")
+
+
+
+```
+
+*Test for individual effect*
+
+```{r}
+#Model with individual effects
+f_eff_ind_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "individual")
+
+# PLM test
+plmtest(f_eff_ind_2, effect="individual")
 ```
 
 ##### aada
@@ -1774,6 +1787,12 @@ URL : <https://www.cairn.info/revue-sociologie-2011-1-page-1.htm>
 **HAHN Nico, 2020.** *Making Maps with R.*
 
 URL : <https://bookdown.org/nicohahn/making_maps_with_r5/docs/introduction.html>
+
+<br>
+
+**HANCK Christoph, ARNOLD Martin, GERBER Alexander & SCMELZER Martin, 2023.** *Introduction to econometrics with R*
+
+URL : <https://www.econometrics-with-r.org/index.html>
 
 <br>
 
