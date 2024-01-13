@@ -395,11 +395,10 @@ Att_graph1 <- Attendance_nat %>%
   filter(year < 1993) %>% 
   ggplot(aes(x = year, y = Attendance)) +
   geom_line(color="orange", linewidth = 0.75) +
-  scale_y_continuous(labels = scales::number_format())+ 
   labs(title ="Attendance in France by year [1966-1992] - Dynamic graph", x="Year", y="Attendance")+
-  theme_minimal()
+  theme_classic()
 
-ggplotly(Att_graph1)
+ggplotly(Att_graph1, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -417,7 +416,7 @@ Att_graph2 <-Attendance_nat %>%
   scale_fill_manual(values = c("lightblue", "orange")) +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
   labs(title = "Growth rate by year [1967-1992]", x="Year", y="Growth rate by year", fill="Growth rate") +
-  theme_minimal()
+  theme_classic()
 
 ggplotly(Att_graph2)
 ```
@@ -455,6 +454,7 @@ ggplot(merged_data, aes(fill = attendance_evolution)) +
   theme(legend.position = "bottom",
         legend.title = element_text(hjust = 0.5))
 ```
+Here we can have a look of the decline of attendance by department, we see that almost none of department are spare at the end.
 
 ```{r Statistics_on_recettes}
 recette_nat <- cnc_data_clean %>% 
@@ -499,34 +499,31 @@ Re_graph1 <- recette_nat %>%
   filter(year < 1993) %>% 
   ggplot(aes(x = year, y = recette_tot)) +
   geom_line(color="skyblue", linewidth = 0.75) +
-  scale_y_continuous(labels = scales::number_format())+ 
   labs(title ="Revenue of movie theater in France by year [1966-1992]", x="Year", y="Totale Revenue")+
-  theme_minimal()
+  theme_classic()
 
-ggplotly(Re_graph1)
-
+ggplotly(Re_graph1, dynamicTicks = TRUE)
 
 Re_graph2 <- recette_nat_without_inf %>% 
   filter(year < 1993) %>% 
   ggplot(aes(x = year, y = recette_tot)) +
   geom_line(color="skyblue", linewidth = 0.75) +
-  scale_y_continuous(labels = scales::number_format())+ 
   labs(title ="Revenue of movie theater in France by year [1966-1992] (in 2015€)", x="Year", y="Totale Revenue")+
-  theme_minimal()
+    theme_classic()
 
-ggplotly(Re_graph2)
+ggplotly(Re_graph2, dynamicTicks = TRUE)
 ```
 
-Despite a decrease in attendance, we have from 1966 to 1982 increasing revenue (if we look at actualized revenue) due to increasing of price --\> see revenue by ticket.
+Despite a decrease in attendance, we have from 1966 to 1982 increasing revenue - if we look at actualized revenue - due to increasing an increasing of the price of the ticket as we can see with the average revenue by ticket sold.
 
 ```{r}
 Re_graph3 <- recette_nat_without_inf %>% 
   filter(year < 1993) %>% 
   ggplot(aes(x = year, y = rme_nat_without_inflation)) +
   geom_line(color="skyblue", linewidth = 0.75) +
-  scale_y_continuous(labels = scales::number_format())+ 
+  scale_y_continuous(labels = function(x) paste0(scales::comma(x), "€")) +
   labs(title ="Average revenue by ticket sold in France by year [1966-1992] (in 2015€)", x="Year", y="Revenue by Ticket")+
-  theme_minimal()
+  theme_classic()
 
 ggplotly(Re_graph3)
 ```
@@ -546,16 +543,16 @@ Equip_nat <- cnc_data_clean %>%
 ```
 
 ```{r}
-#Evolution of the number of Seats
+#Evolution of the number of seats
 
 Se_graph1 <- Equip_nat %>% 
   filter(year<1993) %>% 
   ggplot(aes(x=year, y=Seats)) +
   geom_line(color="red", linewidth = 0.75)+
-  labs(title = "Evolution of the number of Seats in France by year [1966-1992]", x="Year", y="Number of Seats")+
-  theme_minimal()
+  labs(title = "Evolution of the number of seats in France by year [1966-1992]", x="Year", y="Number of Seats")+
+  theme_classic()
 
-ggplotly(Se_graph1)
+ggplotly(Se_graph1, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -584,9 +581,11 @@ Equip_nat <- Equip_nat %>%  mutate(Screens_b100=Screens/Screens[year==1966]*100,
   geom_line(linewidth = 0.75) +
   scale_color_manual(values = c("blue", "red")) +
   labs(title = "Comparaison of the number of seats and screens (base index 100 in 1966)", x="Year", y="Number of seats")+
-  theme_minimal()
+  theme_classic()
 
-ggplotly(Se_Sc_graph1)
+ggplotly(Se_Sc_graph1, dynamicTicks = TRUE) %>%
+    layout(legend = list(x = 0.2, y = -0.2, orientation = "h"))
+
 ```
 
 <br>
@@ -599,9 +598,9 @@ Se_Sc_graph2 <- Equip_nat %>%
   ggplot(aes(x=year,y=Seats_by_screens))+
   geom_line(color = "turquoise", linewidth = 0.75)+
   labs(title = "Ratio of Seats by Screens in France by year [1966-1992]", x="Year", y="Seats by Screen")+
-  theme_minimal()
+  theme_classic()
 
-ggplotly(Se_Sc_graph2)
+ggplotly(Se_Sc_graph2, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -637,11 +636,10 @@ Att_graph3 <- Attendance_nat %>%
   filter(year >1992) %>% 
   ggplot(aes(x = year, y = Attendance)) +
   geom_line(color="orange", linewidth = 0.75) +
-  scale_y_continuous(labels = scales::number_format())+ 
   labs(title ="Attendance in France by year [1993-2022]", x="Year", y="Attendance")+
-  theme_minimal()
+  theme_classic()
 
-ggplotly(Att_graph3)
+ggplotly(Att_graph3, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -655,7 +653,7 @@ Att_graph4 <-Attendance_nat %>%
   scale_fill_manual(values = c("lightblue", "orange")) +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
   labs(title = "Growth rate by year [1993-2019]", x="Year", y="Growth rate by year", fill="Growth rate") +
-  theme_minimal()
+  theme_classic()
 
 ggplotly(Att_graph4)
 ```
@@ -701,11 +699,10 @@ Re_graph4 <- recette_nat_without_inf %>%
   filter(year > 1992) %>% 
   ggplot(aes(x = year, y = recette_tot)) +
   geom_line(color="skyblue", linewidth = 0.75) +
-  scale_y_continuous(labels = scales::number_format())+ 
   labs(title ="Revenue of movie theater in France by year [1993-2022] (in 2015€)", x="Year", y="Totale Revenue")+
-  theme_minimal()
+  theme_classic()
 
-ggplotly(Re_graph4)
+ggplotly(Re_graph4, dynamicTicks = TRUE)
 ```
 
 ```{r}
@@ -713,9 +710,9 @@ Re_graph5 <- recette_nat_without_inf %>%
   filter(year > 1992) %>% 
   ggplot(aes(x = year, y = rme_nat_without_inflation)) +
   geom_line(color="skyblue", linewidth = 0.75) +
-  scale_y_continuous(labels = scales::number_format())+ 
+    scale_y_continuous(labels = function(x) paste0(scales::comma(x), "€")) +
   labs(title ="Average revenue by ticket sold in France by year [1993-2022] (in 2015€)", x="Year", y="Revenue by Ticket")+
-  theme_minimal()
+  theme_classic()
 
 ggplotly(Re_graph5)
 ```
@@ -748,9 +745,9 @@ Etablissement_nat <- cnc_data_clean %>%
   ggplot(aes(x = year, y = nb_multiplex)) +
   geom_line(color = "purple", linewidth = 0.75) + 
   labs(title ="Number of multiplexes in France between 1993 and 2022", x="Year", y="Number of Multiplexes")+
-  theme_minimal()
+  theme_classic()
 
-ggplotly(M_graph1)
+ggplotly(M_graph1, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -773,9 +770,12 @@ Et_graph <- Etablissement_nat %>%
   ggplot(aes(x=year,y=Nb, color=Variables)) +
   labs(title = "Number of movie theater in France between 1992 and 2022", x="Year", y="Number of cinemas")+
   geom_line(linewidth = 0.75)+
-  theme_minimal()
+  theme_classic() +
+  theme(legend.position = "bottom")
 
-ggplotly(Et_graph) 
+
+ggplotly(Et_graph, dynamicTicks = TRUE, tooltip = "text") %>%
+  layout(legend = list(x = 0.1, y = -0.2, orientation = "h"))
   
 #The rename function is used to change (only for the creation of this graphic) the name of the original column which became the values of the column"Variables". The goal behind this transformation is to have more significative name for the two curves in our legend. We also use the layout function to put the legend above the graph because plotly does not take into account theme(legend.position = "top") when it transform the ggplot.
 ```
@@ -791,7 +791,7 @@ M_graph2 <- Etablissement_nat %>%
   geom_line(color="purple", linewidth = 0.75) +
   scale_y_continuous(labels = scales::percent_format(scale = 1))+ 
    labs(title="Share of the multiplexes in the total of movie theater between 1993 and 2022", x="Year", y="Percentage")+
-  theme_minimal()
+  theme_classic() 
 
 ggplotly(M_graph2)
 ```
@@ -806,9 +806,9 @@ Sc_graph <- Equip_nat %>%
   ggplot(aes(x = year, y = Screens)) +
   geom_line(color = "blue", linewidth = 0.75) +
   labs(title = "Number of Screens in France between 1993 and 2022", x = "Year", y = "Number of Screens") +
-  theme_minimal()
+  theme_classic()
 
-ggplotly(Sc_graph)
+ggplotly(Sc_graph, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -842,9 +842,9 @@ Se_graph2 <- Equip_nat %>%
   geom_line(color="red", linewidth = 0.75)+
   geom_vline(xintercept = 1993, linetype = "dotted", color = "black")+
   labs(title = "Number of Seats in France between 1962 and 2022", x="Year", y="Number of Seats")+
-  theme_minimal()
+  theme_classic()
 
-ggplotly(Se_graph2)
+ggplotly(Se_graph2, dynamicTicks = TRUE)
 
 #Evolution of the number of Seats
 Se_graph3 <- Equip_nat %>% 
@@ -852,9 +852,9 @@ Se_graph3 <- Equip_nat %>%
   ggplot(aes(x=year, y=Seats)) +
   geom_line(color="red", linewidth = 0.75)+
   labs(title = "Number of Seats in France between 1993 and 2022", x="Year", y="Number of Seats")+
-  theme_minimal()
+  theme_classic()
 
-ggplotly(Se_graph3)
+ggplotly(Se_graph3, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -874,9 +874,9 @@ Seances_graph <- seance_nat %>%
   ggplot(aes(x = year, y = seance_by_etab)) +
   geom_line(color="purple", linewidth = 0.75) +
   labs(title="Number of seances by movie theater between 1993 and 2022", x="Year", y="Seances")+
-  theme_minimal()
+  theme_classic()
 
-ggplotly(Seances_graph)
+ggplotly(Seances_graph, dynamicTicks = TRUE)
 ```
 
 ### Rising of the arthouse
@@ -901,9 +901,9 @@ AE_graph1 <- Attendance_AE_nat %>%
   geom_line(color="orange", linewidth = 0.75) +
   scale_y_continuous(labels = scales::number_format())+ 
   labs(title ="Attendance arthouse cinema in France", x="Year", y="Attendance")+
-  theme_minimal()
+  theme_classic()
 
-ggplotly(AE_graph1)
+ggplotly(AE_graph1, dynamicTicks = TRUE)
 ```
 
 Peaople get more interested in arthouse cinema
@@ -917,7 +917,7 @@ AE_graph2 <-Attendance_AE_nat %>%
   scale_fill_manual(values = c("lightblue", "orange")) +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
   labs(title = "Growth rate by year [2002-2019]", x="Year", y="Growth rate", fill="Growth rate") +
-  theme_minimal()
+  theme_classic()
 
 ggplotly(AE_graph2)
 ```
@@ -927,9 +927,9 @@ AE_graph3 <-  recette_AE_nat %>%
   ggplot(aes(x = year, y = recetteAE_tot)) +
   geom_line(color = "skyblue", linewidth = 0.75) + 
   labs(titre="Totale revenue arthouse cinema in France", x="Year", y="Totale Revenue")+
-  theme_minimal()
+  theme_classic()
 
-ggplotly(AE_graph3)
+ggplotly(AE_graph3, dynamicTicks = TRUE)
 ```
 
 ```{r}
@@ -946,9 +946,9 @@ AE_graph4 <-  Etablissement_AE %>%
   ggplot(aes(x = year, y = part_AE)) +
   geom_line(color = "purple", linewidth = 0.75) + 
   labs(titre="Number of arthouse cinema in France", x="Year", y="Number of arthouse cinema")+
-  theme_minimal()
+  theme_classicws()
 
-ggplotly(AE_graph4)
+ggplotly(AE_graph4, dynamicTicks = TRUE)
 ```
 
 More and more movie theater are considered arthouse cinema.
@@ -991,7 +991,7 @@ merged_data <- merge(france_shape, pop_dep, by = "departement_code")
 ggplot(merged_data, aes(fill = per_pop_dep_change)) +
   geom_sf() +
   scale_fill_viridis_c(option = "C") + 
-  labs(title = "Population Map of France", fill = "Evolution of the relative concentration of the population by department") +
+  labs(title = "Evolution of the relative concentration of the population by department in France ", fill = "Evolution of the relative concentration of the population by department") +
   theme_classic() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
@@ -1034,7 +1034,7 @@ merged_data <- merge(france_shape, seats_dep, by = "departement_code")
 ggplot(merged_data, aes(fill = per_seats_dep_change)) +
   geom_sf() +
   scale_fill_viridis_c(option = "C") + 
-  labs(title = "Population Map of France", fill = "Evolution of the relative concentration of the offer of seats by department") +
+  labs(title = "Evolution of the relative concentration of the offer of seats by department in France", fill = "Evolution of the relative concentration of the offer of seats by department") +
   theme_classic() +
   annotation_scale()+
   annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
