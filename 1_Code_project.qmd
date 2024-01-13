@@ -23,9 +23,10 @@ execute :
 ```{r Configuration, message=FALSE}
 here::i_am("CNC_INSEE_project.Rproj")
 library(here)
+library(readxl)
 library(dplyr)
 library(tidyr)
-library(readxl)
+library(data.table)
 library(ggplot2)
 library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
 library(plotly) #plotly will allow us to create interactive graph
@@ -358,7 +359,7 @@ calculate_growth_rate <- function(data, start_year, end_year) {
     select(-Growth)
 
   growth_rate <- subset_data %>%
-    reframe(Growth = (Attendance - lag(Attendance)) / lag(Attendance) * 100) %>%
+    reframe(Growth = (Attendance - shift(Attendance, type = "lag")) / shift(Attendance, type = "lag")  * 100) %>%
     filter(!is.na(Growth)) %>%
     pull(Growth) %>%
     round(digits = 2)
@@ -380,7 +381,7 @@ nrow_1966_1992 <-
 Av_Growth_rate_1966_1992 <- Attendance_nat %>% 
   filter(year %in% c(1966,1992)) %>% 
   select(-Growth) %>% 
-  mutate(Growth = ((Attendance / lag(Attendance))^(1/nrow_1966_1992) - 1) * 100) %>% 
+  mutate(Growth = ((Attendance / shift(Attendance, type = "lag") )^(1/nrow_1966_1992) - 1) * 100) %>% 
   filter(!is.na(Growth)) %>% 
   pull(Growth) %>%
   round(., digits=1)
@@ -624,7 +625,7 @@ nrow_1993_2019 <- Attendance_nat %>%
 Av_Growth_rate_1993_2019 <- Attendance_nat %>% 
   filter(year %in% c(1993,2019)) %>% 
   select(-Growth) %>% 
-  mutate(Growth = ((Attendance / lag(Attendance))^(1/nrow_1993_2019) - 1) * 100) %>% 
+  mutate(Growth = ((Attendance / shift(Attendance, type = "lag") )^(1/nrow_1993_2019) - 1) * 100) %>% 
   filter(!is.na(Growth))  %>% 
   pull(Growth) %>%
   round(., digits=1)
@@ -818,7 +819,7 @@ ggplotly(Sc_graph, dynamicTicks = TRUE)
 Se_diff_rate_1993_2022 <- Equip_nat %>%
   filter(year %in% c(1993, 2022)) %>%  
   select(-Screens) %>% 
-  reframe(Growth=(Seats-lag(Seats))) %>% 
+  reframe(Growth=(Seats-shift(Seats, type = "lag") )) %>% 
   filter(!is.na(Growth)) %>% 
   pull(Growth)
 
@@ -827,7 +828,7 @@ Se_diff_rate_1993_2022 <- format(Se_diff_rate_1993_2022, big.mark = " ")
 Se_Growth_rate_1993_2022 <- Equip_nat %>%
   filter(year %in% c(1993, 2022)) %>%  
   select(-Screens) %>% 
-  reframe(Growth=(Seats-lag(Seats))/lag(Seats)*100) %>% 
+  reframe(Growth=(Seats-shift(Seats, type = "lag"))/shift(Seats, type = "lag")*100) %>% 
   filter(!is.na(Growth)) %>% 
   pull(Growth) %>% 
   round(.,digits = 0)
