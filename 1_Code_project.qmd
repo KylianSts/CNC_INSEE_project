@@ -398,7 +398,7 @@ Att_graph1 <- Attendance_nat %>%
   labs(title ="Attendance in France by year [1966-1992] - Dynamic graph", x="Year", y="Attendance")+
   theme_minimal()
 
-ggplotly(Att_graph1)
+ggplotly(Att_graph1, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -454,6 +454,7 @@ ggplot(merged_data, aes(fill = attendance_evolution)) +
   theme(legend.position = "bottom",
         legend.title = element_text(hjust = 0.5))
 ```
+Here we can have a look of the decline of attendance by department, we see that almost none of department are spare at the end.
 
 ```{r Statistics_on_recettes}
 recette_nat <- cnc_data_clean %>% 
@@ -502,8 +503,7 @@ Re_graph1 <- recette_nat %>%
   labs(title ="Revenue of movie theater in France by year [1966-1992]", x="Year", y="Totale Revenue")+
   theme_minimal()
 
-ggplotly(Re_graph1)
-
+ggplotly(Re_graph1, dynamicTicks = TRUE)
 
 Re_graph2 <- recette_nat_without_inf %>% 
   filter(year < 1993) %>% 
@@ -513,10 +513,10 @@ Re_graph2 <- recette_nat_without_inf %>%
   labs(title ="Revenue of movie theater in France by year [1966-1992] (in 2015€)", x="Year", y="Totale Revenue")+
   theme_minimal()
 
-ggplotly(Re_graph2)
+ggplotly(Re_graph2, dynamicTicks = TRUE)
 ```
 
-Despite a decrease in attendance, we have from 1966 to 1982 increasing revenue (if we look at actualized revenue) due to increasing of price --\> see revenue by ticket.
+Despite a decrease in attendance, we have from 1966 to 1982 increasing revenue - if we look at actualized revenue - due to increasing an increasing of the price of the ticket as we can see with the average revenue by ticket sold.
 
 ```{r}
 Re_graph3 <- recette_nat_without_inf %>% 
@@ -527,7 +527,7 @@ Re_graph3 <- recette_nat_without_inf %>%
   labs(title ="Average revenue by ticket sold in France by year [1966-1992] (in 2015€)", x="Year", y="Revenue by Ticket")+
   theme_minimal()
 
-ggplotly(Re_graph3)
+ggplotly(Re_graph3, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -545,16 +545,16 @@ Equip_nat <- cnc_data_clean %>%
 ```
 
 ```{r}
-#Evolution of the number of Seats
+#Evolution of the number of seats
 
 Se_graph1 <- Equip_nat %>% 
   filter(year<1993) %>% 
   ggplot(aes(x=year, y=Seats)) +
   geom_line(color="red", linewidth = 0.75)+
-  labs(title = "Evolution of the number of Seats in France by year [1966-1992]", x="Year", y="Number of Seats")+
+  labs(title = "Evolution of the number of seats in France by year [1966-1992]", x="Year", y="Number of Seats")+
   theme_minimal()
 
-ggplotly(Se_graph1)
+ggplotly(Se_graph1, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -585,7 +585,7 @@ Equip_nat <- Equip_nat %>%  mutate(Screens_b100=Screens/Screens[year==1966]*100,
   labs(title = "Comparaison of the number of seats and screens (base index 100 in 1966)", x="Year", y="Number of seats")+
   theme_minimal()
 
-ggplotly(Se_Sc_graph1)
+ggplotly(Se_Sc_graph1, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -600,7 +600,7 @@ Se_Sc_graph2 <- Equip_nat %>%
   labs(title = "Ratio of Seats by Screens in France by year [1966-1992]", x="Year", y="Seats by Screen")+
   theme_minimal()
 
-ggplotly(Se_Sc_graph2)
+ggplotly(Se_Sc_graph2, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -640,7 +640,7 @@ Att_graph3 <- Attendance_nat %>%
   labs(title ="Attendance in France by year [1993-2022]", x="Year", y="Attendance")+
   theme_minimal()
 
-ggplotly(Att_graph3)
+ggplotly(Att_graph3, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -656,7 +656,7 @@ Att_graph4 <-Attendance_nat %>%
   labs(title = "Growth rate by year [1993-2019]", x="Year", y="Growth rate by year", fill="Growth rate") +
   theme_minimal()
 
-ggplotly(Att_graph4)
+ggplotly(Att_graph4, dynamicTicks = TRUE)
 ```
 
 Numerous scientific papers and reports agree that this revival is due to the development of multiplexes (Blanchard, 2014 ; CNC, 2013; Muhlberger, 2013; Thiolliere and Ralite, 2003). Theses structures would have sparked again the interest of the consumers for movie theaters.
@@ -704,7 +704,7 @@ Re_graph4 <- recette_nat_without_inf %>%
   labs(title ="Revenue of movie theater in France by year [1993-2022] (in 2015€)", x="Year", y="Totale Revenue")+
   theme_minimal()
 
-ggplotly(Re_graph4)
+ggplotly(Re_graph4, dynamicTicks = TRUE)
 ```
 
 ```{r}
@@ -716,7 +716,7 @@ Re_graph5 <- recette_nat_without_inf %>%
   labs(title ="Average revenue by ticket sold in France by year [1993-2022] (in 2015€)", x="Year", y="Revenue by Ticket")+
   theme_minimal()
 
-ggplotly(Re_graph5)
+ggplotly(Re_graph5, dynamicTicks = TRUE)
 ```
 
 NOTE A CEDRIC : tu peux mettre cette partie si tu la trouve mieux placé apres tout ce qui est multiplex et changement du marché
@@ -749,7 +749,7 @@ Etablissement_nat <- cnc_data_clean %>%
   labs(title ="Number of multiplexes in France between 1993 and 2022", x="Year", y="Number of Multiplexes")+
   theme_minimal()
 
-ggplotly(M_graph1)
+ggplotly(M_graph1, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -774,7 +774,7 @@ Et_graph <- Etablissement_nat %>%
   geom_line(linewidth = 0.75)+
   theme_minimal()
 
-ggplotly(Et_graph) 
+ggplotly(Et_graph, dynamicTicks = TRUE) 
   
 #The rename function is used to change (only for the creation of this graphic) the name of the original column which became the values of the column"Variables". The goal behind this transformation is to have more significative name for the two curves in our legend. We also use the layout function to put the legend above the graph because plotly does not take into account theme(legend.position = "top") when it transform the ggplot.
 ```
@@ -792,7 +792,7 @@ M_graph2 <- Etablissement_nat %>%
    labs(title="Share of the multiplexes in the total of movie theater between 1993 and 2022", x="Year", y="Percentage")+
   theme_minimal()
 
-ggplotly(M_graph2)
+ggplotly(M_graph2, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -807,7 +807,7 @@ Sc_graph <- Equip_nat %>%
   labs(title = "Number of Screens in France between 1993 and 2022", x = "Year", y = "Number of Screens") +
   theme_minimal()
 
-ggplotly(Sc_graph)
+ggplotly(Sc_graph, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -843,7 +843,7 @@ Se_graph2 <- Equip_nat %>%
   labs(title = "Number of Seats in France between 1962 and 2022", x="Year", y="Number of Seats")+
   theme_minimal()
 
-ggplotly(Se_graph2)
+ggplotly(Se_graph2, dynamicTicks = TRUE)
 
 #Evolution of the number of Seats
 Se_graph3 <- Equip_nat %>% 
@@ -853,7 +853,7 @@ Se_graph3 <- Equip_nat %>%
   labs(title = "Number of Seats in France between 1993 and 2022", x="Year", y="Number of Seats")+
   theme_minimal()
 
-ggplotly(Se_graph3)
+ggplotly(Se_graph3, dynamicTicks = TRUE)
 ```
 
 <br>
@@ -875,7 +875,7 @@ Seances_graph <- seance_nat %>%
   labs(title="Number of seances by movie theater between 1993 and 2022", x="Year", y="Seances")+
   theme_minimal()
 
-ggplotly(Seances_graph)
+ggplotly(Seances_graph, dynamicTicks = TRUE)
 ```
 
 ### Rising of the arthouse
@@ -902,7 +902,7 @@ AE_graph1 <- Attendance_AE_nat %>%
   labs(title ="Attendance arthouse cinema in France", x="Year", y="Attendance")+
   theme_minimal()
 
-ggplotly(AE_graph1)
+ggplotly(AE_graph1, dynamicTicks = TRUE)
 ```
 
 Peaople get more interested in arthouse cinema
@@ -918,7 +918,7 @@ AE_graph2 <-Attendance_AE_nat %>%
   labs(title = "Growth rate by year [2002-2019]", x="Year", y="Growth rate", fill="Growth rate") +
   theme_minimal()
 
-ggplotly(AE_graph2)
+ggplotly(AE_graph2, dynamicTicks = TRUE)
 ```
 
 ```{r}
@@ -928,7 +928,7 @@ AE_graph3 <-  recette_AE_nat %>%
   labs(titre="Totale revenue arthouse cinema in France", x="Year", y="Totale Revenue")+
   theme_minimal()
 
-ggplotly(AE_graph3)
+ggplotly(AE_graph3, dynamicTicks = TRUE)
 ```
 
 ```{r}
@@ -947,7 +947,7 @@ AE_graph4 <-  Etablissement_AE %>%
   labs(titre="Number of arthouse cinema in France", x="Year", y="Number of arthouse cinema")+
   theme_minimal()
 
-ggplotly(AE_graph4)
+ggplotly(AE_graph4, dynamicTicks = TRUE)
 ```
 
 More and more movie theater are considered arthouse cinema.
