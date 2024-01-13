@@ -315,23 +315,23 @@ In essence, our research delves into the recent history of movie theaters in Fra
 
 ## Introduction : the "golden age" of the first half of the 20th century
 
-The history of the movie theater market unfolds on a winter day. In December 28th 1895, two brothers August and Louis Lumiere gave the first commercial public screening. Because a good history is full of happy coincidences, it is in France, at the Salon Indien du Grand Café in Paris that the two brothers used their *cinématographe*.
+The history of the movie theater market unfolds on a winter day. In December 28th 1895, two brothers August and Louis Lumiere gave the first commercial public screening. Because a good history is full of happy coincidences, it is in France (our studied country), at the Salon Indien du Grand Café in Paris that the two brothers used their *cinématographe*.
 
 ![](Pictures%20and%20illustrations/cinema-lumiere.jpg){fig-align="center"}
 
-The movie theaters market experienced fast growth. According to Muhlberger (2013), in 1920s, cinema became a mass leisure activity in France but also in the USA and numerous European countries. In the Hexagon, cinema market fully blossomed a decade later. The period between 1929 and 1957 is often described as a golden age for cinema in France. Movie theaters attendance reached its zenith, with peaks beyond 400 millions entries. In a report for the French Senate, Thiolliere and Ralite (2003) link this fast period with the introduction of talking films.
+The movie theaters market experienced growth relatively quickly. According to Muhlberger (2013) it already became a mass leisure activity in Franc in 1920s but also in the USA and numerous European countries. However, it fully blossomed in the Hexagone a decade later. The period between 1929 and 1957 is often described as a golden age for cinema in France. Movie theaters attendance reached its zenith, with peaks beyond 400 millions entries. In a report for the French Senate, Thiolliere and Ralite (2003) link this fast period with the introduction of talking films.
 
 <br>
 
-The importance of cinema during this period maybe undestimated by our contemporary eyes. However, the two senatorial rapporteur explain that :
+The importance of cinema during this period maybe underestimated by our contemporary eyes. However, the two senatorial rapporteurs explain that :
 
-"We forget too often \[...\] that until the advent of the 'petite lucarne' (i.e. television) in households, cinema had a monopoly on the broadcasting of images. People frequented the theater, not to see a film, but rather to watch a program consisting of one or more short films, news, the trailer for the next film and, after the intermission and advertising, of the 'feature film'."
+" until the advent of the 'petite lucarne' (i.e. television) in households, cinema had a monopoly on the broadcasting of images. People frequented the theater, not to see a film, but rather to watch a program consisting of one or more short films, news, the trailer for the next film and, after the intermission and advertising, of the 'feature film'."
 
 <center>*THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.* L'évolution du secteur de l'exploitation cinématographique, Rapport d'information sénatoriale n°308 (2002-2003)</center>
 
 <br>
 
-Nevertheless, as in many stories, the golden age is not eternal. Ours knew its dawn in 1957. Attendance collapsed. It more than halved between 1957 and 1966. The arrival of television is often cited as not the sole but a pivotal factor in this decline, which we will see will continue during most of the 20th century.
+As in many stories, this golden age was not eternal. Ours knew its dawn in 1957. Attendance start to collapsed and more than halved between 1957 and 1966. The arrival of television is often cited as (not the sole) but a pivotal factor in this decline.
 
 <br>
 
@@ -387,7 +387,7 @@ Av_Growth_rate_1966_1992 <- Attendance_nat %>%
   round(., digits=1)
 ```
 
-Our analytic journey starts in 1966, which is the first availabe year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992` % during the period). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance droped by `r abs(Growth_rate_1966_1969)` %. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
+Our analytic journey starts in 1966. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992` % during the period). The movie theater market experienced especially two periods of sharp decline. From1966 to 1969, attendance dropped by `r abs(Growth_rate_1966_1969)` %. Movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
 
 ```{r}
 #Graphic of the evolution of attendance in time
@@ -404,7 +404,7 @@ ggplotly(Att_graph1, dynamicTicks = TRUE)
 
 <br>
 
-18 of the 26 years between 1966 (not included) and 1992 (included) are thus characterized by a negative attendance's growth rate.The causes of this degrowth are multifactorial. The democratisation of television and of automobile are however presented as one of the the key factors of this decay.
+18 of the 26 years between 1966 (not included) and 1992 (included) are characterized by a negative attendance's growth rate. On single factor can not be point as the responsible of this degrowth because its causes are multifactorial. However, democratization of television and of automobile are however presented as key factors of this decay.
 
 ```{r}
 #Graphic of the Growth by year
@@ -437,6 +437,8 @@ att_dep_1 <- left_join(att_dep_1,base_year, by= 'departement_code') %>%
   mutate(attendance_evolution = (attendance_dep/base - 1)*100)
 ```
 
+The map below show the evolution of the attendance by department and year in France. Each year show the total growth rate between this year and the 1966 year. One can that the majority of the deportment are not spare by the decline. However, the trend is not homogeneous by department. Some has a periodnone of department are spare at the end. The department of the north-east of the Hexagon knew a stronger degrowth of their attendance. At the opposite some departments of Ile-de-France and of the south-east of the territory had a better resilience even knowing significant growth phases.
+
 ```{r fig.width=10, fig.height=12}
 france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
 
@@ -456,7 +458,7 @@ ggplot(merged_data, aes(fill = attendance_evolution)) +
         legend.title = element_text(hjust = 0.5))
 ```
 
-Here we can have a look of the decline of attendance by department, we see that almost none of department are spare at the end.
+<br>
 
 ```{r Statistics_on_recettes}
 recette_nat <- cnc_data_clean %>% 
