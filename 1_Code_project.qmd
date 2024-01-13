@@ -1048,9 +1048,27 @@ ggplot(merged_data, aes(fill = per_seats_dep_change)) +
 
 ```
 
-## Econometrics Model : potentiel démarche
+## Explaining the diversity in the temporal evolution of attendance by department : an econometric analysis
 
-Our aim here will be to study if we can link the heterogeneity regarding the evolution of attendance with the evolution of the CSP and Age-group by department.
+In the preceding section, we explored the narrative shaped by the history of movie theaters. A pivotal aspect of this tale was the presence of heterogeneity in the trajectory that each departmental attendance followed. This final section aims is to study whether we can link this heterogeneity with the demographic features of the department and its evolution. Specifically, we will attempt to understand which sociodemographic characteristics had a positive or negative influence on the evolution of attendance over time. <br> Studying this interaction can be challenging through the sole use of graphics. The dataset's variables can be affected by complex interactions, and relying solely on plots can lead to spurious conclusions. Moreover, graphical method encounters limitations as the number of variables of interest increases. That’s why the utilization of econometric models can be valuable to perform a more thorough analysis. This section is dedicated to employing econometric methodologies to find answers that address our research question. To achieve this, we will use a panel data econometric model that incorporates both cross-sectional and time series characteristics of our dataset.
+
+\<br\>
+
+However, we quickly realized that this project was ambitious. At this stage of our academic journey, our technical understanding of econometrics is not sufficient to execute a solid panel regression that would address all the requirements of our dataset. Mastery of panel data is yet beyond our current training and knowledge. Nevertheless, we approached this assignment as a training ground to familiarize ourselves with the procedures for conducting an econometrics analysis on panel data. Therefore, we do not have the pretention to say that our work provided the correct correlation between our explained variable and the sociodemographic features of the department. However, it demonstrates what a procedure for testing and interpreting a longitudinal econometrics model.
+
+\<br\>
+
+After consulting various sources, our final procedure drew mainly inspiration from Altaf (2017) and a document by Torres-Reyna (2010) for Princeton University. The codes and the process were also influenced by Schmidheiny (2023) and Wagle (2021) papers. Bourbonnais (2020) also contributed significantly to our understanding of part of the theory behind the use of panel data.
+
+\<br\>
+
+This section is divided into two parts:
+
+1.  The first part is dedicated to the tests and corrections that we used in our model,
+
+2.  The second part discusses the obtained outcomes and emphasizes some limitations that our approach encounters.
+
+### Part 1 : Model and test
 
 ```{r Creation_of_the_specific_database_for_the_econometrics_model}
 
@@ -1086,38 +1104,69 @@ Econ_data_CSP <- Econ_data %>%
   rename( Farm = "1", Craf_sh_head = "2", Ex_intel = "3", Int_prof = "4", Employees = "5", Workers = "6", Retirees = "8", Ina = "9")
 
 
-#Number of inhabitant by CSP (without unemployed person)
-  ## Number of unemployed person by CSP
-  Econ_data_CSP_wo <- insee_econ %>% 
-    filter(TYP_ACT == 2) %>%
-    group_by(departement_code, year, CSP) %>% 
-    summarise(POND_UNEMP = sum(POND2, na.rm = TRUE)) %>%
-    pivot_wider(names_from = "CSP", values_from = "POND_UNEMP") %>%
-    mutate(across(c("1", "2"), ~replace_na(., 0))) %>%
-    pivot_longer(cols = -c(departement_code, year), names_to = "CSP", values_to = "POND_UNEMP")%>%
-    mutate(CSP = as.integer(CSP))
-  
+```
 
-  Econ_data_CSP2 <- Econ_data %>%
-    group_by(departement_code, year, CSP) %>% 
-    summarise(POND2=sum(POND2, na.rm = TRUE))
-  
-  Econ_data_CSP_wu <- left_join(Econ_data_CSP2, Econ_data_CSP_wo, by = c("departement_code", "year", "CSP")) %>%
-    mutate(POND_UNEMP = replace(POND_UNEMP, is.na(POND_UNEMP), 0), POND3=POND2-POND_UNEMP) %>% 
-    select(-POND2, -POND_UNEMP) %>% 
-    pivot_wider(names_from = "CSP", values_from = "POND3" ) %>% 
-  rename(Farm_wu = "1", Craf_sh_head_wu = "2", Ex_intel_wu = "3", Int_prof_wu = "4", Employees_wu = "5", Workers_wu = "6", Retirees_wu = "8", Ina_wu = "9")
+Our basic model has attendance as the dependent variable, and each classification of socioprofessional categories (CSP) from the Insee terminology serves as independent variables. Specifically, the model is described by the formula below :\
+$$
+Entrées_{it} = \beta_0 + \beta_1 Farm_{it} + \beta_2 Craf\_sh\_head_{it} + \beta_3 Ex\_intel_{it} + \beta_4 Int\_prof_{it} + \beta_5 Employees_{it} + \beta_6 Workers_{it} + \beta_7 Retirees_{it} + \beta_8 Ina_{it} + u_{it}
+$$ Where :
 
-# Number of inhabitant by type of activity
+-   $Entrées$ : the attendance
 
-Econ_data_TYP <- Econ_data %>%  
-  group_by(departement_code, year, TYP_ACT) %>%
-  summarize(POND2=sum(POND2)) %>% 
-  pivot_wider(names_from = "TYP_ACT", values_from = "POND2") %>% 
-  rename( Employed = "1", Unemployed = "2", Stud_pup = "3", Milit = "4", Form_Act="5", Oth_Ina="6") %>% 
-  mutate(Milit = replace(Milit, is.na(Milit), 0))
+-   $Farm$ : the number of farmers
 
-#Final database with AGE_GROUP and CSP
+-   $Craf\_sh\_head$ : the number of artisans, shopkeepers, and business owners
+
+-   $Ex\_intel$ : the number of executives and intellectual Professions
+
+-   $Int\_prof$ : the number of intermediate occupation, i.e. "job between executives and workers or employees or intermediate professions in a more figurative sense" (teachers, nurses, social workers) ([Insee, 2003](https://insee.fr/fr/metadonnees/pcs2003/categorieSocioprofessionnelleAgregee/4?champRecherche=false)).
+
+-   $Employees$ :the number of employees
+
+-   $Workers$ : the number of manual workers
+
+-   $Retirees$ : the number of retirees
+
+-   $Ina$ :the number "inactive individuals and person who have never worked" where we notably find pupils, students and other kind of "inactive" individuals
+
+-   $u$ : the residuals
+
+Various models were tested during the draft of our work using age range, type of activity and combination of the aforementioned data with CSP. However, we choose this final model for two reasons. On one hand, it had good Bayesian information criterion (BIC) score relatively to its counterpart (see Annex 2 for the method used to compute the BIC score). On the other hand, it was the model were the colinearity between explanotary variable was the less strong
+
+```{r Creation_of_the_needed_datasets_for the models}
+
+# Importation of the database
+insee_econ <- read.csv("Data/INSEE_clean_econ.csv")
+
+insee_econ <- insee_econ  %>%  
+  select(-X) %>% filter(nchar(DEP_RES_21) != 3) %>%  
+  rename(departement_code = DEP_RES_21, year =  AN_RECENS) 
+
+# Fusion with CNC Data
+
+Econ_data <- left_join(cnc_data_clean, insee_econ, by = c("departement_code", "year"))
+
+Econ_data <- Econ_data %>% 
+  filter(!is.na(POND2))
+
+
+# Number of inhabitant by age range
+
+Econ_data_AG <- Econ_data %>% 
+  group_by(departement_code, year, AGE_GROUP) %>% 
+  summarise(POND2=sum(POND2)) %>% pivot_wider(names_from = "AGE_GROUP", values_from = "POND2") %>% 
+  select(departement_code, year,a_less_than_6, a_6_to_24, a_25_to_42, a_43_to_59, a_60_and_more)
+
+# Number of inhabitant by CSP
+
+
+Econ_data_CSP <- Econ_data %>%
+  group_by(departement_code, year, CSP) %>% 
+  summarise(POND2=sum(POND2, na.rm = TRUE)) %>% 
+  pivot_wider(names_from = "CSP", values_from = "POND2" ) %>% 
+  rename( Farm = "1", Craf_sh_head = "2", Ex_intel = "3", Int_prof = "4", Employees = "5", Workers = "6", Retirees = "8", Ina = "9")
+
+#Final dataset with AGE_GROUP and CSP
 Econ_data_v2 <- Econ_data %>% 
   select(departement_code, year, entrées) %>%
   distinct() %>%  
@@ -1125,165 +1174,6 @@ Econ_data_v2 <- Econ_data %>%
 
 Econ_data_v2 <- Econ_data_v2  %>% 
   left_join(Econ_data_CSP, by = c("departement_code", "year"))
-
-#Final database with AGE_GROUP, CSP(without unemployment) & TUnemployed
-Econ_data_v3 <- Econ_data %>% 
-  select(departement_code, year, entrées) %>%
-  distinct() %>% 
-  left_join(Econ_data_AG, by = c("departement_code", "year"))
-
-Econ_data_v3 <- Econ_data_v3 %>% 
-  left_join(Econ_data_CSP_wu, by = c("departement_code", "year"))
-
-Econ_unemp <- Econ_data_TYP %>% 
-  select(departement_code,year,Unemployed)
-
-Econ_data_v3 <- Econ_data_v3 %>% 
-  left_join(Econ_unemp, by = c("departement_code", "year"))
-
-```
-
-### Modèle économétrique avec uniquement CSP
-
-```{r}
-#For fixed effect
-f_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within")
-summary(f_eff_2)
-
-#For random effect
-r_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="random") 
-summary(r_eff_2 )
-
-#Haussman test to determine between fixed and random effect
-phtest(f_eff_2, r_eff_2)
-
-#Test r_eff-sectional dependence
-pcdtest(f_eff_2, test = c("lm"))
-pcdtest(f_eff_2, test = c("cd"))
- 
-# Test time-fixed effects.
-f_eff_time_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
-pFtest(f_eff_time_2, f_eff_2)
-plmtest(f_eff_2, c("time"), type=("bp"))
-
-#Test for serial correlation
-pbgtest(f_eff_2)
-
-#Test for heteroscedasticity
-bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
-
-#Test for unit roots
- Panel.set<- plm.data(Econ_data_v2, index = c("departement_code", "year")) 
-
- adf.test(Econ_data_v2$entrées, k=2)
-```
-
-### Decomposition en deux periodes
-
-#### Avant 1990 (inclus)
-
-```{r}
-Econ_data_v2_1<- Econ_data_v2 %>% filter(year <= 1990)
-
-#For fixed effect
-f_eff_2_1 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within")
-summary(f_eff_2_1)
-
-#For random effect
-r_eff_2_1 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="random") 
-summary(r_eff_2_1 )
-
-#Haussman test to determine between fixed and random effect
-phtest(f_eff_2_1, r_eff_2_1)
-
-#Test r_eff-sectional dependence
-pcdtest(f_eff_2_1, test = c("lm"))
-pcdtest(f_eff_2_1, test = c("cd"))
- 
-# Test time-fixed effects.
-f_eff_time_2_1<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2_1, index=c("departement_code", "year"), model="within")
-pFtest(f_eff_time_2_1, f_eff_2_1)
-plmtest(f_eff_2_1, c("time"), type=("bp"))
-
-#Test for serial correlation
-pbgtest(f_eff_2_1)
-
-#Test for heteroscedasticity
-bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2_1, studentize=F)
-
-#Test for unit roots
- Panel.set<- plm.data(Econ_data_v2_1, index = c("departement_code", "year")) 
-
- adf.test(Econ_data_v2_1$entrées, k=2)
-```
-
-#### Apres 1990 (non inclus)
-
-```{r}
-Econ_data_v2_2<- Econ_data_v2 %>% filter(year > 1990)
-
-#For fixed effect
-f_eff_2_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within")
-summary(f_eff_2_2)
-
-#For random effect
-r_eff_2_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_2, index=c("departement_code", "year"), model="random") 
-summary(r_eff_2_2 )
-
-#Haussman test to determine between fixed and random effect
-phtest(f_eff_2_2, r_eff_2_2)
-
-#Test r_eff-sectional dependence
-pcdtest(f_eff_2_2, test = c("lm"))
-pcdtest(f_eff_2_2, test = c("cd"))
- 
-# Test time-fixed effects.
-f_eff_time_2_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2_2, index=c("departement_code", "year"), model="within")
-pFtest(f_eff_time_2_2, f_eff_2_2)
-plmtest(f_eff_2_2, c("time"), type=("bp"))
-
-#Test for serial correlation
-pbgtest(f_eff_2_2)
-
-#Test for heteroscedasticity
-bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2_2, studentize=F)
-
-#Test for unit roots
- Panel.set<- plm.data(Econ_data_v2_2, index = c("departement_code", "year")) 
-
- adf.test(Econ_data_v2_2$entrées, k=2)
-```
-
-
-## Potential final procedure
-
-The relationship between the sociodemographic characteristics of departments and the evolution of movie theaters' attendance can be tricky to analyze through the unique use of graphics. On one hand, because the variables in the dataset can be affected by complex interactions, relying solely on graphics can lead to spurious conclusions. On the other hand, graphics also have strong limitations when the number of variables of interest increases. That’s why econometric models can be useful to delve into a thorough analysis of the link between variables. This section is dedicated to employing econometric methodologies to find answers that address our research question. Specifically, we will attempt to understand which sociodemographic characteristics had a positive or negative influence on the heterogeneous evolution of attendance in French departments. To do so, we will employ a panel data econometric model that utilizes both the cross-sectional and longitudinal characteristics of our dataset.
-
-\<br\>
-
-However, we quickly realized that this project was ambitious. At this stage of our academic journey, our technical knowledge of econometrics is not sufficient to perform a solid panel regression that would address all the needs of our dataset. The use of panel data is beyond our current training and knowledge and such issue such as how to correct serial correlation in panel data, to deal with potential non-linearity or the use of dynamic models for example woul have been challenging. Nevertheless, we used this assignment as a training ground to familiarize ourselves with the procedures for performing an econometrics analysis on panel data.
-
-\<br\>
-
-After looking into various sources, our final procedure drew inspiration from Altaf (2017) and a document by Torres-Reyna (2010) for Princeton University. The codes and the process were also influenced by Schmidheiny (2023) and Wagle (2021). Bourbonnais (2020) also played a role in our understanding part of the theory behind the use of panel data.
-
-\<br\>
-
-This section is divided into three parts:
-
-1.  The first part is dedicated to the tests and corrections that we used for our model,
-
-2.  The second part discusses the obtained outcomes,
-
-3.  We conclude by emphasizing some limitations that our approach encounters.
-
-### Procedure
-
-#### Presentation of the original models
-
-Présenter les modèles calculées : possible de les écrire mathématiquement avec latex ou un autre truc
-
-```{r Creation_of_the_needed_datasets_for the models}
 
 ```
 
@@ -1339,7 +1229,9 @@ plmtest(f_eff_time_2_2, effect="time", type="honda")
 
 ```
 
-We then used a two-ways model combining time-fixed and individual effects.
+We then used a two-ways model combining time-fixed and individual effects. Our model become : $$
+Attendance = \beta_0 + \beta_1 Farm_{it} + \beta_2 Craf\_sh\_head_{it} + \beta_3 Ex\_intel_{it} + \beta_4 Int\_prof_{it} + \beta_5 Employees_{it} + \beta_6 Workers_{it} + \beta_7 Retirees_{it} + \beta_8 Ina_{it} + \alpha_{it} + \gamma_{it} + u_{it}
+$$
 
 ```{r}
 f_eff_2ways_2 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year) + factor(departement_code), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
@@ -1576,6 +1468,10 @@ URL : <https://bookdown.org/nicohahn/making_maps_with_r5/docs/introduction.html>
 URL : <https://www.econometrics-with-r.org/index.html>
 
 <br>
+
+**Insee, 2023.** *Consulter la PCS 2003 - Professions et catégories socioprofessionnelles - Catégorie socioprofessionnelle agrégée 4 : Professions Intermédiaires*
+
+\<br\>
 
 **MUHLBERGER David 2013.** *Cinema attendance during crises is there a relationship between cinema attendance and the state of the economy in France in the period 1992-2012?*
 
