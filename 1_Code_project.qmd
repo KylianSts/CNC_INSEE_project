@@ -1131,7 +1131,7 @@ $$ Where :
 
 -   $u$ : the residuals
 
-Various models were tested during the draft of our work using age range, type of activity and combination of the aforementioned data with CSP. However, we choose this final model for two reasons. On one hand, it had good Bayesian information criterion (BIC) score relatively to its counterpart (see Annex 2 for the method used to compute the BIC score). On the other hand, it was the model were the colinearity between explanotary variable was the less strong
+Various models were tested during the draft of our work, considering factors such as age range, type of activity and combinations of the aforementioned data with CSP. However, we opted for this final model for two reasons. Firstly, it had a good Bayesian information criterion (BIC) score relatively to its counterpart (see Annex 2 for the method used to compute the BIC score). Secondly, it was the model were the colinearity among explanotary variables was the least strong. The main part of our econometrics treatment were performed with the **plm** package. By prudence, we selected to apply only basic techniques for the econometric analysis of panel data.
 
 ```{r Creation_of_the_needed_datasets_for the models}
 
@@ -1179,7 +1179,7 @@ Econ_data_v2 <- Econ_data_v2  %>%
 
 #### Choice of the type of model
 
-We only employed basics techniques for econometric analysis of panel data. Three simple and standards models are often used for panel data :
+An early step consists to determine which kind of models suits the dataset. Three standards models are often used for panel data :
 
 1.  Regular OLS
 
@@ -1187,61 +1187,63 @@ We only employed basics techniques for econometric analysis of panel data. Three
 
 3.  Random effect model
 
-An early step consists to analyze which technique best fits the dataset. The F Test for Individual and/or Time Effects of the **plm** package (**pFtest**) enable us to arbitrate between the use of a fixed effect model and an OLS. The decision criterion is that if the p-value is below the significance level of 0.05, the fixed effect model is preferred. Here, our F test p-value is under the aforementioned level.
+The plm package's F Test for Individual and/or Time Effects (pFtest) were used to arbitrate between the utilization of a fixed effect model and an OLS. The decision criterion is that if the p-value is below the significance level of 0.05, the fixed effect model is preferred. It is our case here. As we can see below, our F test p-value is under the aforementioned threshold.
 
 ```{r Test_between_fixed_effect_and_OLS}
 
 #OLS Model
-ols_2 <- plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="pooling")
+ols <- plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="pooling")
 
 #Fixed effect model
-f_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+f_eff <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within")
 
 # F Test for Individual and/or Time Effects test
-pFtest(f_eff_2, ols_2)
+pFtest(f_eff, ols)
 ```
 
-The Haussman test continue our analysis by discerning the most suitable model between the fixed-effect and the random model. The p-value being below the significance level of 0.05, the fixed effect model is favored.
+The Haussman test continue our analysis by determining the most suitable model between the fixed effect and the random model. The p-value being below the significance level of 0.05, the fixed effect model is favored.
 
 ```{r Test_between_fixed_and_random_effect}
 #Random effect model
-r_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="random") 
+r_eff <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="random") 
 
 
 #Haussman test to determine between fixed and random effect
-phtest(f_eff_2, r_eff_2)
+phtest(f_eff, r_eff)
 ```
 
+<br>
 #### Test for time-fixed effect and individual effect
 
-Having selected the fixed effect model, the next step was to identify if the addition time-fixed effects improve the model's quality.
+Having selected the fixed effect model, the next step was to identify whether the addition of time-fixed effects contribute to the improvement the model's quality.
 
-With p-values below 0.05, both Breusch-Pagan and Honda tests support the introduction of fixed effect.
+With p-values below 0.05, both Breusch-Pagan and Honda tests advocate for the addition  of time-fixed effect.
+
 
 ```{r}
 #Model with time-fixed effects.
-f_eff_time_2_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "time")
+f_eff_time <-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "time")
 
 #PLM test
-plmtest(f_eff_time_2_2, effect="time", type="bp")
-plmtest(f_eff_time_2_2, effect="time", type="honda")
+plmtest(f_eff_time, effect="time", type="bp")
+plmtest(f_eff_time, effect="time", type="honda")
 
 
 ```
 
-We then used a two-ways model combining time-fixed and individual effects. Our model become : $$
+We then used a two ways model combining time-fixed and individual effects. Our model became :
+$$
 Attendance = \beta_0 + \beta_1 Farm_{it} + \beta_2 Craf\_sh\_head_{it} + \beta_3 Ex\_intel_{it} + \beta_4 Int\_prof_{it} + \beta_5 Employees_{it} + \beta_6 Workers_{it} + \beta_7 Retirees_{it} + \beta_8 Ina_{it} + \alpha_{it} + \gamma_{it} + u_{it}
 $$
-
 ```{r}
-f_eff_2ways_2 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year) + factor(departement_code), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+f_eff_2ways <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within",effect = "twoways")
 ```
 
 <br>
 
 #### Test for unit roots
 
-By running an augmented Dickey-Fuller test on the attendance, it appears that the explanatory variable seems to bee stationary.
+The augmented Dickey-Fuller test enables us to check for unit roots. Its results suggest the presence of stationarity in our data.
 
 ```{r Test_for_unit_roots}
 Panel.set<- pdata.frame(Econ_data_v2, index = c("departement_code", "year")) 
@@ -1253,7 +1255,7 @@ adf.test(Econ_data_v2$entrées, k=2)adf.test(Econ_data_v2$entrées, k=2)
 
 #### Test for serial correlation
 
-However, our panel data encounter several issues. Firstlyn our model also suffer from serial correlation. The Breusch-Godfrey/Wooldridge indicate a p-value below the significance level of 0.05. To correct this issue, both Altaf and Torres-Reyna propose t the use of Arellano's technique as we will see in the next paragraph.
+Our panel data faces several issues. Firstly, our model suffers from serial correlation. The Breusch-Godfrey/Wooldridge test indicates a p-value below the significance level of 0.05. To address this issue, both Altaf and Torres-Reyna recommend the utilization of Arellano's technique.
 
 ```{r Test_for_serial_correlation}
 pbgtest(f_eff_2ways_2)
@@ -1261,13 +1263,13 @@ pbgtest(f_eff_2ways_2)
 
 #### Test of Heterosedasticity
 
-The second challenge of our ecometrics analysis was the presence of heteroscedasticity in the model.
+The second challenge in our econometrics analysis was the presence of heteroscedasticity in the model.
 
 ```{r #Test_for_heteroscedasticity}
 bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
 ```
 
-Nevertheless, heteroscedasticity if a common issue in ecometric analysis and solutions has been presented to tackle it. The use of the **vcovHC** function from the **sandwich** package computes heteroskedasticity-consistent covariance estimators using White and Arellano method (White 1980, 1984; Arellano, 1987). Moreover, this function can be used to correct simultaneously both heteroskedasticity and serial correlation with ' **method = "arellano"** '.
+Nevertheless, heteroscedasticity if a common issue in ecometric analysis and solutions has been presented to tackle it. The use of the **vcovHC** function from the **sandwich** package computes heteroskedasticity-consistent covariance estimators using White and Arellano method (White 1980, 1984; Arellano, 1987). ' The argument **method = "arellano"** ', can be used to correct simultaneously the serial correlation that we have presented before.
 
 #### Test for cross-sectional dependence
 
@@ -1337,7 +1339,8 @@ vif(mvif_6)
 
 ### Bayesan Information Criterion
 
-The selection of the final were performed using the Bayesian Information Criterion. We used the formula used in Yum's paper (2021) on his analysis of is an AIC for model selection for panel data models with fixed effect : $$
+The selection of the final were performed using the Bayesian Information Criterion. We used the formula used in Yum's paper (2021) on his analysis of is an AIC for model selection for panel data models with fixed effect : 
+$$
 BIC = N \times T \times \log(\sigma^2) + K \times \log(N \times T) 
 $$ With \$ \sigma = \frac{SSR}{N \times T}\$
 
