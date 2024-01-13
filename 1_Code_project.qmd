@@ -1447,7 +1447,7 @@ Econ_data_v4 <- left_join(Econ_data_v4, NR_60_and_more, by = c("year", "departem
 Remaning_variables <- Econ_data_v3 %>%
   select(departement_code, year, Retirees_wu, entrées, Unemployed)
 
-Econ_data_v4 <- left_join(Econ_data_v4, Retirees, by = c("year", "departement_code"))
+Econ_data_v4 <- left_join(Econ_data_v4, Remaning_variables, by = c("year", "departement_code"))
 
 ```
 
@@ -1487,7 +1487,9 @@ pbgtest(f_eff_5)
 
 #Test for heteroscedasticity
 
-bptest(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data = Econ_data_v4, studentize=F)
+formula_hetero <- as.formula(X_Y)
+
+bptest(formula_hetero, data = Econ_data_v4, studentize=F)
 
 #Test for unit roots
  Panel.set<- pdata.frame(Econ_data_v4, index = c("departement_code", "year")) 
