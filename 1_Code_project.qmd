@@ -1596,9 +1596,9 @@ This section is divided into three parts:
 
 3.  We conclude by emphasizing some limitations that our approach encounters.
 
-#### Procedure
+### Procedure
 
-##### Presentation of the original models
+#### Presentation of the original models
 
 Présenter les modèles calculées : possible de les écrire mathématiquement avec latex ou un autre truc
 
@@ -1606,7 +1606,7 @@ Présenter les modèles calculées : possible de les écrire mathématiquement a
 
 ```
 
-##### Choice of the type of model
+#### Choice of the type of model
 
 We only employed basics yechniques for econometric analysis of panel data. Three simple and standards models are often used for panel data :
 
@@ -1642,13 +1642,13 @@ phtest(f_eff_2, r_eff_2)
 
 ```
 
-#####  Test for time-fixed effect and individual effect
+####  Test for time-fixed effect and individual effect
 
 Having selected the fixed effect model, the next step was to identify if the addition of individual or time-fixed effects improve the model's quality.
 
-We applied TORRES-REYNA (2010)'s method, which consist on adding dummy variables to craft models with these effect. On R, an alternative methode exists. It consists of using the **effect** argument of the **plm** package with code such as ' **effect ="time"** 'or **effect = "individual"** '(Wagle, 2021; Croissant et al., 2023; Hanck et al., 2023). However, we had to abandon its usage betcause it gave us results that seems incoherent. Indeed, they provided us coefficient that seems excessively large.
+We applied TORRES-REYNA (2010)'s method, which consist on adding dummy variables to craft models with these effect. On R, an alternative method exists. It consists of using the **effect** argument of the **plm** package with code such as ' **effect ="time"** 'or **effect = "individual"** '(Wagle, 2021; Croissant et al., 2023; Hanck et al., 2023). However, we had to abandon its usage betcause it gave us results that seems incoherent. Indeed, they provided us coefficient that seems excessively large.
 
-With a p value below 0.05, the Brehsch-Pagan test support the hypothesis of using time-fixed effect. However, the Honda test rejects it. Despite diffrent coefficient, we decided to use time–fixed effects. Indeed, while testing the function with and without the **effect** argument, we remarked that despite having different coefficient, the two techniques found the same significant variables and also tend to support the use of the time-fixed effects. Therefore, the different indices seeming to favor the use of these effects, we used as hypothesis that time-fixed effects contribute to a better specification of the model.
+With a p value below 0.05, the Brehsch-Pagan test support the hypothesis of using time-fixed effect. However, the Honda test rejects it. Despite different coefficients, we decided to use time–fixed effects. Indeed, while testing the function with and without the **effect** argument, we remarked that despite having different coefficient, the two techniques found the same significant variables and also tend to support the use of the time-fixed effects. Therefore, the different indices seeming to favor the use of these effects, we used as hypothesis that time-fixed effects contribute to a better specification of the model.
 
 ```{r}
 f_eff_time_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
@@ -1698,7 +1698,7 @@ plmtest(f_eff_time_2_2, effect="individual", type="honda")
 
 #### Test for unit roots
 
-By running an augmented Dickey-Fullter test on the attendance, it appears that the explanatory variable seems to bee stationary.
+By running an augmented Dickey-Fuller test on the attendance, it appears that the explanatory variable seems to bee stationary.
 
 ```{r Test_for_unit_roots}
 Panel.set<- pdata.frame(Econ_data_v2, index = c("departement_code", "year")) 
@@ -1708,7 +1708,7 @@ adf.test(Econ_data_v2$entrées, k=2)adf.test(Econ_data_v2$entrées, k=2)
 
 #### Test for serial correlation
 
-Our model also suffer from serial correlation. Indeed, Breusch-Godfrey/Wooldridge test has a p-value below the significance level. Both, Altaf and Torres-Reyna propose the same methode to daddressh cross-sectional dependence. The
+Our model also suffer from serial correlation. Indeed, Breusch-Godfrey/Wooldridge test has a p-value below the significance level. Both, Altaf and Torres-Reyna propose the same method to address cross-sectional dependence the use of Arellano's technique as we will see in the next paragraph.
 
 ```{r Test_for_serial_correlation}
 pbgtest(f_eff_2ways_2)
