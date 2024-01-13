@@ -39,6 +39,7 @@ library(plm)
 library(lmtest)
 library(tseries)
 library(sandwich)
+library(car)
 ```
 
 # A presentation of the project
@@ -1402,7 +1403,7 @@ f_eff_time_4_lag<-plm(entrées ~ entrées_l1 + a_6_to_24 + a_25_to_42 + a_43_to_
 pbgtest(f_eff_time_4_lag)
 ```
 
-Preparation de la base de donnée pour le modele
+### Preparation de la base de donnée pour le modele
 
 ```{r}
 CSP_young_and_old <- insee_econ %>%
@@ -1451,7 +1452,7 @@ Econ_data_v4 <- left_join(Econ_data_v4, Retirees, by = c("year", "departement_co
 
 ```
 
-modele avec retraité, 60+ non retraité, etudiant/eleve, 6-24 non etudiant, chomeur et CSP 24-59 ans
+### modele avec retraité, 60+ non retraité, etudiant/eleve, 6-24 non etudiant, chomeur et CSP 24-59 ans
 
 ```{r}
 X <- Econ_data_v4 %>% ungroup() %>% select(-departement_code, -year, -entrées)
@@ -1602,13 +1603,52 @@ This section is divided into three parts:
 
 Présenter les modèles calculées : possible de les écrire mathématiquement avec latex ou un autre truc
 
-```{r Creatation_of_the_needed_datasets_for the models}
+```{r Creation_of_the_needed_datasets_for the models}
+
+```
+
+#### Multicolinearity analysis
+```{r}
+
+
+# Modèle économétrique avec juste les tranches d'âge
+mvif_1 <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more, data=Econ_data_v2, index=c("departement_code", "year"), model="pooling")
+
+vif(mvif_1)
+
+# Modèle économétrique avec uniquement CSP
+mvif_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="pooling")
+
+vif(mvif_2)
+
+# Modèle Econométrique avec Groupe d'Age et CSP mais sans retraité et en remplaçant la CSP sur les inactifs par Unemployed
+mvif_3 <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data=Econ_data_v3, index=c("departement_code", "year"), model="pooling")
+
+vif(mvif_3)
+
+# Modèle Econométrique avec Groupe d'Age et CSP mais sans retraité, sans enfant de moins de 6 ans et en remplaçant la CSP sur les inactifs par Unemployed
+mvif_4 <-plm(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data=Econ_data_v3, index=c("departement_code", "year"), model="pooling")
+
+vif(mvif_4)
+
+# modele avec retraité, 60+ non retraité, etudiant/eleve, 6-24 non etudiant, chomeur et CSP 24-59 ans
+mvif_5 <-plm(X_Y, data=Econ_data_v4, index=c("departement_code", "year"), model="pooling")
+
+vif(mvif_5)
+
+# Age range and CSP
+
+model_for_AG_CSP_vif <- paste("entrées ~ ",X_for_AG_CSP)
+
+mvif_6 <- plm(model_for_AG_CSP_vif, data=Econ_data_AG_CSP, index=c("departement_code", "year"), model="pooling")
+
+vif(mvif_6)
 
 ```
 
 #### Choice of the type of model
 
-We only employed basics yechniques for econometric analysis of panel data. Three simple and standards models are often used for panel data :
+We only employed basics techniques for econometric analysis of panel data. Three simple and standards models are often used for panel data :
 
 1.  Regular OLS
 
@@ -1642,7 +1682,7 @@ phtest(f_eff_2, r_eff_2)
 
 ```
 
-####  Test for time-fixed effect and individual effect
+#### Test for time-fixed effect and individual effect
 
 Having selected the fixed effect model, the next step was to identify if the addition of individual or time-fixed effects improve the model's quality.
 
@@ -1740,6 +1780,28 @@ pcdtest(f_eff_2, test = c("cd"))
 
 ```{r Coefficient_with_correction_of_the_different_issues}
 coeftest(f_eff_2ways_2, vcov = vcovBK(f_eff_2ways_2, method = "arellano", cluster = "group"))
+```
+
+### Bayesan Information Criterion
+The selection of the final were performed using the Bayesian Information Criterion.
+$$
+BIC = N \times T \times \log(\sigma^2) + K \times \log(N \times T) 
+$$
+With $ \sigma = \frac{SSR}{N \times T}$
+
+<br> 
+
+```{r BIC_Calculation}
+ssr <- sum(residuals(f_eff_2ways_2)^2)
+sigma_squared <- ssr / (length(residuals(f_eff_2ways_2)))
+
+# Compute BIC manually
+n_obs <- length(residuals(f_eff_2ways_2))
+k_parameters <- length(coef(f_eff_2ways_2))
+bic_value <- n_obs * log(sigma_squared) + k_parameters * log(n_obs)
+
+# Print the BIC value
+print(bic_value)
 ```
 
 ### Limits
