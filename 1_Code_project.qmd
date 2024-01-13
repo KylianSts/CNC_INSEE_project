@@ -1746,7 +1746,8 @@ f_eff_2ways_2 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Emplo
 SSR <- sum(residuals(f_eff_2ways_2)^2)
 
 #N
-N_model <- length(residuals(f_eff_2ways_2))
+N_model <- 96
+
 
 #T
 T_model <- 8
@@ -1757,7 +1758,7 @@ sigma_squared <- ssr / (N_model * T_model)
 
 # Compute BIC manually
 
-k_model <- length(coef(f_eff_2_2ways_2))
+k_model <- length(coef(f_eff_2ways_2))
 bic_value <- n_obs * log(sigma_squared) + k_model * log(n_obs)
 
 # Print the BIC value
