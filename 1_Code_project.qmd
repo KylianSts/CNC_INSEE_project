@@ -1749,22 +1749,36 @@ vif(mvif_6)
 
 
 ### Bayesan Information Criterion
-The selection of the final were performed using the Bayesian Information Criterion.
+The selection of the final were performed using the Bayesian Information Criterion. We used the formula used in Yum's paper (2021) on his analysis of is an AIC for model selection for panel data models with fixed effect :  : 
 $$
 BIC = N \times T \times \log(\sigma^2) + K \times \log(N \times T) 
 $$
 With $ \sigma = \frac{SSR}{N \times T}$
 
 <br> 
+```{r}
+f_eff_2ways_2 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year) + factor(departement_code), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+```
+
 
 ```{r BIC_Calculation}
-ssr <- sum(residuals(f_eff_2ways_2)^2)
-sigma_squared <- ssr / (length(residuals(f_eff_2ways_2)))
+# SSR
+SSR <- sum(residuals(f_eff_2ways_2)^2)
+
+#N
+N_model <- length(residuals(f_eff_2ways_2))
+
+#T
+T_model <- 8
+
+#Sigma squared
+
+sigma_squared <- ssr / (N_model * T_model)
 
 # Compute BIC manually
-n_obs <- length(residuals(f_eff_2ways_2))
-k_parameters <- length(coef(f_eff_2ways_2))
-bic_value <- n_obs * log(sigma_squared) + k_parameters * log(n_obs)
+
+k_model <- length(coef(f_eff_2_2ways_2))
+bic_value <- n_obs * log(sigma_squared) + k_model * log(n_obs)
 
 # Print the BIC value
 print(bic_value)
