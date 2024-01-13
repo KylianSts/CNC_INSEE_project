@@ -23,9 +23,10 @@ execute :
 ```{r Configuration, message=FALSE}
 here::i_am("CNC_INSEE_project.Rproj")
 library(here)
+library(readxl)
 library(dplyr)
 library(tidyr)
-library(readxl)
+library(data.table)
 library(ggplot2)
 library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
 library(plotly) #plotly will allow us to create interactive graph
@@ -358,7 +359,7 @@ calculate_growth_rate <- function(data, start_year, end_year) {
     select(-Growth)
 
   growth_rate <- subset_data %>%
-    reframe(Growth = (Attendance[2:n()]/Attendance[1:(n()-1)] - 1) * 100)%>%
+    reframe(Growth = (Attendance - shift(Attendance, type = "lag")) / shift(Attendance, type = "lag")  * 100) %>%
     filter(!is.na(Growth)) %>%
     pull(Growth) %>%
     round(digits = 2)
@@ -380,7 +381,7 @@ nrow_1966_1992 <-
 Av_Growth_rate_1966_1992 <- Attendance_nat %>% 
   filter(year %in% c(1966,1992)) %>% 
   select(-Growth) %>% 
-  mutate(Growth = ((Attendance / c(NA,Attendance[1:(n()-1)]))^(1/nrow_1966_1992) - 1) * 100) %>%
+  mutate(Growth = ((Attendance / shift(Attendance, type = "lag") )^(1/nrow_1966_1992) - 1) * 100) %>% 
   filter(!is.na(Growth)) %>% 
   pull(Growth) %>%
   round(., digits=1)
@@ -624,7 +625,7 @@ nrow_1993_2019 <- Attendance_nat %>%
 Av_Growth_rate_1993_2019 <- Attendance_nat %>% 
   filter(year %in% c(1993,2019)) %>% 
   select(-Growth) %>% 
-  mutate(Growth = ((Attendance / lag(Attendance))^(1/nrow_1993_2019) - 1) * 100) %>% 
+  mutate(Growth = ((Attendance / shift(Attendance, type = "lag") )^(1/nrow_1993_2019) - 1) * 100) %>% 
   filter(!is.na(Growth))  %>% 
   pull(Growth) %>%
   round(., digits=1)
@@ -818,7 +819,7 @@ ggplotly(Sc_graph, dynamicTicks = TRUE)
 Se_diff_rate_1993_2022 <- Equip_nat %>%
   filter(year %in% c(1993, 2022)) %>%  
   select(-Screens) %>% 
-  reframe(Growth=(Seats-lag(Seats))) %>% 
+  reframe(Growth=(Seats-shift(Seats, type = "lag") )) %>% 
   filter(!is.na(Growth)) %>% 
   pull(Growth)
 
@@ -827,7 +828,7 @@ Se_diff_rate_1993_2022 <- format(Se_diff_rate_1993_2022, big.mark = " ")
 Se_Growth_rate_1993_2022 <- Equip_nat %>%
   filter(year %in% c(1993, 2022)) %>%  
   select(-Screens) %>% 
-  reframe(Growth=(Seats-lag(Seats))/lag(Seats)*100) %>% 
+  reframe(Growth=(Seats-shift(Seats, type = "lag"))/shift(Seats, type = "lag")*100) %>% 
   filter(!is.na(Growth)) %>% 
   pull(Growth) %>% 
   round(.,digits = 0)
@@ -1251,6 +1252,7 @@ bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers
  adf.test(Econ_data_v2_2$entrées, k=2)
 ```
 
+
 ## Potential final procedure
 
 The relationship between the sociodemographic characteristics of departments and the evolution of movie theaters' attendance can be tricky to analyze through the unique use of graphics. On one hand, because the variables in the dataset can be affected by complex interactions, relying solely on graphics can lead to spurious conclusions. On the other hand, graphics also have strong limitations when the number of variables of interest increases. That’s why econometric models can be useful to delve into a thorough analysis of the link between variables. This section is dedicated to employing econometric methodologies to find answers that address our research question. Specifically, we will attempt to understand which sociodemographic characteristics had a positive or negative influence on the heterogeneous evolution of attendance in French departments. To do so, we will employ a panel data econometric model that utilizes both the cross-sectional and longitudinal characteristics of our dataset.
@@ -1307,7 +1309,7 @@ f_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees +
 pFtest(f_eff_2, ols_2)
 ```
 
-The Hassman test continue our analysis by discerning the most suitable model between the fixed-effect and the random model. The p-value being below the significance level of 0.05, the fixed effect model is favored.
+The Haussman test continue our analysis by discerning the most suitable model between the fixed-effect and the random model. The p-value being below the significance level of 0.05, the fixed effect model is favored.
 
 ```{r Test_between_fixed_and_random_effect}
 #Random effect model
@@ -1320,36 +1322,9 @@ phtest(f_eff_2, r_eff_2)
 
 #### Test for time-fixed effect and individual effect
 
-Having selected the fixed effect model, the next step was to identify if the addition of individual or time-fixed effects improve the model's quality.
+Having selected the fixed effect model, the next step was to identify if the addition time-fixed effects improve the model's quality.
 
-We applied TORRES-REYNA (2010)'s method, which consist on adding dummy variables to craft models with these effect. On R, an alternative method exists. It consists of using the **effect** argument of the **plm** package with code such as ' **effect ="time"** 'or **effect = "individual"** '(Wagle, 2021; Croissant et al., 2023; Hanck et al., 2023). However, we had to abandon its usage betcause it gave us results that seems incoherent. Indeed, they provided us coefficient that seems excessively large.
-
-With a p value below 0.05, the Brehsch-Pagan test support the hypothesis of using time-fixed effect. However, the Honda test rejects it. Despite different coefficients, we decided to use time–fixed effects. Indeed, while testing the function with and without the **effect** argument, we remarked that despite having different coefficient, the two techniques found the same significant variables and also tend to support the use of the time-fixed effects. Therefore, the different indices seeming to favor the use of these effects, we used as hypothesis that time-fixed effects contribute to a better specification of the model.
-
-```{r}
-f_eff_time_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
-plmtest(f_eff_time_2, effect="time", type="bp")
-plmtest(f_eff_time_2, effect="time", type="honda")
-
-```
-
-The Lagrange multiplier test support the simultaneous utilization of individual effects.
-
-```{r}
-f_eff_ind_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(departement_code), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
-plmtest(f_eff_time_2, effect="individual", type="bp")
-plmtest(f_eff_time_2, effect="individual", type="honda")
-```
-
-We then used a two-way model combining time-fixed and individual effects.
-
-```{r}
-f_eff_2ways_2 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year) + factor(departement_code), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
-```
-
-As we said before, it can be noted that while it gave us different coefficients, the utilization of the **effect** argument arrived at the same conclusion regarding the use of a two-way model :
-
-*Test for time-fixed effect*
+With p-values below 0.05, both Breusch-Pagan and Honda tests support the introduction of fixed effect.
 
 ```{r}
 #Model with time-fixed effects.
@@ -1359,18 +1334,16 @@ f_eff_time_2_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employ
 plmtest(f_eff_time_2_2, effect="time", type="bp")
 plmtest(f_eff_time_2_2, effect="time", type="honda")
 
+
 ```
 
-*Test for individual effect*
+We then used a two-ways model combining time-fixed and individual effects.
 
 ```{r}
-#Model with individual effects
-f_eff_ind_2_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "individual")
-
-# PLM test
-plmtest(f_eff_ind_2_2, effect="individual", type="bp")
-plmtest(f_eff_time_2_2, effect="individual", type="honda")
+f_eff_2ways_2 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year) + factor(departement_code), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
 ```
+
+<br>
 
 #### Test for unit roots
 
@@ -1382,9 +1355,11 @@ Panel.set<- pdata.frame(Econ_data_v2, index = c("departement_code", "year"))
 adf.test(Econ_data_v2$entrées, k=2)adf.test(Econ_data_v2$entrées, k=2)
 ```
 
+<br>
+
 #### Test for serial correlation
 
-Our model also suffer from serial correlation. Indeed, Breusch-Godfrey/Wooldridge test has a p-value below the significance level. Both, Altaf and Torres-Reyna propose the same method to address cross-sectional dependence the use of Arellano's technique as we will see in the next paragraph.
+However, our panel data encounter several issues. Firstlyn our model also suffer from serial correlation. The Breusch-Godfrey/Wooldridge indicate a p-value below the significance level of 0.05. To correct this issue, both Altaf and Torres-Reyna propose t the use of Arellano's technique as we will see in the next paragraph.
 
 ```{r Test_for_serial_correlation}
 pbgtest(f_eff_2ways_2)
@@ -1392,17 +1367,17 @@ pbgtest(f_eff_2ways_2)
 
 #### Test of Heterosedasticity
 
-With a p-value below 0.05, our model encounter heteroscedasticity.
+The second challenge of our ecometrics analysis was the presence of heteroscedasticity in the model.
 
 ```{r #Test_for_heteroscedasticity}
 bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
 ```
 
-Nevertheless, the use of the **vcovHC** function from the **sandwich** package computes heteroskedasticity-consistent covariance estimators using White and Arellano method (White 1980, 1984; Arellano 1987). Moreover, this function can be used to correct simultaneously both heteroskedasticity and serial correlation with the code ' **method = "arellano"** '.
+Nevertheless, heteroscedasticity if a common issue in ecometric analysis and solutions has been presented to tackle it. The use of the **vcovHC** function from the **sandwich** package computes heteroskedasticity-consistent covariance estimators using White and Arellano method (White 1980, 1984; Arellano, 1987). Moreover, this function can be used to correct simultaneously both heteroskedasticity and serial correlation with ' **method = "arellano"** '.
 
 #### Test for cross-sectional dependence
 
-A final issue is common with panel data, and ours is no exception. This issue is the cross-sectional dependance. As we can see on the Breusch-Pagan and Pesaran tests below, our model suffers of this issue. The utilisation of Beck and Katz method is proposed by Altaf as a solution to tackle this issue. To use this method, we will forego the utilisation of the **vcovHC** function but do a similar work with the **vcovBK** one, which also tackles cross-sectional dependence
+A final issue was the presence of cross-sectional dependance as we can see on the Breusch-Pagan and Pesaran tests below.
 
 ```{r Test_for_cross_sectional_dependence}
 #Breusch-Pagan LM test for cross-sectional dependence
@@ -1412,18 +1387,23 @@ pcdtest(f_eff_2, test = c("lm"))
 pcdtest(f_eff_2, test = c("cd"))
 ```
 
-### Outcome
+The utilization of Beck and Katz method is proposed by Altaf as a solution to tackle this issue. To use this method, we will forego the utilization of the **vcovHC** function but do a similar work with the **vcovBK** one, which also enable to correct cross-sectional dependence.
+
+### Discussion
+
+```{r Results_before_correction}
+summary(f_eff_2ways_2)
+```
 
 ```{r Coefficient_with_correction_of_the_different_issues}
 coeftest(f_eff_2ways_2, vcov = vcovBK(f_eff_2ways_2, method = "arellano", cluster = "group"))
 ```
 
+<br>
 
 #### Multicolinearity analysis
 
 ```{r}
-
-
 # Modèle économétrique avec juste les tranches d'âge
 mvif_1 <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more, data=Econ_data_v2, index=c("departement_code", "year"), model="pooling")
 
@@ -1463,7 +1443,7 @@ vif(mvif_6)
 
 ### Bayesan Information Criterion
 
-The selection of the final were performed using the Bayesian Information Criterion. We used the formula used in Yum's paper (2021) on his analysis of is an AIC for model selection for panel data models with fixed effect : : $$
+The selection of the final were performed using the Bayesian Information Criterion. We used the formula used in Yum's paper (2021) on his analysis of is an AIC for model selection for panel data models with fixed effect : $$
 BIC = N \times T \times \log(\sigma^2) + K \times \log(N \times T) 
 $$ With \$ \sigma = \frac{SSR}{N \times T}\$
 
@@ -1478,7 +1458,8 @@ f_eff_2ways_2 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Emplo
 SSR <- sum(residuals(f_eff_2ways_2)^2)
 
 #N
-N_model <- length(residuals(f_eff_2ways_2))
+N_model <- 96
+
 
 #T
 T_model <- 8
@@ -1489,7 +1470,7 @@ sigma_squared <- SSR / (N_model * T_model)
 
 # Compute BIC manually
 
-k_model <- length(coef(f_eff_2_2ways_2))
+k_model <- length(coef(f_eff_2ways_2))
 bic_value <- n_obs * log(sigma_squared) + k_model * log(n_obs)
 
 # Print the BIC value
@@ -1532,7 +1513,9 @@ chosen_breaks <- c(-Inf, -50, -25, 0, 25, 50, Inf)
 
 # References
 
-**BLANCHARD Jean-Philippe, 2014.** " Multiplexes, public de banlieue et création cinématographique française : caractère marchand de l'ethnicité sur grand écran ". *Migrations Société*, 151, 153-164. <https://doi.org/10.3917/migra.151.0153>
+**BLANCHARD Jean-Philippe, 2014.** " Multiplexes, public de banlieue et création cinématographique française : caractère marchand de l'ethnicité sur grand écran ". *Migrations Société*, 151, 153-164.
+
+DOI : <https://doi.org/10.3917/migra.151.0153>
 
 <br>
 
@@ -1633,3 +1616,9 @@ URL: <https://www.senat.fr/rap/r02-308/r02-308_mono.html#toc5>
 **WAGLE Manil, 2021.** *How to deal with Panel Data - Practical Application using R.* Medium.com
 
 URL : [https://medium.com/\@manilwagle/how-to-deal-with-panel-data-practical-application-using-r-18ef95ae99c6](https://medium.com/@manilwagle/how-to-deal-with-panel-data-practical-application-using-r-18ef95ae99c6)
+
+<br>
+
+**YUM** **Minchul , 2022.** Model selection for panel data models with fixed effects: a simulation study, *Applied Economics Letters*, 29:19, p. 1776-1783
+
+DOI: [10.1080/13504851.2021.1962505](https://doi.org/10.1080/13504851.2021.1962505)
