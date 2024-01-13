@@ -1048,78 +1048,6 @@ ggplot(merged_data, aes(fill = per_seats_dep_change)) +
 
 ```
 
-## The demand ...
-
-```{r}
-#on regarde que la population de vieux et on regarde l'évolution de la part de vieux dans le departement par rapport a la population de vieux 
-
-pop_dep_old_now <- insee_data_clean %>%
-  filter(year == 2019) %>%
-  filter(AGE_GROUP == '60-74' | AGE_GROUP == '75 and more') %>%
-  group_by(departement_code) %>%
-  summarise(population_dep_old = sum(POND2))
-
-pop_dep_now <- insee_data_clean %>%
-  filter(year == 2019) %>%
-  group_by(departement_code) %>%
-  summarise(population_dep = sum(POND2))
-
-pop_dep_old_now <- left_join(pop_dep_old_now, pop_dep_now, by = "departement_code") %>%
-  mutate(percentage_old = population_dep_old/population_dep *100)
-
-attendance_dep <- cnc_data_clean %>% 
-  filter(year == 2019) %>%
-  group_by(departement_code) %>% 
-  summarise(entrées_dep = sum(entrées))
-
-pop_dep_old_now <- left_join(pop_dep_old_now, attendance_dep, by = "departement_code")%>%
-  mutate(entry_for_1000_person = (population_dep*1000)/entrées_dep)
-```
-
-```{r}
-demand_scatter1 <- ggplot(pop_dep_old_now, aes(x = percentage_old, y = entry_for_1000_person)) +
-  geom_point() +
-  geom_smooth(method = "lm",formula = y ~ x, se = FALSE, color = "gray") +
-  labs(titre="Number of entry every 1000 person depending on the percentage of the 60+ in each department", x="Percentage of 60+", y="Number of Entry for 1000 person") +
-  theme_classic()
-
-ggplotly(demand_scatter1)
-```
-
-```{r}
-pop_dep_etu_now <- insee_data_clean %>%
-  filter(year == 2019) %>%
-  filter(TYP_ACT == 3) %>%
-  group_by(departement_code) %>%
-  summarise(population_dep_etu = sum(POND2))
-
-pop_dep_now <- insee_data_clean %>%
-  filter(year == 2019) %>%
-  group_by(departement_code) %>%
-  summarise(population_dep = sum(POND2))
-
-pop_dep_etu_now <- left_join(pop_dep_etu_now, pop_dep_now, by = "departement_code") %>%
-  mutate(percentage_etu = population_dep_etu/population_dep *100)
-
-attendance_dep <- cnc_data_clean %>% 
-  filter(year == 2019) %>%
-  group_by(departement_code) %>% 
-  summarise(entrées_dep = sum(entrées))
-
-pop_dep_etu_now <- left_join(pop_dep_etu_now, attendance_dep, by = "departement_code")%>%
-  mutate(entry_for_1000_person = (population_dep*1000)/entrées_dep)
-```
-
-```{r}
-demand_scatter2 <- ggplot(pop_dep_etu_now, aes(x = percentage_etu, y = entry_for_1000_person)) +
-  geom_point() +
-  geom_smooth(method = "lm",formula = y ~ x, se = FALSE, color = "gray") +
-  labs(titre="Number of entry every 1000 person depending on the percentage of student in each department", x="Percentage of student", y="Number of Entry for 1000 person") +
-  theme_classic()
-
-ggplotly(demand_scatter2)
-```
-
 ## Econometrics Model : potentiel démarche
 
 Our aim here will be to study if we can link the heterogeneity regarding the evolution of attendance with the evolution of the CSP and Age-group by department.
@@ -1215,84 +1143,6 @@ Econ_data_v3 <- Econ_data_v3 %>%
 
 ```
 
-### Modèle économétrique avec juste les tranches d'âge
-
-#### Modèle en unité
-
-```{r Econometrics_Model}
-
-#For fixed effect
-f_eff <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more, data=Econ_data_v2, index=c("departement_code", "year"), model="within")
-summary(f_eff)
-
-#For random effect
-r_eff <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more, data=Econ_data_v2, index=c("departement_code", "year"), model="random") 
-summary(r_eff )
-
-#Haussman test to determine between fixed and random effect
-phtest(f_eff, r_eff)
-
-#Test r_eff-sectional dependence
-pcdtest(f_eff, test = c("lm"))
-pcdtest(f_eff, test = c("cd"))
- 
-# Test time-fixed effects.
-f_eff_time<-plm(
-  entrées~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + factor(year),
-  data=Econ_data_v2, 
-  index=c("departement_code", "year"), 
-  model="within"
-  )
-
-pFtest(f_eff_time, f_eff)
-plmtest(f_eff, c("time"), type=("bp"))
-
-#Test for serial correlation
-pbgtest(f_eff)
-
-#Test for heteroscedasticity
-bptest(entrées~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more, data = Econ_data_v2, studentize=F)
-
-#Test for unit roots
-Panel.set<- plm.data(Econ_data_v2, index = c("departement_code", "year")) 
-adf.test(Econ_data_v2$entrées, k=2)
-
-```
-
-#### Modèle en log
-
-```{r}
-#For fixed effect
-f_eff_log <-plm(log(entrées) ~ log(a_less_than_6) + log(a_6_to_24) + log(a_25_to_42) + log(a_43_to_59) + log(a_60_and_more), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
-summary(f_eff)
-
-#For random effect
-r_eff_log <-plm(log(entrées) ~ log(a_less_than_6) + log(a_6_to_24) + log(a_25_to_42) + log(a_43_to_59) + log(a_60_and_more), data=Econ_data_v2, index=c("departement_code", "year"), model="random") 
-summary(r_eff )
-
-#Haussman test to determine between fixed and random effect
-phtest(f_eff, r_eff)
-
-#Test r_eff-sectional dependence
-pcdtest(f_eff, test = c("lm"))
-pcdtest(f_eff, test = c("cd"))
- 
-# Test time-fixed effects.
-f_eff_time<-plm(log(entrées) ~ log(a_less_than_6) + log(a_6_to_24) + log(a_25_to_42) + log(a_43_to_59) + log(a_60_and_more) + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
-pFtest(f_eff_time, f_eff)
-plmtest(f_eff, c("time"), type=("bp"))
-
-#Test for serial correlation
-pbgtest(f_eff)
-
-#Test for heteroscedasticity
-bptest(log(entrées) ~ log(a_less_than_6) + log(a_6_to_24) + log(a_25_to_42) + log(a_43_to_59) + log(a_60_and_more), data = Econ_data_v2, studentize=F)
-
-#Test for unit roots
- Panel.set<- plm.data(Econ_data_v2, index = c("departement_code", "year")) 
- adf.test(Econ_data_v2$entrées, k=2)
-```
-
 ### Modèle économétrique avec uniquement CSP
 
 ```{r}
@@ -1320,7 +1170,6 @@ plmtest(f_eff_2, c("time"), type=("bp"))
 pbgtest(f_eff_2)
 
 #Test for heteroscedasticity
- 
 bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
 
 #Test for unit roots
@@ -1329,217 +1178,82 @@ bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers
  adf.test(Econ_data_v2$entrées, k=2)
 ```
 
-### Modèle Econométrique avec Groupe d'Age et CSP mais sans retraité et en remplaçant la CSP sur les inactifs par Unemployed
+### Decomposition en deux periodes
+
+#### Avant 1990 (inclus)
 
 ```{r}
-f_eff_3 <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data=Econ_data_v3, index=c("departement_code", "year"), model="within")
-summary(f_eff_3)
+Econ_data_v2_1<- Econ_data_v2 %>% filter(year <= 1990)
+
+#For fixed effect
+f_eff_2_1 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within")
+summary(f_eff_2_1)
 
 #For random effect
-r_eff_3 <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data=Econ_data_v3, index=c("departement_code", "year"), model="random") 
-summary(r_eff_3)
+r_eff_2_1 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="random") 
+summary(r_eff_2_1 )
 
 #Haussman test to determine between fixed and random effect
-phtest(f_eff_3, r_eff_3)
+phtest(f_eff_2_1, r_eff_2_1)
 
 #Test r_eff-sectional dependence
-pcdtest(f_eff_3, test = c("lm"))
-pcdtest(f_eff_3, test = c("cd"))
+pcdtest(f_eff_2_1, test = c("lm"))
+pcdtest(f_eff_2_1, test = c("cd"))
  
 # Test time-fixed effects.
-f_eff_time_3<-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed + factor(year), data=Econ_data_v3, index=c("departement_code", "year"), model="within")
-pFtest(f_eff_time_3, f_eff_3)
-plmtest(f_eff_3, c("time"), type=("bp"))
+f_eff_time_2_1<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2_1, index=c("departement_code", "year"), model="within")
+pFtest(f_eff_time_2_1, f_eff_2_1)
+plmtest(f_eff_2_1, c("time"), type=("bp"))
 
 #Test for serial correlation
-pbgtest(f_eff_3)
+pbgtest(f_eff_2_1)
 
 #Test for heteroscedasticity
-bptest(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data = Econ_data_v3, studentize=F)
+bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2_1, studentize=F)
 
 #Test for unit roots
- Panel.set<- pdata.frame(Econ_data_v3, index = c("departement_code", "year")) 
+ Panel.set<- plm.data(Econ_data_v2_1, index = c("departement_code", "year")) 
 
- adf.test(Econ_data_v3$entrées, k=2)
+ adf.test(Econ_data_v2_1$entrées, k=2)
 ```
 
-### Modèle Econométrique avec Groupe d'Age et CSP mais sans retraité, sans enfant de moins de 6 ans et en remplaçant la CSP sur les inactifs par Unemployed
+#### Apres 1990 (non inclus)
 
 ```{r}
-f_eff_4 <-plm(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data=Econ_data_v3, index=c("departement_code", "year"), model="within")
-summary(f_eff_4)
+Econ_data_v2_2<- Econ_data_v2 %>% filter(year > 1990)
+
+#For fixed effect
+f_eff_2_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within")
+summary(f_eff_2_2)
 
 #For random effect
-r_eff_4 <-plm(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data=Econ_data_v3, index=c("departement_code", "year"), model="random") 
-summary(r_eff_4)
+r_eff_2_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_2, index=c("departement_code", "year"), model="random") 
+summary(r_eff_2_2 )
 
 #Haussman test to determine between fixed and random effect
-phtest(f_eff_4, r_eff_4)
+phtest(f_eff_2_2, r_eff_2_2)
 
 #Test r_eff-sectional dependence
-pcdtest(f_eff_4, test = c("lm"))
-pcdtest(f_eff_4, test = c("cd"))
+pcdtest(f_eff_2_2, test = c("lm"))
+pcdtest(f_eff_2_2, test = c("cd"))
  
 # Test time-fixed effects.
-f_eff_time_4<-plm(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed + factor(year), data=Econ_data_v3, index=c("departement_code", "year"), model="within")
-pFtest(f_eff_time_4, f_eff_4)
-plmtest(f_eff_4, c("time"), type=("bp"))
+f_eff_time_2_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2_2, index=c("departement_code", "year"), model="within")
+pFtest(f_eff_time_2_2, f_eff_2_2)
+plmtest(f_eff_2_2, c("time"), type=("bp"))
 
 #Test for serial correlation
-pbgtest(f_eff_time_4)
-
-
-#Test for heteroscedasticity
-
-bptest(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data = Econ_data_v3, studentize=F)
-
-#Test for unit roots
- Panel.set<- pdata.frame(Econ_data_v3, index = c("departement_code", "year")) 
-
- adf.test(Econ_data_v3$entrées, k=2)
- 
- ##Creation of the lag
-Econ_data_v3_lag <- Econ_data_v3 %>% ungroup() %>% group_by(departement_code) %>% mutate(entrées_l1 = c(NA, (entrées[1:(n()-1)]))) %>% filter(year != 1968)
-
-#Lagged version - test of serial correlation
-f_eff_time_4_lag<-plm(entrées ~ entrées_l1 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed + factor(year), data=Econ_data_v3_lag, index=c("departement_code", "year"), model="within")
-
-pbgtest(f_eff_time_4_lag)
-```
-
-### Preparation de la base de donnée pour le modele
-
-```{r}
-CSP_young_and_old <- insee_econ %>%
-  filter(AGE_GROUP %in% c('a_less_than_6', 'a_6_to_24', 'a_60_and_more')) %>%
-  filter(CSP != 8) %>%
-  group_by(year, departement_code, CSP) %>%
-  summarise(POND2 = sum(POND2, na.rm = TRUE)) %>%
-  mutate_all(~ replace_na(., 0))%>%
-  rename(POND_young_old = "POND2")
-
-Econ_data_v4 <- left_join(Econ_data_CSP_wo, Econ_data_CSP2, by = c("year", "departement_code", "CSP"))
-
-Econ_data_v4 <- left_join(Econ_data_v4,CSP_young_and_old, by = c("year", "departement_code", "CSP")) %>%
-  mutate(POND_UNEMP = replace(POND_UNEMP, is.na(POND_UNEMP), 0),POND = POND2 - POND_young_old - POND_UNEMP) %>%
-  select(-POND_UNEMP, -POND_young_old, -POND2) %>%
-  pivot_wider(names_from = "CSP", values_from = "POND" ) %>% 
-  rename( Farm_25_59 = "1", Craf_sh_head_25_59 = "2", Ex_intel_25_59 = "3", Int_prof_25_59 = "4", Employees_25_59 = "5", Workers_25_59 = "6", Ina_25_59 = "9")
-
-Econ_data_etu <- insee_econ %>%
-  filter(TYP_ACT == 3) %>%
-  group_by(year, departement_code) %>%
-  summarize(Student = sum(POND2, na.rm = TRUE))
-
-Econ_data_v4 <- left_join(Econ_data_v4, Econ_data_etu, by = c("year", "departement_code"))
-
-NE_6_24 <- insee_econ %>%
-  filter(AGE_GROUP == 'a_6_to_24') %>%
-  filter(TYP_ACT != 3) %>%
-  group_by(year, departement_code) %>%
-  summarize(not_student_6_24 = sum(POND2))
-
-Econ_data_v4 <- left_join(Econ_data_v4, NE_6_24, by = c("year", "departement_code"))
-
-NR_60_and_more  <- insee_econ %>%
-  filter(AGE_GROUP == 'a_60_and_more') %>%
-  filter(CSP != 8) %>%
-  group_by(year, departement_code) %>%
-  summarize(not_retirees_60_and_more = sum(POND2))
-
-Econ_data_v4 <- left_join(Econ_data_v4, NR_60_and_more, by = c("year", "departement_code"))
-
-Remaning_variables <- Econ_data_v3 %>%
-  select(departement_code, year, Retirees_wu, entrées, Unemployed)
-
-Econ_data_v4 <- left_join(Econ_data_v4, Remaning_variables, by = c("year", "departement_code"))
-
-```
-
-### modele avec retraité, 60+ non retraité, etudiant/eleve, 6-24 non etudiant, chomeur et CSP 24-59 ans
-
-```{r}
-X <- Econ_data_v4 %>% ungroup() %>% select(-departement_code, -year, -entrées)
-X_names <- paste(colnames(X), collapse = " + ")
-X_Y <- paste("entrées ~ ",X_names)
-
-f_eff_5 <-plm(X_Y, data=Econ_data_v4, index=c("departement_code", "year"), model="within")
-summary(f_eff_5)
-
-#For random effect
-r_eff_5 <-plm(X_Y, data=Econ_data_v4, index=c("departement_code", "year"), model="random")
-summary(r_eff_5)
-
-
-#Haussman test to determine between fixed and random effect
-phtest(f_eff_5, r_eff_5)
-
-#Test r_eff-sectional dependence
-pcdtest(f_eff_5, test = c("lm"))
-pcdtest(f_eff_5, test = c("cd"))
- 
-# Test time-fixed effects.
-f_eff_time_5<-plm(paste(X_Y ," + factor(year)"), 
-                  data=Econ_data_v4, 
-                  index=c("departement_code", "year"), 
-                  model="within")
-
-pFtest(f_eff_time_5, f_eff_5)
-plmtest(f_eff_5, c("time"), type=("bp"))
-
-#Test for serial correlation
-pbgtest(f_eff_5)
+pbgtest(f_eff_2_2)
 
 #Test for heteroscedasticity
-
-bptest(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data = Econ_data_v4, studentize=F)
+bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2_2, studentize=F)
 
 #Test for unit roots
- Panel.set<- pdata.frame(Econ_data_v4, index = c("departement_code", "year")) 
+ Panel.set<- plm.data(Econ_data_v2_2, index = c("departement_code", "year")) 
 
- adf.test(Econ_data_v4$entrées, k=2)
+ adf.test(Econ_data_v2_2$entrées, k=2)
 ```
 
-### Age range and CSP
-
-```{r}
-#Fusion of the AGE_Group and CSP in a single variable
-Econ_data_AG_CSP <- Econ_data %>% 
-    mutate(CSP = case_when( CSP == 1 ~ "Farm", 
-                            CSP == 2 ~ "Craf_sh_head", 
-                            CSP == 3 ~ "Ex_intel", 
-                            CSP == 4 ~ "Int_prof", 
-                            CSP == 5 ~ "Employees", 
-                            CSP == 6 ~ "Workers", 
-                            CSP == 8 ~ "Retirees", 
-                            CSP == 9 ~ "Ina")) %>% 
-  unite(AGE_CSP, AGE_GROUP, CSP, sep = "_") %>% 
-  group_by(departement_code, year, entrées, AGE_CSP) %>% 
-  summarize(POND2 = round(sum(POND2), digits = 0)) %>%
-  pivot_wider(names_from = "AGE_CSP", values_from = "POND2")
-
-
-#Suppression of NA, most of the NA corresponds to combination of CSP and AGE like Retiree + less than 6 years old. The NA corresponds most of the time to null value
-
-Econ_data_AG_CSP <-  Econ_data_AG_CSP %>%
-  ungroup() %>%
-  mutate_all(~ ifelse(is.na(.), 0, .))
-
-
-
-#Econometrics model
-## There are many columns, therefore we will right the model formula using a code
-  
-AG_CSP <- Econ_data_AG_CSP %>% select(-departement_code,-year, -entrées)
-
-X_for_AG_CSP <- paste(colnames(AG_CSP), collapse = " + ")
-model_for_AG_CSP <- paste("entrées ~ ",X_for_AG_CSP, " + factor(year)" )
-
-
-f_eff_time_AGE_CSP <- plm(model_for_AG_CSP, data=Econ_data_AG_CSP, index=c("departement_code", "year"), model="within")
-
-summary(f_eff_time_AGE_CSP)
-```
 
 ## Potential final procedure
 
@@ -1606,7 +1320,6 @@ r_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees +
 
 #Haussman test to determine between fixed and random effect
 phtest(f_eff_2, r_eff_2)
-
 ```
 
 #### Test for time-fixed effect and individual effect
@@ -1693,15 +1406,13 @@ coeftest(f_eff_2ways_2, vcov = vcovBK(f_eff_2ways_2, method = "arellano", cluste
 #### Multicolinearity analysis
 
 ```{r}
-
-
 # Modèle économétrique avec juste les tranches d'âge
 mvif_1 <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more, data=Econ_data_v2, index=c("departement_code", "year"), model="pooling")
 
 vif(mvif_1)
 
 # Modèle économétrique avec uniquement CSP
-mvif_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="pooling")
+mvif_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="pooling")
 
 vif(mvif_2)
 
@@ -1716,7 +1427,7 @@ mvif_4 <-plm(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Fa
 vif(mvif_4)
 
 # modele avec retraité, 60+ non retraité, etudiant/eleve, 6-24 non etudiant, chomeur et CSP 24-59 ans
-mvif_5 <-plm(X_Y, data=Econ_data_v4, index=c("departement_code", "year"), model="pooling")
+mvif_5 <-plm(X_Y, data=Econ_data_v4_1, index=c("departement_code", "year"), model="pooling")
 
 vif(mvif_5)
 
@@ -1757,7 +1468,7 @@ T_model <- 8
 
 #Sigma squared
 
-sigma_squared <- ssr / (N_model * T_model)
+sigma_squared <- SSR / (N_model * T_model)
 
 # Compute BIC manually
 
