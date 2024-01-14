@@ -28,12 +28,15 @@ library(dplyr)
 library(tidyr)
 library(data.table)
 library(ggplot2)
-library(scales)#scales will be used to coerce R to present our data as number and not in scientific writing. I will also allow us later to put data in a percent format
+library(scales)
 library(plotly) #plotly will allow us to create interactive graph
 
 #Package for maps
-library(sf) #We'll use sf to open shapefile, i.e. cartographic data
+library(sf)
 library(ggspatial)
+library(tmap)
+#Note for Mister Rossy : if you do not have the tmap package, one of the document that we use as inspiration to create the interactive maps recommend to install tmap's development version from the r-universe repository : install.packages("tmap", repos = c("https://r-tmap.r-universe.dev", "https://cloud.r-project.org"))
+library(tmaptools)
 
 #Package for econometrics
 library(plm) 
@@ -48,7 +51,7 @@ library(texreg)
 
 ## Sources
 
-This project is powered by two databases :
+This project is mainly powered by two databases :
 
 -   CNC's "**Exploitation - data by department**" : <https://www.cnc.fr/cinema/etudes-et-rapports/exploitation--donnees-par-departement_223440>
 
@@ -62,7 +65,7 @@ This project is powered by two databases :
 
 The first database was created by the French National Center for Cinema and the Moving Image, most commonly known as CNC. The CNC is an agency of the French Ministry of Culture. Its role is to implement the state's policy on the question of cinema, audiovisual and multimedia. It is notably in charge of the regulation, promotion and distribution of French movies.
 
-In the execution of its mission, the French agency also collects data regarding its purview and proposes part of them in open access. The database "Exploitation - data by department" is one of the aforementioned open data. It is a statistical monitoring of the evolution of French movie theaters and their attendance between 1966 and 2022. Notably, it contains data on the number of venues, their characteristics (e.g. number of screens, seating capacity, ...); but also on the number of sold tickets and gained revenues. As its name indicates, French departments (according to their 2021 administrative division) are the statistical unit of the data. The CNC's data is constructed by using two primary sources :
+In the execution of its mission, the French agency also collects data regarding its purview and proposes part of them in open access. The database "Exploitation - data by department" is one of the aforementioned open data. It is a statistical monitoring of the evolution of French movie theaters and their attendance between 1966 and 2022. Notably, it contains data on the number of venues, their characteristics - e.g. number of screens, seating capacity, ...; but also on the number of sold tickets and gained revenues. As its name indicates, French departments - according to their 2021 administrative division - are the statistical unit of the data. The CNC's data is constructed by using two primary sources :
 
 -   the **list of movie theaters** authorized by the agency
 
@@ -84,21 +87,29 @@ list_of_census<- list_of_census |>  pivot_wider(names_from="census",values_from 
 list_of_census |> knitr::kable(caption ="French census between 1968 and 2019", format="html", align='c')
 ```
 
-Censuses are one of the most important data collections taking place in France. Answering their survey is an obligation for all inhabitants under penalty of a fine (article 3 of the Law n°51-711 of 7 June 1951). Historically, population censuses took the form of an exhaustive collect of all French townships during a same year. However, the collection method evolved in 2002. Nowadays, Insee uses a rotational approach. For townships of at least 10 000 inhabitants, 8% of the housing of are interviewed each year. The goal is then to cover 40% of their population over a 5-year period. This 5-year moving sample is then used to estimate demographic data annually. For townships with less than 10 000 inhabitants, the collection is still exhaustive but is not simultaneous. Indeed, it occurs in a fifth of towns each year ensuring that all townships are censused every 5 years. Demographic information between 2 collections is then estimated using data from the nearest one.
+Censuses are one of the most important data collections taking place in France. Answering their survey is an obligation for all inhabitants under penalty of a fine - article 3 of the Law n°51-711 of 7 June 1951. Historically, population censuses took the form of an exhaustive collect of all French townships during a same year. However, the collection method evolved in 2002. Nowadays, Insee uses a rotational approach. For townships of at least 10 000 inhabitants, 8% of the housing of are interviewed each year. The goal is then to cover 40% of their population over a 5-year period. This 5-year moving sample is then used to estimate demographic data annually. For townships with less than 10 000 inhabitants, the collection is still exhaustive but is not simultaneous. Indeed, it occurs in a fifth of towns each year ensuring that all townships are censused every 5 years. Demographic information between 2 collections is then estimated using data from the nearest one.
 
 The data is collected by face-to-face interviews or-since 2015- via internet surveys.
 
-The database that will be used in this project is an harmonized compilation of data from 8 census databases. Its content includes the number of inhabitants by department and key socio-demographic variables (e.g. age, socio-professional categories, type of professional activity).
+The database that will be used in this project is an harmonized compilation of data from 8 census databases. Its content includes the number of inhabitants by department and key socio-demographic variables - e.g. age, socio-professional categories, type of professional activity.
 
 It can be downloaded from the [INSEE website](https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232) in a DBF or CSV format.
 
 <br>
 
+### Additional databases
+
+Two complementary dataset play a supporting role in our work :
+
+-   "**Admin Express**" from IGN : a shapefile containing polygons forming a map of the French department. URL : <https://geoservices.ign.fr/adminexpress>
+
+-    and the a dataset named "**Transformation coefficient from one year's Euro or French Franc to another year's Euro or French Franc – Base 2015**" of Insee : we will use it to adjust past monetary values for inflation.
+
 ## Modification of the original databases
 
 ### Formatting and cleaning the Insee database
 
-The two databases underwent transformations to become exploitable for our project. The main problem of the Insee one is that it consumes a lot of RAM because of its size (3GB). Indeed, some categorical variables have a significant number of "categories"/"levels". For example, the variable on the age of the population contains 120 levels, one by each possible year of life of an individual. As a result, the number of potential combinations, and therefore the number of rows, among all variables is impressively large, contributing to the important size of the database.
+The two databases underwent transformations to become exploitable for our project. The main problem of the Insee one is that it consumes a lot of RAM because of its size - 3GB. Indeed, some categorical variables have a significant number of "categories"/"levels". For example, the variable on the age of the population contains 120 levels, one by each possible year of life of an individual. As a result, the number of potential combinations, and therefore the number of rows, among all variables is impressively large, contributing to the important size of the database.
 
 ```{r Calculation_of_the_number_of_rows_in_Insee_cleanv3 , message = FALSE}
 
@@ -229,7 +240,7 @@ cnc_data_clean %>%
   knitr::kable(caption = "Statistics of the CNC's variables", format = "html", align = 'c')
 ```
 
-**insee_data (from Insee_cleanv3.csv)**
+**insee_data - from Insee_cleanv3.csv -**
 
 ```{r Nb_rows_and_columns_Insee}
 insee_data_clean %>%
@@ -296,11 +307,11 @@ A central question will guide our research : **"How has the movie theater landsc
 
 The databases at our disposal will help us to explore this question by looking into the following key aspects:
 
-1.  **Evolution of the Market :** The information provided will help us understand how the movie theater market has evolved in terms of volumes over the last fifty years. One of the key aspects in exploring this question will be to examine the market evolution in terms of venues (établissements). However, the number of movie theaters will not be our sole indicator. Indeed, the number of sessions (séances), seats (fauteuils), and screens (écrans) will be complementary variables that can help us to put under the spotlight potential trends that may not be apparent when solely examining the number of venues. Employing panel data has a dual utility here. It not only enables us to capture the overall temporal trends but also to observe potential cross-sectional differences. Indeed, one of our key objectives is to comprehend whether divergences in trajectories and characteristics exist among the various French departments.
+1.  **Evolution of the Market :** The information provided will help us understand how the movie theater market has evolved in terms of volumes over the last fifty years. One of the key aspects in exploring this question will be to examine the market evolution in terms of venues - établissements. However, the number of movie theaters will not be our sole indicator. Indeed, the number of sessions - séances, seats - fauteuils, and screens - écrans - will be complementary variables that can help us to put under the spotlight potential trends that may not be apparent when solely examining the number of venues. Employing panel data has a dual utility here. It not only enables us to capture the overall temporal trends but also to observe potential cross-sectional differences. Indeed, one of our key objectives is to comprehend whether divergences in trajectories and characteristics exist among the various French departments.
 
 2.  **Structural Shifts with Multiplexes:** A zoom on the multiplexes permits evaluating a recent structural transformation in the movie theater industry. The first one appears in France during the end of the 1990s and can be arguably seen as a shift in the movie theater market. Blanchard ([2014](https://www.cairn.info/revue-migrations-societe-2014-1-page-153.htm)) argues that these facilities "have contributed to the resurgence of attendance, notably by making the movie theater more accessible to suburban residents." Furthermore, despite their relative novelty, they represent an important share of the market industry.
 
-3.  **Economic Health of the Industry:** Variables such as the number of tickets bought (entrées) and total revenue (recettes) will also be complementary and potentially important information. They will notably be key tools for gauging the economic vitality of the industry and determining if the economic dynamics align with the stock of venues, seats, and their past investments.
+3.  **Economic Health of the Industry:** Variables such as the number of tickets bought - entrées - and total revenue - recettes - will also be complementary and potentially important information. They will notably be key tools for gauging the economic vitality of the industry and determining if the economic dynamics align with the stock of venues, seats, and their past investments.
 
 4.  **Cultural Diversity through Arthouse Cinemas:** The representation of Arthouse cinemas in our dataset highlights the emergence of a cultural niche. Examining the growth and audience engagement of these movie theaters provides insights into the supply and demand for culturally diverse content.
 
@@ -316,7 +327,7 @@ In essence, our research delves into the recent history of movie theaters in Fra
 
 ## Introduction : the "golden age" of the first half of the 20th century
 
-The history of the movie theater market unfolds on a winter day. In December 28th 1895, two brothers August and Louis Lumiere gave the first commercial public screening. Because a good history is full of happy coincidences, it is in France (our studied country), at the Salon Indien du Grand Café in Paris that the two brothers used their *cinématographe*.
+The history of the movie theater market unfolds on a winter day. In December 28th 1895, two brothers August and Louis Lumiere gave the first commercial public screening. Because a good history is full of happy coincidences, it is in France - our studied country, at the Salon Indien du Grand Café in Paris that the two brothers used their *cinématographe*.
 
 ![](Pictures%20and%20illustrations/cinema-lumiere.jpg){fig-align="center"}
 
@@ -326,13 +337,13 @@ The movie theaters market experienced growth relatively quickly. According to Mu
 
 The importance of movie theater during this period maybe underestimated by our contemporary eyes. However, the two senatorial rapporteurs explain that :
 
-" until the advent of the 'petite lucarne' (i.e. television) in households, movie theater had a monopoly on the broadcasting of images. People frequented the theater, not to see a film, but rather to watch a program consisting of one or more short films, news, the trailer for the next film and, after the intermission and advertising, of the 'feature film'."
+" until the advent of the 'petite lucarne' - i.e. television - in households, movie theater had a monopoly on the broadcasting of images. People frequented the theater, not to see a film, but rather to watch a program consisting of one or more short films, news, the trailer for the next film and, after the intermission and advertising, of the 'feature film'."
 
 <center>*THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.* L'évolution du secteur de l'exploitation cinématographique, Rapport d'information sénatoriale n°308 (2002-2003)</center>
 
 <br>
 
-As in many stories, this golden age was not eternal. Ours knew its dawn in 1957. Attendance start to collapsed and more than halved between 1957 and 1966. The arrival of television is often cited as (not the sole) but a pivotal factor in this decline.
+As in many stories, this golden age was not eternal. Ours knew its dawn in 1957. Attendance start to collapsed and more than halved between 1957 and 1966. The arrival of television is often cited as - not the sole - but a pivotal factor in this decline.
 
 <br>
 
@@ -405,19 +416,19 @@ ggplotly(Att_graph1, dynamicTicks = TRUE)
 
 <br>
 
-18 of the 26 years between 1966 (not included) and 1992 (included) are characterized by a negative attendance's growth rate. On single factor can not be point as the responsible of this degrowth because its causes are multifactorial. However, democratization of television and of automobile are however presented as key factors of this decay.
+18 of the 26 years between 1966 - not included - and 1992 - included - are characterized by a negative attendance's growth rate. On single factor can not be point as the responsible of this degrowth because its causes are multifactorial. However, democratization of television and of automobile are however presented as key factors of this decay.
 
 ```{r}
 #Graphic of the Growth by year
 
 Att_graph2 <-Attendance_nat %>% 
-  filter(year < 1993 & year>1966) %>% 
+  filter(year < 1993) %>% 
   mutate(Growth_rate=ifelse(Growth<0, "Negative", "Positive")) %>% 
   ggplot(aes(x = year, y = Growth, fill=Growth_rate)) +
   geom_col() +
   scale_fill_manual(values = c("lightblue", "orange")) +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
-  labs(title = "Growth rate by year [1967-1992]", x="Year", y="Growth rate by year", fill="Growth rate") +
+  labs(title = "Growth rate by year [1967-1992]", x="Year", y="Growth rate by year", fill="Trend indicator") +
   theme_classic()
 
 ggplotly(Att_graph2)
@@ -438,28 +449,33 @@ att_dep_1 <- left_join(att_dep_1,base_year, by= 'departement_code') %>%
   mutate(attendance_evolution = (attendance_dep/base - 1)*100)
 ```
 
-The map below show the evolution of the attendance by department and year in France. Each year show the total growth rate between this year and the 1966 year. One can that the majority of the deportment are not spare by the decline. However, the trend is not homogeneous by department. Some has a periodnone of department are spare at the end. The department of the north-east of the Hexagon knew a stronger degrowth of their attendance. At the opposite some departments of Ile-de-France and of the south-east of the territory had a better resilience even knowing significant growth phases.
+The map below show the evolution of the attendance by department and year in France. Each year show the total growth rate between this year and the 1966 year. One can that the majority of the department are not spare by the decline. However, the trend is not homogeneous by department. The department of the north-east of the Hexagon knew a stronger degrowth of their attendance. At the opposite some departments of Ile-de-France and of the south-east of the territory had a better resilience even knowing significant growth phases.
 
 ```{r fig.width=10, fig.height=12}
 france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
 
 france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
 
-merged_data <- merge(france_shape, att_dep_1, by = "departement_code")
+map_data1 <- merge(france_shape, att_dep_1, by = "departement_code")
 
-ggplot(merged_data, aes(fill = attendance_evolution)) +
-  geom_sf() +
-  scale_fill_viridis_c(option = "C") + 
-  labs(title = "Evolution of attendance by departement from 1966 to 1992 compare to 1966", fill = "Evolution of the attendance") +
-  theme_classic() +
-  annotation_scale()+
-  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  facet_wrap(~year, ncol = 3)+
-  theme(legend.position = "bottom",
-        legend.title = element_text(hjust = 0.5))
+
+chosen_breaks <- c(-Inf, -50, -25, 0, 25, 50, Inf)
+#After testing numerous ways to create classes for the following map with the style option of tm_fill ("quantile", "pretty", "equal", "headtails") and values for the option n, we chose to define our own classes using the breaks option and style ="fixed". These new classes are inspired by, but diverge from, the values obtained with style="quantile" (while conducting parallel tests with n=) for values under 100. For values above 100, arbitrary classes were created to emphasize the divergence of trajectories of department with positive growth, which quantile had difficulty capturing due to the smaller sample of values above 100.".
+
+  
+tm_shape(map_data1) +
+tm_fill(fill="attendance_evolution", style = "fixed", breaks=chosen_breaks, palette="-RdYlBu", midpoint=0) +
+tm_borders() +
+tm_facets(by = "year", nrow = 2, ncol = 3)+
+tm_compass(type="8star",position=c("RIGHT","TOP"),show.labels = 1, size =3)+
+tm_scalebar(position=c("left","bottom"))+
+tm_title_out(text ="Evolution of the attendance relatively to 1966 in percentage",  position = tm_pos_out("center", "top"))+
+ tm_style("white")
 ```
 
 <br>
+
+#### Evolution of the market
 
 ```{r Statistics_on_revenue}
 recette_nat <- cnc_data_clean %>% 
@@ -499,6 +515,8 @@ recette_nat_without_inf <-recettes_without_inflation %>%
 )
 ```
 
+Intriguingly, despite the observed drop in attendance, the movie of the movie theater industry increases from 1966 to 1982.
+
 ```{r}
 Re_graph1 <- recette_nat %>% 
   filter(year < 1993) %>% 
@@ -508,6 +526,11 @@ Re_graph1 <- recette_nat %>%
   theme_classic()
 
 ggplotly(Re_graph1, dynamicTicks = TRUE)
+```
+
+This rise is consistent even if we adjust revenue for inflation, as we can see in the graph below. However, an equally significany contraction characterized the 80s and 90s.
+
+```{r}
 
 Re_graph2 <- recette_nat_without_inf %>% 
   filter(year < 1993) %>% 
@@ -519,7 +542,7 @@ Re_graph2 <- recette_nat_without_inf %>%
 ggplotly(Re_graph2, dynamicTicks = TRUE)
 ```
 
-Despite a decrease in attendance, we have from 1966 to 1982 increasing revenue - if we look at actualized revenue - due to increasing an increasing of the price of the ticket as we can see with the average revenue by ticket sold.
+This observed growth during the 70s can be partly explained by a continuous growth of the average revenue by ticket sold – i.e. the price.
 
 ```{r}
 Re_graph3 <- recette_nat_without_inf %>% 
@@ -533,11 +556,7 @@ Re_graph3 <- recette_nat_without_inf %>%
 ggplotly(Re_graph3)
 ```
 
-<br>
-
-#### Evolution of the structure of the market
-
-The number of seats strongly declined during this period. As we can see on the graphic below, while the Hexagon welcomed 2,4 million of movie theater seats in 1966, only 93 000 seats characetrized the French market in 1992.
+The decade between 1966 and 1993 also witnessed significant structural shifts in the industry. The number of seats strongly declined during this period. While the Hexagon welcomed 2.4 million movie theater seats in 1966, only 93,000 seats characterized the French market in 1992.
 
 ```{r Statistics_on_seats_and_screens}
 Equip_nat <- cnc_data_clean %>% 
@@ -562,11 +581,11 @@ ggplotly(Se_graph1, dynamicTicks = TRUE)
 
 <br>
 
-Data on the number of movie theaters is not available on our database before 1992. However, we have for hypothesis that a part of this decline is due to the foreclosure of movie theaters. Nevertheless, this hypothesis is not sufficient to understand the evolution of the number of seats during this quarter of century.
+The data on the number of movie theaters is unavailable on our database before 1992. However, we have for hypothesis that part of this decline is due to the foreclosure of movie theaters. Nevertheless, this hypothesis is not sufficient to understand the evolution of the number of seats during this quarter-century.
 
-Indeed, what can be surprising is that, at the same time that the number of seats diminished, the number of screens had a different journey.
+Indeed, what might be surprising is that, at the same time that the number of seats diminished, the number of screens had a different journey.
 
-Until 1971, the number of seats and screens followed the same downward trajectory. However, while the number of seats plundered, the number of screens tended to stabilize then to grow between 1972 and 1985. The graphic below highlights these elements. By using a 1966 base index 100 for both variables, we can focus on their evolution, putting aside the scale effect. The index of the number of seats almost halved from 1972 to 1985. In parallel the index of the number of screens is more than 20 points higher in 1985 than what was observed in 1972. It is even 5 points higher than the index in 1966. Despite the fact that the number of screens experienced a period of degrowth between 1986 and 1992, a serious gap exists between the two indexes in 1992.
+Up until 1971, the number of seats and screens followed the same downward trajectory. However, while the number of seats plummeted, the number of screens stabilized and then increased between 1972 and 1985. The graphic below highlights these elements. By utilizing a 1966 base index 100 for both variables, we can focus on their evolution, putting aside the scale effect. The index of the number of seats almost halved from 1972 to 1985. In parallel the index of the number of screens was more than 20 points higher in 1985 than what was observed in 1972. It was even 5 points above the index in 1966. Likewise, despite the fact that the number of screens experienced a period of degrowth between 1986 and 1992, a serious gap exists between the two indexes in 1992.
 
 ```{r Graph_Comp_Seats_and_Screens}
 #Addition of base index 100 variable
@@ -595,7 +614,7 @@ ggplotly(Se_Sc_graph1, dynamicTicks = TRUE) %>%
 
 <br>
 
-How can we comprehend these contradictory trends? Thiolliere and Ralite (2003) explained that this paradox can be explained by a structural change of the movie theater market. Prior to the late 60s, a large portion of the movie theater market was dominated by single-screen movie halls with a substantial number of seats. Everything changed after the 60s. The second half of the 21st century witnessed a shift from one-room movie halls to halls with fewer seats but a plural number of screens. Thus, some former one-room movie theaters repurposed their spaces to welcome more screens, and multiroom setups became predominant among newly constructed movie theaters. Thiolliere and Ralite assert that this new structure enabled the industry to intensify its exploitation capabilities in order to offer more choices for its consumers. These new movie theaters had better performance than their one-room elders, explaining the latter's gradual disappearance. This shift can be observed in the ratio of chairs to screens, which can be interpreted as an indicator of the size of the screening room in terms of seats.
+How can we comprehend these contradictory trends? Thiolliere and Ralite (2003) explained that this paradox can be attributed to a structural change in the movie theater market. Prior to the late '60s, a large portion of the movie theater market was dominated by single-screen movie halls with a substantial number of seats. However, everything changed after the 60s. The second half of the 20th century witnessed a shift from one-room movie halls to halls with fewer seats but a plural number of screens. Thus, some former one-room movie theaters repurposed their spaces to accommodate more screens, and multiroom setups became predominant among newly constructed movie theaters. Thiolliere and Ralite assert that this new structure enabled the industry to intensify its exploitation capabilities in order to offer more choices for its consumers. These new movie theaters had better performance than their one-room predecessors, explaining the gradual disappearance of the latter. This shift can be observed in the ratio of chairs to screens, which can be interpreted as an indicator of the size of the screening room in terms of seats. It experienced a constant decrease since 1969, and ultimately halved by 1992.
 
 ```{r Graph_Ratio_Seats_by_Screens}
 Se_Sc_graph2 <- Equip_nat %>%
@@ -634,7 +653,7 @@ Av_Growth_rate_1993_2019 <- Attendance_nat %>%
   round(., digits=1)
 ```
 
-In many movies, after a tragic downfall, the hero comeback in a flamboyant manner.If this storyline mark movies in theater, it also echoes the history of the industry. The 25 years between 1993 and 2019 are a period of growth for the movie theater's market. The attendance went from 130 million to suprass the symbolic bar of the 200 million. If this level is still lower thanwhat was observed during the "golden age", the upturn is still significant with agrowth of `r Growth_rate_1993_2019` % during the period and an average growth of `r Av_Growth_rate_1993_2019` % by year.
+In numerous movies, after a tragic downfall, the hero makes a flamboyant comeback. If this storyline nourishes many movies in theater, it also mirrors the history of the industry. The 25 years between 1993 and 2019 are a period of growth for the movie theater's market. Attendance surge from 130 million to surpass the symbolic bar of the 200 million. The attendance went from 130 million to surpass the symbolic bar of the 200 million. If this level is still lower than what was observed during the "golden age", the upturn is still significant with a growth of `r Growth_rate_1993_2019` % during the period and an average growth of `r Av_Growth_rate_1993_2019` % by year.
 
 ```{r Graph_attendance_after_1992}
 Att_graph3 <- Attendance_nat %>% 
@@ -657,13 +676,13 @@ Att_graph4 <-Attendance_nat %>%
   geom_col() +
   scale_fill_manual(values = c("lightblue", "orange")) +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
-  labs(title = "Growth rate by year [1993-2019]", x="Year", y="Growth rate by year", fill="Growth rate") +
+  labs(title = "Growth rate by year [1993-2019]", x="Year", y="Growth rate by year", fill="Trend indicator") +
   theme_classic()
 
 ggplotly(Att_graph4)
 ```
 
-Numerous scientific papers and reports agree that this revival is due to the development of multiplexes (Blanchard, 2014 ; CNC, 2013; Muhlberger, 2013; Thiolliere and Ralite, 2003). Theses structures would have sparked again the interest of the consumers for movie theaters.
+As mentioned earlier, it is important to note and remeber that growth is not uniform across all departments. While it is true that almost every department experienced a period of increase, the western part of the territory, for example, appears to have a stronger and earlier upturn.
 
 ```{r}
 att_dep_2 <- cnc_data_clean %>%
@@ -681,56 +700,25 @@ att_dep_2 <- left_join(att_dep_2,base_year, by= 'departement_code') %>%
 ```
 
 ```{r fig.width=10, fig.height=12}
-france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
+map_data2 <- merge(france_shape, att_dep_2, by = "departement_code")
 
-france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
-
-merged_data <- merge(france_shape, att_dep_2, by = "departement_code")
-
-ggplot(merged_data, aes(fill = attendance_evolution)) +
-  geom_sf() +
-  scale_fill_viridis_c(option = "C") + 
-  labs(title = "Evolution of attendance by departement from 1993 to 2019 compare to 1993", fill = "Evolution of the attendance") +
-  theme_classic() +
-  annotation_scale()+
-  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  facet_wrap(~year, ncol = 3)+
-  theme(legend.position = "bottom",
-        legend.title = element_text(hjust = 0.5))
+tm_shape(map_data2) +
+tm_fill(fill="attendance_evolution", style = "fixed", breaks=chosen_breaks, palette="-RdYlBu", midpoint=0) +
+tm_borders() +
+tm_facets(by = "year", nrow = 2, ncol = 3)+
+tm_compass(type="8star",position=c("RIGHT","TOP"),show.labels = 1, size =3)+
+tm_scalebar(position=c("left","bottom"))+
+tm_title_out(text ="Evolution of attendance by departement from 1993 to 2019 compare to 1993",  position = tm_pos_out("center", "top"))+
+  tm_style("white")
 ```
 
-```{r}
-Re_graph4 <- recette_nat_without_inf %>% 
-  filter(year > 1992) %>% 
-  ggplot(aes(x = year, y = recette_tot)) +
-  geom_line(color="skyblue", linewidth = 0.75) +
-  labs(title ="Revenue of movie theater in France by year [1993-2022] (in 2015€)", x="Year", y="Totale Revenue")+
-  theme_classic()
-
-ggplotly(Re_graph4, dynamicTicks = TRUE)
-```
-
-```{r}
-Re_graph5 <- recette_nat_without_inf %>% 
-  filter(year > 1992) %>% 
-  ggplot(aes(x = year, y = rme_nat_without_inflation)) +
-  geom_line(color="skyblue", linewidth = 0.75) +
-    scale_y_continuous(labels = function(x) paste0(scales::comma(x), "€")) +
-  labs(title ="Average revenue by ticket sold in France by year [1993-2022] (in 2015€)", x="Year", y="Revenue by Ticket")+
-  theme_classic()
-
-ggplotly(Re_graph5)
-```
-
-NOTE A CEDRIC : tu peux mettre cette partie si tu la trouve mieux placé apres tout ce qui est multiplex et changement du marché
-
-<br>
+Numerous scientific papers and institutional reports agree that this revival is due to the development of multiplexes (Blanchard, 2014 ; CNC, 2013; Muhlberger, 2013; Thiolliere and Ralite, 2003). Theses structures would have reignited consumer interest in movie theaters. <br>
 
 #### Evolution of the structure of the market
 
-Several concurrent definitions exist for the term 'multiplex.' A broad one can characterize multiplexes as movie halls with a large number of screens. Nevertheless, Blanchard (2014) argues that multiplexes cannot be solely summarized by the number of screens. He highlights that multiplexes also offer a better quality of the consumers' experience, with enhanced overall comfort in the screening room and access to additional services such as arcades or restaurants. According to this definition, the first multiplex opened in France in Toulon in 1993. The CNC (National Center of Cinematography and the Moving Image) uses a simpler definition to establish its statistics. It describes multiplexes as movie theaters with at least 8 screens - with this definition, 31 movie theaters met the multiplex criteria in 1992. Despite these differing definitions, both the CNC and Blanchard draw the same conclusion about the significant impact of multiplexes on the market upturn.
+The term 'multiplex' has several concurrent definitions. A broad one characterizes multiplexes as movie halls with a large number of screens. Nevertheless, Blanchard (2014) argues that multiplexes cannot be solely summarized by the number of screens. He emphasizes that they also offer a better consumer experience, with enhanced overall comfort in the screening room and access to additional services such as arcades or restaurants. According to this definition, the first multiplex opened in Toulon in 1993. The CNC uses a simpler definition to establish its statistics. It describes multiplexes as movie theaters with at least 8 screens - with this definition, 31 movie theaters met the multiplex criteria in 1992. Despite these differing definitions, both the CNC and Blanchard draw the same conclusion about the significant impact of multiplexes on the market upturn.
 
-The last three decades are indeed an era of sustained growth for multiplexes. Their numbers have multiplied by seven between 1993 and 2022.
+Indeed, the last three decades are an era of sustained growth for multiplexes. Their numbers have multiplied by seven between 1993 and 2022.
 
 ```{r Statistics_on_etablishment}
 Etablissement_nat <- cnc_data_clean %>% 
@@ -757,7 +745,7 @@ ggplotly(M_graph1, dynamicTicks = TRUE)
 
 <br>
 
-Data on the number of movie theaters were not available in the database prior to 1992. The existing data seem to reveal 3 phases :
+Data on the number of movie theaters were not available in the database before 1992. The existing data seem to reveal 3 phases :
 
 -   a period of growth in the 90s
 
@@ -765,7 +753,7 @@ Data on the number of movie theaters were not available in the database prior to
 
 -   and, a small revival between 2014 and 2018.
 
-However, when observing the number of movie theaters, multiplexes excluded, a different story unfolds before our eyes. The graph below shows the evolution of the number of movie theaters, both with and without multiplexes. It appears that multiplexes accounted for most of the growth in the 1990s. Moreover, the number of movie theaters has plummeted since 2000 when multiplexes are excluded from the count. Nevertheless, it is important to note that our analysis is limited by an element whose significance remains uncertain. Our data do not allow us to distinguish between the outright closure of movie theaters and the transformation of former multiroom movie theaters into multiplexes.
+However, when observing the number of movie theaters, multiplexes excluded, a different story unfolds before our eyes. The graph below shows the evolution of the number of movie theaters, both with and without multiplexes. It appears that multiplexes accounted for most of the growth in the 1990s. The the number of movie theaters has even plummeted since 2000 when multiplexes are excluded from the count. Nevertheless, it is important to note that our analysis is limited by an element whose significance remains uncertain. Our data do not allow us to distinguish between the outright closure of movie theaters and the transformation of former multiroom movie theaters into multiplexes.
 
 ```{r}
 Et_graph <- Etablissement_nat %>% 
@@ -779,7 +767,7 @@ Et_graph <- Etablissement_nat %>%
   theme(legend.position = "bottom")
 
 
-ggplotly(Et_graph, dynamicTicks = TRUE, tooltip = "text") %>%
+ggplotly(Et_graph, dynamicTicks = TRUE) %>%
   layout(legend = list(x = 0.1, y = -0.2, orientation = "h"))
   
 #The rename function is used to change (only for the creation of this graphic) the name of the original column which became the values of the column"Variables". The goal behind this transformation is to have more significative name for the two curves in our legend. We also use the layout function to put the legend above the graph because plotly does not take into account theme(legend.position = "top") when it transform the ggplot.
@@ -787,7 +775,7 @@ ggplotly(Et_graph, dynamicTicks = TRUE, tooltip = "text") %>%
 
 <br>
 
-The share of multiplexes in the total number of movie theaters also grew during this year, gaining 9.5 percentage points between 1993 and 2018. Furthermore, if multiplexes may still be a minority in the overall number of movie theaters, this is not the case for the total number of attendance. They accounted for more than half of the entries in 2012 (Blanchard, 2014).
+The share of multiplexes in the total number of movie theaters also grew during this period, gaining 9.5 percentage points between 1993 and 2018. Furthermore, while multiplexes account for a tenth of movie theaters, this is not the case for the total number of attendance. They accounted for more than half of the entries in 2012 (Blanchard, 2014).
 
 ```{r}
 M_graph2 <- Etablissement_nat %>% 
@@ -837,7 +825,7 @@ Se_Growth_rate_1993_2022 <- Equip_nat %>%
   round(.,digits = 0)
 ```
 
-The number of seats started also to grow again. This growth did not compensate the historical significant decline that marked the second haft of the 20th century - c.f. graph below on the 1962-2022 period. However, it is still highly significant regarding the level observed in 1993 -c.f. graph below on the 1993-2022 period. In total, the number of seats increased of `r Se_diff_rate_1993_2022` seats, representing an augmentation of `r Se_Growth_rate_1993_2022` %.
+The number of seats started also to grow again. This growth did not compensate the historical significant decline that marked the second haft of the 20th century, as indicated in the graph below for the 1962-2022. However, it remains highly significant regarding the level observed in 1993. In total, the number of seats increased of `r Se_diff_rate_1993_2022` seats, representing an augmentation of `r Se_Growth_rate_1993_2022` %.
 
 ```{r}
 #Evolution of the number of Seats
@@ -873,6 +861,8 @@ seance_nat <- cnc_data_clean %>%
             seance_by_etab = nb_seances/nb_etab)
 ```
 
+Simultaneously, the number of seances was multiplied by two.
+
 ```{r}
 Seances_graph <- seance_nat %>%
   filter(year > 1992) %>% 
@@ -882,6 +872,33 @@ Seances_graph <- seance_nat %>%
   theme_classic()
 
 ggplotly(Seances_graph, dynamicTicks = TRUE)
+```
+
+During the same period, the price of tickets - adjusted for inflation - tended to decrease. The years 2008 and 2014 stand out as outliers, which can potentially be explained by the economic context of the moment, with the subprime crisis occurring in 2008 and the sovereign debt crisis between 2010 and 2012. Nevertheless, the decrease began largely before these years, starting in the 90s. In reality, the price in facial values did not decrease during the period but rather grew However, they increased at a slower pace than the general level of prices
+
+```{r}
+Re_graph5 <- recette_nat_without_inf %>% 
+  filter(year > 1992) %>% 
+  ggplot(aes(x = year, y = rme_nat_without_inflation)) +
+  geom_line(color="skyblue", linewidth = 0.75) +
+    scale_y_continuous(labels = function(x) paste0(scales::comma(x), "€")) +
+  labs(title ="Average revenue by ticket sold in France by year [1993-2022] (in 2015€)", x="Year", y="Revenue by Ticket")+
+  theme_classic()
+
+ggplotly(Re_graph5)
+```
+
+With or without adjustment for inflation, revenues have been consistently increasing over the past thirty years, thanks to the rise in audience numbers. Between 1992 and 2010, revenues grew by 500 million dollars. They also showed a peculiar resilience to economic shocks. If small decreases were observed in 2007 at the dawn of the subprime crisis and in 2013 after the sovereign crisis, both were mild and of short duration. It seems to confirm Muhlberger’s work (2013). Indeed, he studied the relationship between attendance and the state of the economy in France between 1992 and 2012 and found that movie theaters were one of the most resilient cultural activities to shifts in economic conditions.
+
+```{r}
+Re_graph4 <- recette_nat_without_inf %>% 
+  filter(year > 1992) %>% 
+  ggplot(aes(x = year, y = recette_tot)) +
+  geom_line(color="skyblue", linewidth = 0.75) +
+  labs(title ="Revenue of movie theater in France by year [1993-2022] (in 2015€)", x="Year", y="Totale Revenue")+
+  theme_classic()
+
+ggplotly(Re_graph4, dynamicTicks = TRUE)
 ```
 
 ### Rising of the arthouse
@@ -921,7 +938,7 @@ AE_graph2 <-Attendance_AE_nat %>%
   geom_col() +
   scale_fill_manual(values = c("lightblue", "orange")) +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
-  labs(title = "Growth rate by year [2002-2019]", x="Year", y="Growth rate", fill="Growth rate") +
+  labs(title = "Growth rate by year [2002-2019]", x="Year", y="Growth rate", fill="Trend indicator") +
   theme_classic()
 
 ggplotly(AE_graph2)
@@ -951,7 +968,7 @@ AE_graph4 <-  Etablissement_AE %>%
   ggplot(aes(x = year, y = part_AE)) +
   geom_line(color = "purple", linewidth = 0.75) + 
   labs(titre="Number of arthouse cinema in France", x="Year", y="Number of arthouse cinema")+
-  theme_classicws()
+  theme_classic()
 
 ggplotly(AE_graph4, dynamicTicks = TRUE)
 ```
@@ -986,14 +1003,9 @@ pop_dep <- left_join(pop_dep, base_year, by = "departement_code") %>%
 
 ```{r fig.width=10, fig.height=12}
 #On regarde l'évolution temporelle de la part de la population de chaque département dans la population pour voir ou se concentre la population dans le temps
+map_data3 <- merge(france_shape, pop_dep, by = "departement_code")
 
-france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
-
-france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
-
-merged_data <- merge(france_shape, pop_dep, by = "departement_code")
-
-ggplot(merged_data, aes(fill = per_pop_dep_change)) +
+ggplot(map_data3, aes(fill = per_pop_dep_change)) +
   geom_sf() +
   scale_fill_viridis_c(option = "C") + 
   labs(title = "Evolution of the relative concentration of the population by department in France ", fill = "Evolution of the relative concentration of the population by department") +
@@ -1029,14 +1041,9 @@ seats_dep <- left_join(seats_dep, base_year, by = "departement_code") %>%
 
 ```{r fig.width=10, fig.height=12}
 #Évolution de la part de la capacité d'accueil du département par rapport à la capacité d'accueil national pour voir où se concentre "l'offre" dans le temps
+map_data4 <- merge(france_shape, seats_dep, by = "departement_code")
 
-france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
-
-france_shape <- france_shape %>% rename(departement_code=INSEE_DEP)
-
-merged_data <- merge(france_shape, seats_dep, by = "departement_code")
-
-ggplot(merged_data, aes(fill = per_seats_dep_change)) +
+ggplot(map_data4, aes(fill = per_seats_dep_change)) +
   geom_sf() +
   scale_fill_viridis_c(option = "C") + 
   labs(title = "Evolution of the relative concentration of the offer of seats by department in France", fill = "Evolution of the relative concentration of the offer of seats by department") +
@@ -1108,6 +1115,14 @@ Econ_data_CSP <- Econ_data %>%
   pivot_wider(names_from = "CSP", values_from = "POND2" ) %>% 
   rename( Farm = "1", Craf_sh_head = "2", Ex_intel = "3", Int_prof = "4", Employees = "5", Workers = "6", Retirees = "8", Ina = "9")
 
+#Final database with AGE_GROUP and CSP
+Econ_data_v2 <- Econ_data %>% 
+  select(departement_code, year, entrées) %>%
+  distinct() %>%  
+  left_join(Econ_data_AG, by = c("departement_code", "year"))
+
+Econ_data_v2 <- Econ_data_v2  %>% 
+  left_join(Econ_data_CSP, by = c("departement_code", "year"))
 
 ```
 
@@ -1136,11 +1151,15 @@ $$ Where :
 
 -   $u$ : the residuals
 
-This Panel Data is such that N = 96 and T = 8 (the 8 years of the french census that are present in the Insee's dataset).
+This Panel Data is such that N = 96 and T = 8 - the 8 years of the french census that are present in the Insee's dataset.
 
 <br>
 
-Various models were tested during the draft of our work, considering factors such as age range, type of activity and combinations of the aforementioned data with CSP. However, we opted for this final model for two reasons. Firstly, it had a good Bayesian information criterion (BIC) score relatively to its counterpart (see Annex 2 for the method used to compute the BIC score). Secondly, it was the model were the colinearity among explanotary variables was the least strong. The main part of our econometrics treatment were performed with the **plm** package. By prudence, we selected to apply only basic techniques for the econometric analysis of panel data. <br>
+Various models were tested during the draft of our work, considering factors such as age range, type of activity and combinations of the aforementioned data with CSP. However, we opted for this final model for two reasons. Firstly, it had a good Bayesian information criterion - BIC - score relatively to its counterpart. Secondly, it was the model were the colinearity among explanatory variables was the least strong.
+
+The main part of our econometrics treatment were performed with the **plm** package. By prudence, we selected to apply only basic techniques for the econometric analysis of panel data.
+
+<br>
 
 #### Choice of the type of model
 
@@ -1152,7 +1171,7 @@ An early step consists to determine which kind of models suits the dataset. Thre
 
 3.  Random effect model
 
-The plm package's F Test for Individual and/or Time Effects (pFtest) were used to arbitrate between the utilization of a fixed effect model and an OLS. The decision criterion is that if the p-value is below the significance level of 0.05, the fixed effect model is preferred. It is our case here. As we can see below, our F test p-value is under the aforementioned threshold.
+The plm package's F Test for Individual and/or Time Effects - pFtest - were used to arbitrate between the utilization of a fixed effect model and an OLS. The decision criterion is that if the p-value is below the significance level of 0.05, the fixed effect model is preferred. It is our case here. As we can see below, our F test p-value is under the aforementioned threshold.
 
 ```{r Test_between_fixed_effect_and_OLS}
 
@@ -1166,7 +1185,7 @@ f_eff <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + W
 pFtest(f_eff, ols)
 ```
 
-The Haussman test continue our analysis by determining the most suitable model between the fixed effect and the random model. The p-value being below the significance level of 0.05, the fixed effect model is favored.
+The Haussman test continues our analysis by determining the most suitable model between the fixed effect and the random model. The p-value being below the significance level of 0.05, the fixed effect model is favored.
 
 ```{r Test_between_fixed_and_random_effect}
 #Random effect model
@@ -1179,7 +1198,7 @@ phtest(f_eff, r_eff)
 
 <br>
 
-#### Test for time-fixed effect and individual effect
+#### Test for time-fixed effect
 
 Having selected the fixed effect model, the next step was to identify whether the addition of time-fixed effects contribute to the improvement the model's quality.
 
@@ -1213,7 +1232,7 @@ The augmented Dickey-Fuller test enables us to check for unit roots. Its results
 ```{r Test_for_unit_roots}
 Panel.set<- pdata.frame(Econ_data_v2, index = c("departement_code", "year")) 
 
-adf.test(Econ_data_v2$entrées, k=2)adf.test(Econ_data_v2$entrées, k=2)
+adf.test(Econ_data_v2$entrées, k=2)
 ```
 
 <br>
@@ -1258,7 +1277,13 @@ Altaf proposes the utilization of the Beck and Katz method as a solution to tack
 
 #### Temporal division
 
-One of our concerns was how the model would react to the shift in attendance trend. As we saw, the decades preceding 1993 are a period of sharp decline, but the opposite is true after this threshold. Unfortunately, we currently lack the techniques to resolve this issue. However, we tried to have an alternative solution to take into account this issue. Our approach was to add in our analysis two models similar to the main one : - One specifically dedicated to the year before 1990 (included), corresponding to the year of the census closest to 1993, - one for the period strictly after.
+One of our concerns was how the model would react to the shift in attendance trend. As we saw, the decades preceding 1993 are a period of sharp decline, but the opposite is true after this threshold. Unfortunately, we currently lack the techniques to resolve this issue. However, we tried to have an alternative solution to take into account this issue. Our approach was to add in our analysis two models similar to the main one :
+
+-   One specifically dedicated to the year before 1990 - included, corresponding to the year of the census closest to 1993,
+
+-    One for the period strictly after.
+
+*All the statistics test on these models are included in annex 2 and 3*
 
 ```{r Addition_of_the_Model_before_and_after_1990}
 #Before 1990
@@ -1304,7 +1329,7 @@ sigma_squared <- SSR / (N_model * T_model)
 
 # Compute BIC manually
 
-k_model <- length(coef(f_eff_2ways_2))
+k_model <- length(coef(f_eff_2ways))
 bic_value <- n_obs * log(sigma_squared) + k_model * log(n_obs)
 
 # Print the BIC value
@@ -1359,43 +1384,19 @@ screenreg(list("<= 1990" = SCC_b90, "> 1990" = SCC_a90))
 
 <br>
 
-These outcomes advocate for the realization of complementary studies. Some of the observed phenomena may also be explained, in part, by limitations inherent with our model. Multicollinearity, as we saw, is one of these issues. However, two other issues deserve attention. One of them is the absence of key control variables. We were particularly eager to incorporate a control variable for television consumption, often cited as a factor in the attendance decline during the 20th century. Unfortunately, we were unable to find data at the departmental level. Furthermore, it is intriguing to explore whether the recent proliferation of streaming services with giants like Netflix, Prime Video, or Disney+ had an impact on cinema attendance. Another limitation of our model arises from the use of linear estimators. Non-linear relationships between our variables could potentially result in spurious coefficients. <br> In conclusion, given the limitations of our models, it is not feasible to draw definitive conclusions. Nevertheless, some of the model results align with elements observed in previous surveys and senatorial reports, notably regarding the impact of workers but also pupils and students population on cinema attendance. The idea that the diversity observed in the evolution of attendance in French departments is linked to the dynamics of these populations emerges as a strong hypothesis. Moreover, this work highlights the potential of the cinema market as an intriguing subject of analysis for econometricians, offering opportunities for further explorations.
+These outcomes advocate for the realization of complementary studies. Some of the observed phenomena may also be explained, in part, by limitations inherent with our model. Multicollinearity, as we saw, is one of these issues. However, two other issues deserve attention. One of them is the absence of key control variables. We were particularly eager to incorporate a control variable for television consumption, often cited as a factor in the attendance decline during the 20th century. Unfortunately, we were unable to find data at the departmental level. Furthermore, it is intriguing to explore whether the recent proliferation of streaming services with giants like Netflix, Prime Video, or Disney+ had an impact on cinema attendance. Another limitation of our model arises from the use of linear estimators. Non-linear relationships between our variables could potentially result in spurious coefficients.
 
 <br>
 
-# Map for comparaison
+In conclusion, given the limitations of our models, it is not feasible to draw definitive conclusions. Nevertheless, some of the model results align with elements observed in previous surveys and senatorial reports, notably regarding the impact of workers but also pupils and students population on cinema attendance. The idea that the diversity observed in the evolution of attendance in French departments is linked to the dynamics of these populations emerges as a strong hypothesis. Moreover, this work highlights the potential of the cinema market as an intriguing subject of analysis for econometricians, offering opportunities for further explorations.
 
-```{r}
-library(tmap)
-library(tmaptools)
-#Note for Mister Rossy : if you do not have the tmap package, one of the document that we use as inspiration to create the interactive maps recommend to install tmap's development version from the r-universe repository : install.packages("tmap", repos = c("https://r-tmap.r-universe.dev", "https://cloud.r-project.org"))
-
-chosen_breaks <- c(-Inf, -50, -25, 0, 25, 50, Inf)
-#After testing numerous ways to create classes for the following graph with the style option of tm_fill ("quantile", "pretty", "equal", "headtails") and values for the option n, we chose to define our own classes using the breaks option and style ="fixed". These new classes are inspired by, but diverge from, the values obtained with style="quantile" (while conducting parallel tests with n=) for values under 100. For values above 100, arbitrary classes were created to emphasize the divergence of trajectories of department with positive growth, which quantile had difficulty capturing due to the smaller sample of values above 100.".
-
-  tmap_mode("plot")
-  
-  tm_shape(merged_data) +
-  tm_fill(fill="attendance_evolution", style = "fixed", breaks=chosen_breaks, palette="cividis", midpoint=0) +
-  tm_borders() +
-  tm_facets(by = "year", nrow = 2, ncol = 3)+
-  tm_compass(type="arrow",position=c("RIGHT","TOP"),show.labels = 0, size=0.5)+
-  tm_scalebar(position=c("left","bottom"))+
-  tm_title_out(text ="Evolution of the attendance relatively to 1966 in percentage",  position = tm_pos_out("center", "top"))
-
-
-```
-
-```{r}
-#Palette
-  tmaptools::palette_explorer()
-```
+<br>
 
 # Annex
 
 ## Annex 1 ...
 
-## Anex 2 - Test on the CSP models for the year before 1990
+## Annex 2 - Test on the CSP models for the year before 1990
 
 <center>**\\1990 and before**</center>
 
@@ -1419,7 +1420,7 @@ pFtest(f_eff_b90, ols_b90)
 
 ### Test between Fixed and Random Model
 
-```{r Test_between_fixed_and_random_effect_b9}
+```{r Test_between_fixed_and_random_effect_b90}
 #Random effect model
 r_eff_b90 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="random") 
 
@@ -1430,9 +1431,9 @@ phtest(f_eff_b90, r_eff_b90)
 
 <br>
 
-### Tests for time-fixed effect and individual effect
+### Tests for time-fixed effect
 
-```{r test_for_time_fixed_effect}
+```{r test_for_time_fixed_effect_b90}
 #Model with time-fixed effects.
 f_eff_time_b90 <-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within", effect = "time")
 
@@ -1449,17 +1450,17 @@ f_eff_2ways_b90 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Emp
 
 ### Test for unit roots
 
-```{r Test_for_unit_roots}
+```{r Test_for_unit_roots_b90}
 Panel.set<- pdata.frame(Econ_data_v2_1, index = c("departement_code", "year")) 
 
-adf.test(Econ_data_v2_1$entrées, k=2)adf.test(Econ_data_v2_1$entrées, k=2)
+adf.test(Econ_data_v2_1$entrées, k=2)
 ```
 
 <br>
 
 ### Test for serial correlation
 
-```{r Test_for_serial_correlation}
+```{r Test_for_serial_correlations_b90}
 pbgtest(f_eff_2ways_b90)
 ```
 
@@ -1467,7 +1468,7 @@ pbgtest(f_eff_2ways_b90)
 
 ### Test of Heterosedasticity
 
-```{r #Test_for_heteroscedasticity}
+```{r #Test_for_heteroscedasticitys_b90}
 bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
 ```
 
@@ -1475,7 +1476,7 @@ bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers
 
 ### Test for cross-sectional dependence
 
-```{r Test_for_cross_sectional_dependence}
+```{r Test_for_cross_sectional_dependences_b90}
 #Breusch-Pagan LM test for cross-sectional dependence
 pcdtest(f_eff_b90, test = c("lm"))
 
@@ -1485,9 +1486,9 @@ pcdtest(f_eff_b90, test = c("cd"))
 
 <br>
 
-### Anex 3 - Test on the CSP models for the year after 1990
+### Annex 3 - Test on the CSP models for the year after 1990
 
-<center> **Striclty after (1990)** </center>
+<center>**Striclty after (1990)**</center>
 
 ```{r Dataset_for_the_model_a80}
 Econ_data_v2_2<- Econ_data_v2 %>% filter(year > 1990)
@@ -1522,7 +1523,7 @@ phtest(f_eff_a90, r_eff_a90)
 
 <br>
 
-### Test for time-fixed effect and individual effect
+### Test for time-fixed effect
 
 ```{r test_for_time_fixed_effect_a90}
 #Model with time-fixed effects.
@@ -1544,7 +1545,7 @@ f_eff_2ways_a90 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Emp
 ```{r Test_for_unit_roots_a90}
 Panel.set<- pdata.frame(Econ_data_v2_2, index = c("departement_code", "year")) 
 
-adf.test(Econ_data_v2_2$entrées, k=2)adf.test(Econ_data_v2_2$entrées, k=2)
+adf.test(Econ_data_v2_2$entrées, k=2)
 ```
 
 <br>
