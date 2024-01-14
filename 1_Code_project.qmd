@@ -41,7 +41,7 @@ library(lmtest)
 library(tseries)
 library(sandwich)
 library(car)
-library(stargazer)
+library(texreg)
 ```
 
 # A presentation of the project
