@@ -276,7 +276,7 @@ We have in the CNC database different variables :
 -   "**RME**" represents the **average revenue by bought tickets**
 -   "**Taux d'occupation des fauteuils**" is the ratio between **entries during the year and the product between the number of seats and the number of sessions**. Taux d'occupation des fauteuils makes it possible to assess the [**"fullness" of the rooms.**]{.underline}
 
-And we have the same for Arthouse. the term Arthouse refers to so-called auteur films, economically independent, with small budgets, open to the different cultures of the world. An Arthouse cinema is a cinematographic establishment which exhibits a significant proportion of recommended Arthouse films and which supports these often difficult films with an adapted animation policy.
+And we have the same for Arthouse. the term Arthouse refers to so-called auteur films, economically independent, with small budgets, open to the different cultures of the world. An Arthouse cinema is a cinematographic establishment which exhibits a significant proportion of recommended Arthouse films and which supports these often difficult films with an adapted animation policy. The variable "RME" and "Taux d'occupation des fauteils" was removed in our final dataset to simplify it.
 
 Insee database is a sociodemographic description of each department with variables such as :
 
@@ -863,7 +863,6 @@ ggplotly(Se_graph3, dynamicTicks = TRUE)
 
 <br>
 
-
 ```{r}
 seance_nat <- cnc_data_clean %>%
   group_by(year) %>%
@@ -926,8 +925,10 @@ ggplot(map_data3, aes(fill = per_seats_dep_change)) +
         legend.title = element_text(hjust = 0.5))
 
 ```
+
 <br>
 This heterogeneity seems partly linked to the evolution of population. comparable index, focusing on the population share, underscores a similar concentration for departments around Paris and in the southeast of France. Nevertheless, the decrease in the share of the North-East is more important in the seat index than to the population one.
+
 ```{r}
 pop_dep <- insee_data_clean %>%
   group_by(departement_code, year) %>%
@@ -967,8 +968,7 @@ ggplot(map_data4, aes(fill = per_pop_dep_change)) +
         legend.title = element_text(hjust = 0.5))
 ```
 
-
-<br>
+<br> 
 The number of screenings per movie theater more than doubled since 1992.
 
 ```{r}
@@ -1089,7 +1089,6 @@ AE_graph4 <-  Etablissement_AE %>%
 
 ggplotly(AE_graph4)
 ```
-
 
 # Explaining the diversity in the temporal evolution of attendance by department : an econometric analysis
 

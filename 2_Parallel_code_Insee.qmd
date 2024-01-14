@@ -5,6 +5,7 @@ format: html
 editor: visual
 execute :
   keep-md: TRUE
+  echo: FALSE
   warning: FALSE
 ---
 
@@ -30,10 +31,6 @@ To facilitate its exploitation, we work on a solution to reduce the size of the 
 
 <br>
 
-# Codes
-
-## Setup
-
 ```{r Opening_the_packages, results='hide'}
  here::i_am("CNC_INSEE_project.Rproj")
 
@@ -49,7 +46,7 @@ library(readr)
 
 <br>
 
-## Importation of the data using the data.table package
+## Explanation of the process
 
 To reproduce this step download the database on (the data are also include in the zip document) : <https://www.insee.fr/fr/statistiques/6671801?sommaire=2414232>
 
@@ -59,10 +56,6 @@ insee <- fread("Data/Ficdep19.csv")
 ```
 
 <br>
-
-## Main codes
-
-### Explanation of the process
 
 ```{r Calculation_of_the_number_of_variable, echo=FALSE, results='hide'}
 metadata <- read_delim("Data/varmod_FICDEP_2019.csv", delim = ";", escape_double = FALSE, trim_ws = TRUE) 
@@ -118,8 +111,6 @@ We have two goals for reducing our database :
 
 We also create a second dataset with the same goals but with another division in the ages in 5 age ranges. It corresponds to a specific division that was needed for an econometric model.
 
-### Main codes in themselves
-
 ```{r Creation_of_our_new_database}
 #Division in age range with a range interval of 15 year
 Insee_cleanv3 <- insee |> 
@@ -149,8 +140,6 @@ Insee_clean_econ <- Insee_clean_econ  |>
 ```
 
 <br>
-
-## Export of our result in a CSV
 
 ```{r Export_to_csv}
 write.csv(Insee_cleanv3, file = "Data/INSEE_cleanv3.csv")
