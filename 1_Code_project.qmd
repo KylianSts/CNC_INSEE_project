@@ -65,13 +65,9 @@ This project is mainly powered by two databases :
 
 The first database was created by the French National Center for Cinema and the Moving Image, most commonly known as CNC. The CNC is an agency of the French Ministry of Culture. Its role is to implement the state's policy on the question of cinema, audiovisual and multimedia. It is notably in charge of the regulation, promotion and distribution of French movies.
 
-<<<<<<< HEAD
-In the execution of its mission, the French agency also collects data regarding its purview and proposes part of them in open access. The database "Exploitation - data by department" is one of the aforementioned open data. It is a statistical monitoring of the evolution of French cinema theaters and their attendance between 1966 and 2022. Notably, it contains data on the number of venues, their characteristics (e.g. number of screens, seating capacity, ...); but also on the number of sold tickets and gained revenues. As its name indicates, French departments (according to their 2021 administrative division) are the statistical unit of the data. The CNC's data is constructed by using two primary sources :
-=======
 In the execution of its mission, the French agency also collects data regarding its purview and proposes part of them in open access. The database "Exploitation - data by department" is one of the aforementioned open data. It is a statistical monitoring of the evolution of French movie theaters and their attendance between 1966 and 2022. Notably, it contains data on the number of venues, their characteristics - e.g. number of screens, seating capacity, ...; but also on the number of sold tickets and gained revenues. As its name indicates, French departments - according to their 2021 administrative division - are the statistical unit of the data. The CNC's data is constructed by using two primary sources :
->>>>>>> 40cc2feb97f4fd1d82a76dcc4a8d11a49226057d
 
--   the **list of cinemas** authorized by the agency
+-   the **list of movie theaters** authorized by the agency
 
 -   and their "bordereaux des recettes" which can be roughly translated by "**revenue slips**"
 
@@ -335,13 +331,13 @@ The history of the movie theater market unfolds on a winter day. In December 28t
 
 ![](Pictures%20and%20illustrations/cinema-lumiere.jpg){fig-align="center"}
 
-The movie theaters market experienced fast growth. According to Muhlberger (2013), in 1920s, cinema became a mass leisure activity in France but also in the USA and numerous European countries. In the Hexagon, cinema market fully blossomed a decade later. The period between 1929 and 1957 is often described as a golden age for cinema in France. Movie theaters attendance reached its zenith, with peaks beyond 400 millions entries. In a report for the French Senate, Thiolliere and Ralite (2003) link this fast period with the introduction of talking films.
+The cinema market experienced fast growth. According to Muhlberger (2013), in 1920s, cinema became a mass leisure activity in France but also in the USA and numerous European countries. In the Hexagon, cinema market fully blossomed a decade later. The period between 1929 and 1957 is often described as a golden age for cinema in France. Movie theaters attendance reached its zenith, with peaks beyond 400 millions entries. In a report for the French Senate, Thiolliere and Ralite (2003) link this fast period with the introduction of talking films.
 
 <br>
 
-The importance of cinema during this period maybe undestimated by our contemporary eyes. However, the two senatorial rapporteur explain that :
+The significance of cinema during this era may be underestimated by contemporary standards. However, the two senatorial rapporteurs explain that:
 
-" until the advent of the 'petite lucarne' - i.e. television - in households, movie theater had a monopoly on the broadcasting of images. People frequented the theater, not to see a film, but rather to watch a program consisting of one or more short films, news, the trailer for the next film and, after the intermission and advertising, of the 'feature film'."
+"Until the advent of the 'petite lucarne' - i.e. television - in households, movie theater had a monopoly on the broadcasting of images. People frequented the theater, not to see a film, but rather to watch a program consisting of one or more short films, news, the trailer for the next film and, after the intermission and advertising, of the 'feature film'."
 
 <center>*THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.* L'évolution du secteur de l'exploitation cinématographique, Rapport d'information sénatoriale n°308 (2002-2003)</center>
 
@@ -454,7 +450,6 @@ att_dep_1 <- left_join(att_dep_1,base_year, by= 'departement_code') %>%
   mutate(attendance_evolution = (attendance_dep/base - 1)*100)
 ```
 
-
 The map below illustrates the evolution of attendance by department and year in France. Each year reflects the total growth rate compared to the base year of 1966. It is noteworthy that the majority of the departments are affected by a decline; however, this trend is not consistent across all departments. Some regions experience periods of decline, while others remain relatively stable over time. The departments in the north-east of the Hexagon undergo a more pronounced decline in attendance. In contrast, certain departments in the Ile-de-France and the south-east of the territory exhibit better resilience, even experiencing significant growth phases.
 
 ```{r fig.width=10, fig.height=12}
@@ -543,6 +538,7 @@ Re_graph2 <- recette_nat_without_inf %>%
 
 ggplotly(Re_graph2, dynamicTicks = TRUE)
 ```
+
 The observed growth during the 70s can be partly explained by a continuous increase in the average revenue per ticket sold, indicating a rise in ticket prices.
 
 ```{r}
@@ -763,9 +759,9 @@ Data on the number of movie theaters were not available in the database before 1
 
 -   a period of growth in the 90s
 
--   a decline in the number of cinemas between 2000 and 2014
+-   a decline in the number of movie theater between 2000 and 2014
 
--   and, a small revival between 2014 and 2018.
+-   and, a small revival between 2014 and 2020.
 
 However, when observing the number of movie theaters, excluding multiplexes, a different story unfolds. The graph below shows the evolution of the number of movie theaters, both with and without multiplexes. It appears that multiplexes accounted for most of the growth in the 1990s. The number of movie theaters has even plummeted since 2000 when multiplexes are excluded from the count. Nevertheless, it is important to note that our analysis is limited by an element whose significance remains uncertain. Our data do not allow us to distinguish between the outright closure of movie theaters and the transformation of former multiroom movie theaters into multiplexes.
 
@@ -775,7 +771,7 @@ Et_graph <- Etablissement_nat %>%
   pivot_longer(cols = c(`All movie theater`, `Movie theater excluding multiplexes`),names_to = "Variables",values_to = "Nb") %>% 
   filter(year<2022) %>% 
   ggplot(aes(x=year,y=Nb, color=Variables)) +
-  labs(title = "Number of movie theater in France between 1992 and 2022", x="Year", y="Number of cinemas")+
+  labs(title = "Number of movie theater in France between 1992 and 2022", x="Year", y="Number of movie theater")+
   geom_line(linewidth = 0.75)+
   theme_classic() +
   theme(legend.position = "bottom")
@@ -996,7 +992,7 @@ Etablissement_AE <- cnc_data_clean %>%
 ```
 
 
-In 2021, arthouse cinema claimed a remarkable 63% of the French film market, showcasing a significant shift in audience preferences and the enduring popularity of these films. This success not only reinforces the cultural and artistic significance of arthouse productions but also positions them as dominant players in the French cinematic landscape. The growing market share reflects a broader trend where audiences increasingly seek unique narratives and artistic merit, signaling a more discerning viewer base valuing diversity and intellectual engagement. This success underscores the film industry's adaptability to changing tastes, with increased support and investment in arthouse cinema from filmmakers, producers, and distributors. In summary, 2021 marks a pivotal moment, indicating a transformative shift in French audiences' cinematic preferences toward arthouse films.
+In 2021, arthouse cinema claimed a remarkable 63% of the French film market, showcasing a significant shift in audience preferences and the enduring popularity of these films. This success not only reinforces the cultural and artistic significance of arthouse productions but also positions them as dominant players in the French cinematic landscape.
 
 ```{r}
 AE_graph4 <-  Etablissement_AE %>% 
