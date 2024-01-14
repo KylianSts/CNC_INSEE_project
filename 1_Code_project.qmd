@@ -67,9 +67,6 @@ The first database was created by the French National Center for Cinema and the 
 
 <<<<<<< HEAD
 In the execution of its mission, the French agency also collects data regarding its purview and proposes part of them in open access. The database "Exploitation - data by department" is one of the aforementioned open data. It is a statistical monitoring of the evolution of French cinema theaters and their attendance between 1966 and 2022. Notably, it contains data on the number of venues, their characteristics (e.g. number of screens, seating capacity, ...); but also on the number of sold tickets and gained revenues. As its name indicates, French departments (according to their 2021 administrative division) are the statistical unit of the data. The CNC's data is constructed by using two primary sources :
-=======
-In the execution of its mission, the French agency also collects data regarding its purview and proposes part of them in open access. The database "Exploitation - data by department" is one of the aforementioned open data. It is a statistical monitoring of the evolution of French movie theaters and their attendance between 1966 and 2022. Notably, it contains data on the number of venues, their characteristics - e.g. number of screens, seating capacity, ...; but also on the number of sold tickets and gained revenues. As its name indicates, French departments - according to their 2021 administrative division - are the statistical unit of the data. The CNC's data is constructed by using two primary sources :
->>>>>>> 40cc2feb97f4fd1d82a76dcc4a8d11a49226057d
 
 -   the **list of cinemas** authorized by the agency
 
