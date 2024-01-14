@@ -41,7 +41,6 @@ library(lmtest)
 library(tseries)
 library(sandwich)
 library(car)
-library(texreg)
 ```
 
 # A presentation of the project
@@ -62,9 +61,9 @@ This project is powered by two databases :
 
 The first database was created by the French National Center for Cinema and the Moving Image, most commonly known as CNC. The CNC is an agency of the French Ministry of Culture. Its role is to implement the state's policy on the question of cinema, audiovisual and multimedia. It is notably in charge of the regulation, promotion and distribution of French movies.
 
-In the execution of its mission, the French agency also collects data regarding its purview and proposes part of them in open access. The database "Exploitation - data by department" is one of the aforementioned open data. It is a statistical monitoring of the evolution of French movie theaters and their attendance between 1966 and 2022. Notably, it contains data on the number of venues, their characteristics (e.g. number of screens, seating capacity, ...); but also on the number of sold tickets and gained revenues. As its name indicates, French departments (according to their 2021 administrative division) are the statistical unit of the data. The CNC's data is constructed by using two primary sources :
+In the execution of its mission, the French agency also collects data regarding its purview and proposes part of them in open access. The database "Exploitation - data by department" is one of the aforementioned open data. It is a statistical monitoring of the evolution of French cinema theaters and their attendance between 1966 and 2022. Notably, it contains data on the number of venues, their characteristics (e.g. number of screens, seating capacity, ...); but also on the number of sold tickets and gained revenues. As its name indicates, French departments (according to their 2021 administrative division) are the statistical unit of the data. The CNC's data is constructed by using two primary sources :
 
--   the **list of movie theaters** authorized by the agency
+-   the **list of cinemas** authorized by the agency
 
 -   and their "bordereaux des recettes" which can be roughly translated by "**revenue slips**"
 
@@ -298,11 +297,11 @@ The databases at our disposal will help us to explore this question by looking i
 
 1.  **Evolution of the Market :** The information provided will help us understand how the movie theater market has evolved in terms of volumes over the last fifty years. One of the key aspects in exploring this question will be to examine the market evolution in terms of venues (établissements). However, the number of movie theaters will not be our sole indicator. Indeed, the number of sessions (séances), seats (fauteuils), and screens (écrans) will be complementary variables that can help us to put under the spotlight potential trends that may not be apparent when solely examining the number of venues. Employing panel data has a dual utility here. It not only enables us to capture the overall temporal trends but also to observe potential cross-sectional differences. Indeed, one of our key objectives is to comprehend whether divergences in trajectories and characteristics exist among the various French departments.
 
-2.  **Structural Shifts with Multiplexes:** A zoom on the multiplexes permits evaluating a recent structural transformation in the movie theater industry. The first one appears in France during the end of the 1990s and can be arguably seen as a shift in the movie theater market. Blanchard ([2014](https://www.cairn.info/revue-migrations-societe-2014-1-page-153.htm)) argues that these facilities "have contributed to the resurgence of attendance, notably by making the movie theater more accessible to suburban residents." Furthermore, despite their relative novelty, they represent an important share of the market industry.
+2.  **Structural Shifts with Multiplexes:** A zoom on the multiplexes permits evaluating a recent structural transformation in the movie theater industry. The first one appears in France during the end of the 1990s and can be arguably seen as a shift in the cinema market. Blanchard ([2014](https://www.cairn.info/revue-migrations-societe-2014-1-page-153.htm)) argues that these facilities "have contributed to the resurgence of attendance, notably by making the cinema more accessible to suburban residents." Furthermore, despite their relative novelty, they represent an important share of the market industry.
 
 3.  **Economic Health of the Industry:** Variables such as the number of tickets bought (entrées) and total revenue (recettes) will also be complementary and potentially important information. They will notably be key tools for gauging the economic vitality of the industry and determining if the economic dynamics align with the stock of venues, seats, and their past investments.
 
-4.  **Cultural Diversity through Arthouse Cinemas:** The representation of Arthouse cinemas in our dataset highlights the emergence of a cultural niche. Examining the growth and audience engagement of these movie theaters provides insights into the supply and demand for culturally diverse content.
+4.  **Cultural Diversity through Arthouse Cinemas:** The representation of Arthouse cinemas in our dataset highlights the emergence of a cultural niche. Examining the growth and audience engagement of these cinemas provides insights into the supply and demand for culturally diverse content.
 
 5.  **Demographic Dynamics :** The inclusion of variables from the INSEE database is a key step in our investigation. Utilizing information on age groups (AGE_GROUP) and socio-professional categories (CSP) will enable us to discern whether correlations exist between the demographic composition of the population and the trajectories of distinct departmental markets.
 
@@ -312,31 +311,31 @@ In essence, our research delves into the recent history of movie theaters in Fra
 
 \newpage
 
-# Evolution of the movie theater market in time : a description of the major trend
+# Evolution of the cinema market in time : a description of the major trend
 
 ## Introduction : the "golden age" of the first half of the 20th century
 
-The history of the movie theater market unfolds on a winter day. In December 28th 1895, two brothers August and Louis Lumiere gave the first commercial public screening. Because a good history is full of happy coincidences, it is in France (our studied country), at the Salon Indien du Grand Café in Paris that the two brothers used their *cinématographe*.
+The history of the movie theater market unfolds on a winter day. In December 28th 1895, two brothers August and Louis Lumiere gave the first commercial public screening. Because a good history is full of happy coincidences, it is in France, at the Salon Indien du Grand Café in Paris that the two brothers used their *cinématographe*.
 
 ![](Pictures%20and%20illustrations/cinema-lumiere.jpg){fig-align="center"}
 
-The movie theaters market experienced growth relatively quickly. According to Muhlberger (2013) it already became a mass leisure activity in Franc in 1920s but also in the USA and numerous European countries. However, it fully blossomed in the Hexagone a decade later. The period between 1929 and 1957 is often described as a golden age for movie theater in France. Movie theaters attendance reached its zenith, with peaks beyond 400 millions entries. In a report for the French Senate, Thiolliere and Ralite (2003) link this fast period with the introduction of talking films.
+The movie theaters market experienced fast growth. According to Muhlberger (2013), in 1920s, cinema became a mass leisure activity in France but also in the USA and numerous European countries. In the Hexagon, cinema market fully blossomed a decade later. The period between 1929 and 1957 is often described as a golden age for cinema in France. Movie theaters attendance reached its zenith, with peaks beyond 400 millions entries. In a report for the French Senate, Thiolliere and Ralite (2003) link this fast period with the introduction of talking films.
 
 <br>
 
-The importance of movie theater during this period maybe underestimated by our contemporary eyes. However, the two senatorial rapporteurs explain that :
+The importance of cinema during this period maybe undestimated by our contemporary eyes. However, the two senatorial rapporteur explain that :
 
-" until the advent of the 'petite lucarne' (i.e. television) in households, movie theater had a monopoly on the broadcasting of images. People frequented the theater, not to see a film, but rather to watch a program consisting of one or more short films, news, the trailer for the next film and, after the intermission and advertising, of the 'feature film'."
+"We forget too often \[...\] that until the advent of the 'petite lucarne' (i.e. television) in households, cinema had a monopoly on the broadcasting of images. People frequented the theater, not to see a film, but rather to watch a program consisting of one or more short films, news, the trailer for the next film and, after the intermission and advertising, of the 'feature film'."
 
 <center>*THIOLLIERE Michel & RALITE Jack au nom de la Commission des affaires culturelles du Sénat, 2003.* L'évolution du secteur de l'exploitation cinématographique, Rapport d'information sénatoriale n°308 (2002-2003)</center>
 
 <br>
 
-As in many stories, this golden age was not eternal. Ours knew its dawn in 1957. Attendance start to collapsed and more than halved between 1957 and 1966. The arrival of television is often cited as (not the sole) but a pivotal factor in this decline.
+Nevertheless, as in many stories, the golden age is not eternal. Ours knew its dawn in 1957. Attendance collapsed. It more than halved between 1957 and 1966. The arrival of television is often cited as not the sole but a pivotal factor in this decline, which we will see will continue during most of the 20th century.
 
 <br>
 
-## Evolution of movie theater in France from 1966 to 2022 : a global perspective
+## Evolution of cinema in France from 1966 to 2022 : a global perspective
 
 <br>
 
@@ -388,7 +387,7 @@ Av_Growth_rate_1966_1992 <- Attendance_nat %>%
   round(., digits=1)
 ```
 
-Our analytic journey starts in 1966. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992` % during the period). The movie theater market experienced especially two periods of sharp decline. From1966 to 1969, attendance dropped by `r abs(Growth_rate_1966_1969)` %. Movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
+Our analytic journey starts in 1966, which is the first availabe year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992` % during the period). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance droped by `r abs(Growth_rate_1966_1969)` %. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
 
 ```{r}
 #Graphic of the evolution of attendance in time
@@ -405,7 +404,7 @@ ggplotly(Att_graph1, dynamicTicks = TRUE)
 
 <br>
 
-18 of the 26 years between 1966 (not included) and 1992 (included) are characterized by a negative attendance's growth rate. On single factor can not be point as the responsible of this degrowth because its causes are multifactorial. However, democratization of television and of automobile are however presented as key factors of this decay.
+18 of the 26 years between 1966 (not included) and 1992 (included) are thus characterized by a negative attendance's growth rate.The causes of this degrowth are multifactorial. The democratisation of television and of automobile are however presented as one of the the key factors of this decay.
 
 ```{r}
 #Graphic of the Growth by year
@@ -438,8 +437,6 @@ att_dep_1 <- left_join(att_dep_1,base_year, by= 'departement_code') %>%
   mutate(attendance_evolution = (attendance_dep/base - 1)*100)
 ```
 
-The map below show the evolution of the attendance by department and year in France. Each year show the total growth rate between this year and the 1966 year. One can that the majority of the deportment are not spare by the decline. However, the trend is not homogeneous by department. Some has a periodnone of department are spare at the end. The department of the north-east of the Hexagon knew a stronger degrowth of their attendance. At the opposite some departments of Ile-de-France and of the south-east of the territory had a better resilience even knowing significant growth phases.
-
 ```{r fig.width=10, fig.height=12}
 france_shape <- st_read(dsn = "Maps/ADMIN-EXPRESS/1_DONNEES_LIVRAISON_2023-12-00156/ADE_3-2_SHP_LAMB93_FXX-ED2023-12-19/DEPARTEMENT.shp", stringsAsFactors = FALSE, quiet = TRUE)
 
@@ -459,9 +456,9 @@ ggplot(merged_data, aes(fill = attendance_evolution)) +
         legend.title = element_text(hjust = 0.5))
 ```
 
-<br>
+Here we can have a look of the decline of attendance by department, we see that almost none of department are spare at the end.
 
-```{r Statistics_on_revenue}
+```{r Statistics_on_recettes}
 recette_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
   summarize(recette_tot = sum(recettes, na.rm = TRUE))
@@ -537,9 +534,9 @@ ggplotly(Re_graph3)
 
 #### Evolution of the structure of the market
 
-The number of seats strongly declined during this period. As we can see on the graphic below, while the Hexagon welcomed 2,4 million of movie theater seats in 1966, only 93 000 seats characetrized the French market in 1992.
+The number of seats strongly declined during this period. As we can see on the graphic below, while the Hexagon welcomed 2,4 million of cinema seats in 1966, only 93 000 seats characetrized the French market in 1992.
 
-```{r Statistics_on_seats_and_screens}
+```{r statistics_on_seats_and_screens}
 Equip_nat <- cnc_data_clean %>% 
   group_by(year) %>% 
   summarize(Screens = sum(écrans, na.rm = TRUE),
@@ -547,7 +544,7 @@ Equip_nat <- cnc_data_clean %>%
             Seats_by_screens = Seats/Screens)
 ```
 
-```{r Graph_number_of_seats}
+```{r}
 #Evolution of the number of seats
 
 Se_graph1 <- Equip_nat %>% 
@@ -562,13 +559,13 @@ ggplotly(Se_graph1, dynamicTicks = TRUE)
 
 <br>
 
-Data on the number of movie theaters is not available on our database before 1992. However, we have for hypothesis that a part of this decline is due to the foreclosure of movie theaters. Nevertheless, this hypothesis is not sufficient to understand the evolution of the number of seats during this quarter of century.
+Data on the number of cinemas is not available on our database before 1992. However, we have for hypothesis that a part of this decline is due to the foreclosure of movie theaters. Nevertheless, this hypothesis is not sufficient to understand the evolution of the number of seats during this quarter of century.
 
 Indeed, what can be surprising is that, at the same time that the number of seats diminished, the number of screens had a different journey.
 
 Until 1971, the number of seats and screens followed the same downward trajectory. However, while the number of seats plundered, the number of screens tended to stabilize then to grow between 1972 and 1985. The graphic below highlights these elements. By using a 1966 base index 100 for both variables, we can focus on their evolution, putting aside the scale effect. The index of the number of seats almost halved from 1972 to 1985. In parallel the index of the number of screens is more than 20 points higher in 1985 than what was observed in 1972. It is even 5 points higher than the index in 1966. Despite the fact that the number of screens experienced a period of degrowth between 1986 and 1992, a serious gap exists between the two indexes in 1992.
 
-```{r Graph_Comp_Seats_and_Screens}
+```{r}
 #Addition of base index 100 variable
 Equip_nat <- Equip_nat %>%  mutate(Screens_b100=Screens/Screens[year==1966]*100, Seats_b100=Seats/Seats[year==1966]*100)
 
@@ -595,9 +592,9 @@ ggplotly(Se_Sc_graph1, dynamicTicks = TRUE) %>%
 
 <br>
 
-How can we comprehend these contradictory trends? Thiolliere and Ralite (2003) explained that this paradox can be explained by a structural change of the movie theater market. Prior to the late 60s, a large portion of the movie theater market was dominated by single-screen movie halls with a substantial number of seats. Everything changed after the 60s. The second half of the 21st century witnessed a shift from one-room movie halls to halls with fewer seats but a plural number of screens. Thus, some former one-room movie theaters repurposed their spaces to welcome more screens, and multiroom setups became predominant among newly constructed movie theaters. Thiolliere and Ralite assert that this new structure enabled the industry to intensify its exploitation capabilities in order to offer more choices for its consumers. These new movie theaters had better performance than their one-room elders, explaining the latter's gradual disappearance. This shift can be observed in the ratio of chairs to screens, which can be interpreted as an indicator of the size of the screening room in terms of seats.
+How can we comprehend these contradictory trends? Thiolliere and Ralite (2003) explained that this paradox can be explained by a structural change of the movie theater market. Prior to the late 60s, a large portion of the cinema market was dominated by single-screen movie halls with a substantial number of seats. Everything changed after the 60s. The second half of the 21st century witnessed a shift from one-room movie halls to halls with fewer seats but a plural number of screens. Thus, some former one-room cinemas repurposed their spaces to welcome more screens, and multiroom setups became predominant among newly constructed cinemas. Thiolliere and Ralite assert that this new structure enabled the industry to intensify its exploitation capabilities in order to offer more choices for its consumers. These new cinemas had better performance than their one-room elders, explaining the latter's gradual disappearance. This shift can be observed in the ratio of chairs to screens, which can be interpreted as an indicator of the size of the screening room in terms of seats.
 
-```{r Graph_Ratio_Seats_by_Screens}
+```{r}
 Se_Sc_graph2 <- Equip_nat %>%
   filter(year<1993) %>% 
   ggplot(aes(x=year,y=Seats_by_screens))+
@@ -634,9 +631,9 @@ Av_Growth_rate_1993_2019 <- Attendance_nat %>%
   round(., digits=1)
 ```
 
-In many movies, after a tragic downfall, the hero comeback in a flamboyant manner.If this storyline mark movies in theater, it also echoes the history of the industry. The 25 years between 1993 and 2019 are a period of growth for the movie theater's market. The attendance went from 130 million to suprass the symbolic bar of the 200 million. If this level is still lower thanwhat was observed during the "golden age", the upturn is still significant with agrowth of `r Growth_rate_1993_2019` % during the period and an average growth of `r Av_Growth_rate_1993_2019` % by year.
+In many movies, after a tragic downfall, the hero comeback in a flamboyant manner.If this storyline mark movies in theater, it also echoes the history of the industry. The 25 years between 1993 and 2019 are a period of growth for the cinema's market. The attendance went from 130 million to suprass the symbolic bar of the 200 million. If this level is still lower thanwhat was observed during the "golden age", the upturn is still significant with agrowth of `r Growth_rate_1993_2019` % during the period and an average growth of `r Av_Growth_rate_1993_2019` % by year.
 
-```{r Graph_attendance_after_1992}
+```{r}
 Att_graph3 <- Attendance_nat %>% 
   filter(year >1992) %>% 
   ggplot(aes(x = year, y = Attendance)) +
@@ -649,7 +646,7 @@ ggplotly(Att_graph3, dynamicTicks = TRUE)
 
 <br>
 
-```{r Graph_growth_rate_after_1992}
+```{r}
 Att_graph4 <-Attendance_nat %>% 
   filter(year >1992 & year<2020) %>% 
   mutate(Growth_rate=ifelse(Growth<0, "Negative", "Positive")) %>% 
@@ -732,7 +729,7 @@ Several concurrent definitions exist for the term 'multiplex.' A broad one can c
 
 The last three decades are indeed an era of sustained growth for multiplexes. Their numbers have multiplied by seven between 1993 and 2022.
 
-```{r Statistics_on_etablishment}
+```{r Statistics_on_etablissement}
 Etablissement_nat <- cnc_data_clean %>% 
   filter(!is.na(multiplexes)) %>% 
   group_by(year) %>% 
@@ -757,15 +754,15 @@ ggplotly(M_graph1, dynamicTicks = TRUE)
 
 <br>
 
-Data on the number of movie theaters were not available in the database prior to 1992. The existing data seem to reveal 3 phases :
+Data on the number of cinemas were not available in the database prior to 1992. The existing data seem to reveal 3 phases :
 
 -   a period of growth in the 90s
 
--   a decline in the number of movie theaters between 2000 and 2014
+-   a decline in the number of cinemas between 2000 and 2014
 
 -   and, a small revival between 2014 and 2018.
 
-However, when observing the number of movie theaters, multiplexes excluded, a different story unfolds before our eyes. The graph below shows the evolution of the number of movie theaters, both with and without multiplexes. It appears that multiplexes accounted for most of the growth in the 1990s. Moreover, the number of movie theaters has plummeted since 2000 when multiplexes are excluded from the count. Nevertheless, it is important to note that our analysis is limited by an element whose significance remains uncertain. Our data do not allow us to distinguish between the outright closure of movie theaters and the transformation of former multiroom movie theaters into multiplexes.
+However, when observing the number of cinemas, multiplexes excluded, a different story unfolds before our eyes. The graph below shows the evolution of the number of cinemas, both with and without multiplexes. It appears that multiplexes accounted for most of the growth in the 1990s. Moreover, the number of cinemas has plummeted since 2000 when multiplexes are excluded from the count. Nevertheless, it is important to note that our analysis is limited by an element whose significance remains uncertain. Our data do not allow us to distinguish between the outright closure of cinemas and the transformation of former multiroom cinemas into multiplexes.
 
 ```{r}
 Et_graph <- Etablissement_nat %>% 
@@ -773,7 +770,7 @@ Et_graph <- Etablissement_nat %>%
   pivot_longer(cols = c(`All movie theater`, `Movie theater excluding multiplexes`),names_to = "Variables",values_to = "Nb") %>% 
   filter(year<2022) %>% 
   ggplot(aes(x=year,y=Nb, color=Variables)) +
-  labs(title = "Number of movie theater in France between 1992 and 2022", x="Year", y="Number of movie theaters")+
+  labs(title = "Number of movie theater in France between 1992 and 2022", x="Year", y="Number of cinemas")+
   geom_line(linewidth = 0.75)+
   theme_classic() +
   theme(legend.position = "bottom")
@@ -787,7 +784,7 @@ ggplotly(Et_graph, dynamicTicks = TRUE, tooltip = "text") %>%
 
 <br>
 
-The share of multiplexes in the total number of movie theaters also grew during this year, gaining 9.5 percentage points between 1993 and 2018. Furthermore, if multiplexes may still be a minority in the overall number of movie theaters, this is not the case for the total number of attendance. They accounted for more than half of the entries in 2012 (Blanchard, 2014).
+The share of multiplexes in the total number of movie theaters also grew during this year, gaining 9.5 percentage points between 1993 and 2018. Furthermore, if multiplexes may still be a minority in the overall number of cinemas, this is not the case for the total number of attendance. They accounted for more than half of the entries in 2012 (Blanchard, 2014).
 
 ```{r}
 M_graph2 <- Etablissement_nat %>% 
@@ -837,7 +834,7 @@ Se_Growth_rate_1993_2022 <- Equip_nat %>%
   round(.,digits = 0)
 ```
 
-The number of seats started also to grow again. This growth did not compensate the historical significant decline that marked the second haft of the 20th century - c.f. graph below on the 1962-2022 period. However, it is still highly significant regarding the level observed in 1993 -c.f. graph below on the 1993-2022 period. In total, the number of seats increased of `r Se_diff_rate_1993_2022` seats, representing an augmentation of `r Se_Growth_rate_1993_2022` %.
+The number of seats started also to grow again. This growth did not compensante the historical significant decline that marked the second haft of the 20th century - c.f. graph below on the 1962-2022 period. However, it is still highlysignificant regarding the level observed in 1993 -c.f. graph below on the 1993-2022 period. In total, the number of seats increased of `r Se_diff_rate_1993_2022` seats, representing an augmentation of `r Se_Growth_rate_1993_2022` %.
 
 ```{r}
 #Evolution of the number of Seats
@@ -931,7 +928,7 @@ ggplotly(AE_graph2)
 AE_graph3 <-  recette_AE_nat %>% 
   ggplot(aes(x = year, y = recetteAE_tot)) +
   geom_line(color = "skyblue", linewidth = 0.75) + 
-  labs(titre="Totale revenue arthouse cinema in France", x="Year", y="Totale Revenue")+
+  labs(title="Totale revenue arthouse cinema in France", x="Year", y="Totale Revenue")+
   theme_classic()
 
 ggplotly(AE_graph3, dynamicTicks = TRUE)
@@ -950,10 +947,11 @@ Etablissement_AE <- cnc_data_clean %>%
 AE_graph4 <-  Etablissement_AE %>% 
   ggplot(aes(x = year, y = part_AE)) +
   geom_line(color = "purple", linewidth = 0.75) + 
-  labs(titre="Number of arthouse cinema in France", x="Year", y="Number of arthouse cinema")+
-  theme_classicws()
+    scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
+  labs(titre="Percentage of arthouse cinema in France", x="Year", y="Percentage of Arthouse Cinema")+
+  theme_classic()
 
-ggplotly(AE_graph4, dynamicTicks = TRUE)
+ggplotly(AE_graph4)
 ```
 
 More and more movie theater are considered arthouse cinema.
@@ -1049,31 +1047,9 @@ ggplot(merged_data, aes(fill = per_seats_dep_change)) +
 
 ```
 
-## Explaining the diversity in the temporal evolution of attendance by department : an econometric analysis
+## Econometrics Model : potentiel démarche
 
-In the preceding section, we explored the narrative shaped by the history of movie theaters. A pivotal aspect of this tale was the presence of heterogeneity in the trajectory that each departmental attendance followed. This final section aims is to study whether we can link this heterogeneity with the demographic features of the department and its evolution. Specifically, we will attempt to understand which sociodemographic characteristics had a positive or negative influence on the evolution of attendance over time.
-
-<br>
-
-Studying this interaction can be challenging through the sole use of graphics. The dataset's variables can be affected by complex interactions, and relying solely on plots can lead to spurious conclusions. Moreover, graphical method encounters limitations as the number of variables of interest increases. That’s why the utilization of econometric models can be valuable to perform a more thorough analysis. This section is dedicated to employing econometric methodologies to find answers that address our research question. To achieve this, we will use a panel data econometric model that incorporates both cross-sectional and time series characteristics of our dataset.
-
-<br>
-
-However, we quickly realized that this project was ambitious. At this stage of our academic journey, our technical understanding of econometrics is not sufficient to execute a solid panel regression that would address all the requirements of our dataset. Mastery of panel data is yet beyond our current training and knowledge. Nevertheless, we approached this assignment as a training ground to familiarize ourselves with the procedures for conducting an econometrics analysis on panel data. Therefore, we do not have the pretention to say that our work provided the correct correlation between our explained variable and the sociodemographic features of the department. However, it demonstrates what a procedure for testing and interpreting a longitudinal econometrics model.
-
-<br>
-
-After consulting various sources, our final procedure drew mainly inspiration from Altaf (2017) and a document by Torres-Reyna (2010) for Princeton University. The codes and the process were also influenced by Schmidheiny (2023) and Wagle (2021) papers. Bourbonnais (2020) also contributed significantly to our understanding of part of the theory behind the use of panel data.
-
-<br>
-
-This section is divided into two parts:
-
-1.  The first part is dedicated to the tests and corrections that we used in our model,
-
-2.  The second part discusses the obtained outcomes and emphasizes some limitations that our approach encounters.
-
-### Part 1 : Model and test
+Our aim here will be to study if we can link the heterogeneity regarding the evolution of attendance with the evolution of the CSP and Age-group by department.
 
 ```{r Creation_of_the_specific_database_for_the_econometrics_model}
 
@@ -1109,42 +1085,210 @@ Econ_data_CSP <- Econ_data %>%
   rename( Farm = "1", Craf_sh_head = "2", Ex_intel = "3", Int_prof = "4", Employees = "5", Workers = "6", Retirees = "8", Ina = "9")
 
 
+#Number of inhabitant by CSP (without unemployed person)
+  ## Number of unemployed person by CSP
+  Econ_data_CSP_wo <- insee_econ %>% 
+    filter(TYP_ACT == 2) %>%
+    group_by(departement_code, year, CSP) %>% 
+    summarise(POND_UNEMP = sum(POND2, na.rm = TRUE)) %>%
+    pivot_wider(names_from = "CSP", values_from = "POND_UNEMP") %>%
+    mutate(across(c("1", "2"), ~replace_na(., 0))) %>%
+    pivot_longer(cols = -c(departement_code, year), names_to = "CSP", values_to = "POND_UNEMP")%>%
+    mutate(CSP = as.integer(CSP))
+  
+
+  Econ_data_CSP2 <- Econ_data %>%
+    group_by(departement_code, year, CSP) %>% 
+    summarise(POND2=sum(POND2, na.rm = TRUE))
+  
+  Econ_data_CSP_wu <- left_join(Econ_data_CSP2, Econ_data_CSP_wo, by = c("departement_code", "year", "CSP")) %>%
+    mutate(POND_UNEMP = replace(POND_UNEMP, is.na(POND_UNEMP), 0), POND3=POND2-POND_UNEMP) %>% 
+    select(-POND2, -POND_UNEMP) %>% 
+    pivot_wider(names_from = "CSP", values_from = "POND3" ) %>% 
+  rename(Farm_wu = "1", Craf_sh_head_wu = "2", Ex_intel_wu = "3", Int_prof_wu = "4", Employees_wu = "5", Workers_wu = "6", Retirees_wu = "8", Ina_wu = "9")
+
+# Number of inhabitant by type of activity
+
+Econ_data_TYP <- Econ_data %>%  
+  group_by(departement_code, year, TYP_ACT) %>%
+  summarize(POND2=sum(POND2)) %>% 
+  pivot_wider(names_from = "TYP_ACT", values_from = "POND2") %>% 
+  rename( Employed = "1", Unemployed = "2", Stud_pup = "3", Milit = "4", Form_Act="5", Oth_Ina="6") %>% 
+  mutate(Milit = replace(Milit, is.na(Milit), 0))
+
+#Final database with AGE_GROUP and CSP
+Econ_data_v2 <- Econ_data %>% 
+  select(departement_code, year, entrées) %>%
+  distinct() %>%  
+  left_join(Econ_data_AG, by = c("departement_code", "year"))
+
+Econ_data_v2 <- Econ_data_v2  %>% 
+  left_join(Econ_data_CSP, by = c("departement_code", "year"))
+
+#Final database with AGE_GROUP, CSP(without unemployment) & TUnemployed
+Econ_data_v3 <- Econ_data %>% 
+  select(departement_code, year, entrées) %>%
+  distinct() %>% 
+  left_join(Econ_data_AG, by = c("departement_code", "year"))
+
+Econ_data_v3 <- Econ_data_v3 %>% 
+  left_join(Econ_data_CSP_wu, by = c("departement_code", "year"))
+
+Econ_unemp <- Econ_data_TYP %>% 
+  select(departement_code,year,Unemployed)
+
+Econ_data_v3 <- Econ_data_v3 %>% 
+  left_join(Econ_unemp, by = c("departement_code", "year"))
+
 ```
 
-Our basic model has attendance as the dependent variable, and each classification of socioprofessional categories (CSP) from the Insee terminology serves as independent variables. Specifically, the model is described by the formula below :\
-$$
-Entrées_{it} = \beta_0 + \beta_1 Farm_{it} + \beta_2 Craf\_sh\_head_{it} + \beta_3 Ex\_intel_{it} + \beta_4 Int\_prof_{it} + \beta_5 Employees_{it} + \beta_6 Workers_{it} + \beta_7 Retirees_{it} + \beta_8 Ina_{it} + u_{it}
-$$ Where :
+### Modèle économétrique avec uniquement CSP
 
--   $Entrées$ : the attendance
+```{r}
+#For fixed effect
+f_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+summary(f_eff_2)
 
--   $Farm$ : the number of farmers
+#For random effect
+r_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="random") 
+summary(r_eff_2 )
 
--   $Craf\_sh\_head$ : the number of artisans, shopkeepers, and business owners
+#Haussman test to determine between fixed and random effect
+phtest(f_eff_2, r_eff_2)
 
--   $Ex\_intel$ : the number of executives and intellectual Professions
+#Test r_eff-sectional dependence
+pcdtest(f_eff_2, test = c("lm"))
+pcdtest(f_eff_2, test = c("cd"))
+ 
+# Test time-fixed effects.
+f_eff_time_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+pFtest(f_eff_time_2, f_eff_2)
+plmtest(f_eff_2, c("time"), type=("bp"))
 
--   $Int\_prof$ : the number of intermediate occupation, i.e. "job between executives and workers or employees or intermediate professions in a more figurative sense" (teachers, nurses, social workers) ([Insee, 2003](https://insee.fr/fr/metadonnees/pcs2003/categorieSocioprofessionnelleAgregee/4?champRecherche=false)).
+#Test for serial correlation
+pbgtest(f_eff_2)
 
--   $Employees$ :the number of employees
+#Test for heteroscedasticity
+bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
 
--   $Workers$ : the number of manual workers
+#Test for unit roots
+ Panel.set<- plm.data(Econ_data_v2, index = c("departement_code", "year")) 
 
--   $Retirees$ : the number of retirees
+ adf.test(Econ_data_v2$entrées, k=2)
+```
 
--   $Ina$ :the number "inactive individuals and person who have never worked" where we notably find pupils, students and other kind of "inactive" individuals
+### Decomposition en deux periodes
 
--   $u$ : the residuals
+#### Avant 1990 (inclus)
 
-This Panel Data is such that N = 96 and T = 8 (the 8 years of the french census that are present in the Insee's dataset).
+```{r}
+Econ_data_v2_1<- Econ_data_v2 %>% filter(year <= 1990)
 
-<br>
+#For fixed effect
+f_eff_2_1 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within")
+summary(f_eff_2_1)
 
-Various models were tested during the draft of our work, considering factors such as age range, type of activity and combinations of the aforementioned data with CSP. However, we opted for this final model for two reasons. Firstly, it had a good Bayesian information criterion (BIC) score relatively to its counterpart (see Annex 2 for the method used to compute the BIC score). Secondly, it was the model were the colinearity among explanotary variables was the least strong. The main part of our econometrics treatment were performed with the **plm** package. By prudence, we selected to apply only basic techniques for the econometric analysis of panel data. <br>
+#For random effect
+r_eff_2_1 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="random") 
+summary(r_eff_2_1 )
+
+#Haussman test to determine between fixed and random effect
+phtest(f_eff_2_1, r_eff_2_1)
+
+#Test r_eff-sectional dependence
+pcdtest(f_eff_2_1, test = c("lm"))
+pcdtest(f_eff_2_1, test = c("cd"))
+ 
+# Test time-fixed effects.
+f_eff_time_2_1<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2_1, index=c("departement_code", "year"), model="within")
+pFtest(f_eff_time_2_1, f_eff_2_1)
+plmtest(f_eff_2_1, c("time"), type=("bp"))
+
+#Test for serial correlation
+pbgtest(f_eff_2_1)
+
+#Test for heteroscedasticity
+bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2_1, studentize=F)
+
+#Test for unit roots
+ Panel.set<- plm.data(Econ_data_v2_1, index = c("departement_code", "year")) 
+
+ adf.test(Econ_data_v2_1$entrées, k=2)
+```
+
+#### Apres 1990 (non inclus)
+
+```{r}
+Econ_data_v2_2<- Econ_data_v2 %>% filter(year > 1990)
+
+#For fixed effect
+f_eff_2_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within")
+summary(f_eff_2_2)
+
+#For random effect
+r_eff_2_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_2, index=c("departement_code", "year"), model="random") 
+summary(r_eff_2_2 )
+
+#Haussman test to determine between fixed and random effect
+phtest(f_eff_2_2, r_eff_2_2)
+
+#Test r_eff-sectional dependence
+pcdtest(f_eff_2_2, test = c("lm"))
+pcdtest(f_eff_2_2, test = c("cd"))
+ 
+# Test time-fixed effects.
+f_eff_time_2_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year), data=Econ_data_v2_2, index=c("departement_code", "year"), model="within")
+pFtest(f_eff_time_2_2, f_eff_2_2)
+plmtest(f_eff_2_2, c("time"), type=("bp"))
+
+#Test for serial correlation
+pbgtest(f_eff_2_2)
+
+#Test for heteroscedasticity
+bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2_2, studentize=F)
+
+#Test for unit roots
+ Panel.set<- plm.data(Econ_data_v2_2, index = c("departement_code", "year")) 
+
+ adf.test(Econ_data_v2_2$entrées, k=2)
+```
+
+
+## Potential final procedure
+
+The relationship between the sociodemographic characteristics of departments and the evolution of movie theaters' attendance can be tricky to analyze through the unique use of graphics. On one hand, because the variables in the dataset can be affected by complex interactions, relying solely on graphics can lead to spurious conclusions. On the other hand, graphics also have strong limitations when the number of variables of interest increases. That’s why econometric models can be useful to delve into a thorough analysis of the link between variables. This section is dedicated to employing econometric methodologies to find answers that address our research question. Specifically, we will attempt to understand which sociodemographic characteristics had a positive or negative influence on the heterogeneous evolution of attendance in French departments. To do so, we will employ a panel data econometric model that utilizes both the cross-sectional and longitudinal characteristics of our dataset.
+
+\<br\>
+
+However, we quickly realized that this project was ambitious. At this stage of our academic journey, our technical knowledge of econometrics is not sufficient to perform a solid panel regression that would address all the needs of our dataset. The use of panel data is beyond our current training and knowledge and such issue such as how to correct serial correlation in panel data, to deal with potential non-linearity or the use of dynamic models for example woul have been challenging. Nevertheless, we used this assignment as a training ground to familiarize ourselves with the procedures for performing an econometrics analysis on panel data.
+
+\<br\>
+
+After looking into various sources, our final procedure drew inspiration from Altaf (2017) and a document by Torres-Reyna (2010) for Princeton University. The codes and the process were also influenced by Schmidheiny (2023) and Wagle (2021). Bourbonnais (2020) also played a role in our understanding part of the theory behind the use of panel data.
+
+\<br\>
+
+This section is divided into three parts:
+
+1.  The first part is dedicated to the tests and corrections that we used for our model,
+
+2.  The second part discusses the obtained outcomes,
+
+3.  We conclude by emphasizing some limitations that our approach encounters.
+
+### Procedure
+
+#### Presentation of the original models
+
+Présenter les modèles calculées : possible de les écrire mathématiquement avec latex ou un autre truc
+
+```{r Creation_of_the_needed_datasets_for the models}
+
+```
 
 #### Choice of the type of model
 
-An early step consists to determine which kind of models suits the dataset. Three standards models are often used for panel data :
+We only employed basics techniques for econometric analysis of panel data. Three simple and standards models are often used for panel data :
 
 1.  Regular OLS
 
@@ -1152,63 +1296,59 @@ An early step consists to determine which kind of models suits the dataset. Thre
 
 3.  Random effect model
 
-The plm package's F Test for Individual and/or Time Effects (pFtest) were used to arbitrate between the utilization of a fixed effect model and an OLS. The decision criterion is that if the p-value is below the significance level of 0.05, the fixed effect model is preferred. It is our case here. As we can see below, our F test p-value is under the aforementioned threshold.
+An early step consists to analyze which technique best fits the dataset. The F Test for Individual and/or Time Effects of the **plm** package (**pFtest**) enable us to arbitrate between the use of a fixed effect model and an OLS. The decision criterion is that if the p-value is below the significance level of 0.05, the fixed effect model is preferred. Here, our F test p-value is under the aforementioned level.
 
 ```{r Test_between_fixed_effect_and_OLS}
 
 #OLS Model
-ols <- plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="pooling")
+ols_2 <- plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="pooling")
 
 #Fixed effect model
-f_eff <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+f_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within")
 
 # F Test for Individual and/or Time Effects test
-pFtest(f_eff, ols)
+pFtest(f_eff_2, ols_2)
 ```
 
-The Haussman test continue our analysis by determining the most suitable model between the fixed effect and the random model. The p-value being below the significance level of 0.05, the fixed effect model is favored.
+The Haussman test continue our analysis by discerning the most suitable model between the fixed-effect and the random model. The p-value being below the significance level of 0.05, the fixed effect model is favored.
 
 ```{r Test_between_fixed_and_random_effect}
 #Random effect model
-r_eff <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="random") 
+r_eff_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="random") 
 
 
 #Haussman test to determine between fixed and random effect
-phtest(f_eff, r_eff)
+phtest(f_eff_2, r_eff_2)
 ```
-
-<br>
 
 #### Test for time-fixed effect and individual effect
 
-Having selected the fixed effect model, the next step was to identify whether the addition of time-fixed effects contribute to the improvement the model's quality.
+Having selected the fixed effect model, the next step was to identify if the addition time-fixed effects improve the model's quality.
 
-With p-values below 0.05, both Breusch-Pagan and Honda tests advocate for the addition of time-fixed effect.
+With p-values below 0.05, both Breusch-Pagan and Honda tests support the introduction of fixed effect.
 
-```{r test_for_time_fixed_effect}
+```{r}
 #Model with time-fixed effects.
-f_eff_time <-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "time")
+f_eff_time_2_2<-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within", effect = "time")
 
 #PLM test
-plmtest(f_eff_time, effect="time", type="bp")
-plmtest(f_eff_time, effect="time", type="honda")
+plmtest(f_eff_time_2_2, effect="time", type="bp")
+plmtest(f_eff_time_2_2, effect="time", type="honda")
+
+
 ```
 
-We then used a two ways model combining time-fixed and individual effects. Our model became : <br>
+We then used a two-ways model combining time-fixed and individual effects.
 
-$$
-Attendance = \beta_0 + \beta_1 Farm_{it} + \beta_2 Craf\_sh\_head_{it} + \beta_3 Ex\_intel_{it} + \beta_4 Int\_prof_{it} + \beta_5 Employees_{it} + \beta_6 Workers_{it} + \beta_7 Retirees_{it} + \beta_8 Ina_{it} + \alpha_{it} + \gamma_{it} + u_{it}
-$$
-
-```{r Creation_of_the_two_ways_model}
-f_eff_2ways <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="within",effect = "twoways")
+```{r}
+f_eff_2ways_2 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year) + factor(departement_code), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
 ```
 
 <br>
 
 #### Test for unit roots
 
-The augmented Dickey-Fuller test enables us to check for unit roots. Its results suggest the presence of stationarity in our data.
+By running an augmented Dickey-Fuller test on the attendance, it appears that the explanatory variable seems to bee stationary.
 
 ```{r Test_for_unit_roots}
 Panel.set<- pdata.frame(Econ_data_v2, index = c("departement_code", "year")) 
@@ -1220,72 +1360,99 @@ adf.test(Econ_data_v2$entrées, k=2)adf.test(Econ_data_v2$entrées, k=2)
 
 #### Test for serial correlation
 
-Our panel data faces several issues. Firstly, our model suffers from serial correlation. The Breusch-Godfrey/Wooldridge test indicates a p-value below the significance level of 0.05. To address this issue, both Altaf and Torres-Reyna recommend the utilization of Arellano's technique.
+However, our panel data encounter several issues. Firstlyn our model also suffer from serial correlation. The Breusch-Godfrey/Wooldridge indicate a p-value below the significance level of 0.05. To correct this issue, both Altaf and Torres-Reyna propose t the use of Arellano's technique as we will see in the next paragraph.
 
 ```{r Test_for_serial_correlation}
-pbgtest(f_eff_2ways)
+pbgtest(f_eff_2ways_2)
 ```
-
-<br>
 
 #### Test of Heterosedasticity
 
-The second challenge in our econometrics analysis was the presence of heteroscedasticity in the model.
+The second challenge of our ecometrics analysis was the presence of heteroscedasticity in the model.
 
 ```{r #Test_for_heteroscedasticity}
 bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
 ```
 
-"Nevertheless, heteroscedasticity is a common issue in econometric analysis, and various solutions have been proposed to address it. Utilizing the **vcovHC** function from the **sandwich** package enables the computation of heteroskedasticity-consistent covariance estimators employing both White's (1980, 1984) and Arellano's (1987) methods. The argument **'** **method = "arellano"** ' can be employed to simultaneously correct the serial correlation issue discussed earlier
-
-<br>
+Nevertheless, heteroscedasticity if a common issue in ecometric analysis and solutions has been presented to tackle it. The use of the **vcovHC** function from the **sandwich** package computes heteroskedasticity-consistent covariance estimators using White and Arellano method (White 1980, 1984; Arellano, 1987). Moreover, this function can be used to correct simultaneously both heteroskedasticity and serial correlation with ' **method = "arellano"** '.
 
 #### Test for cross-sectional dependence
 
-A final issue was the presence of cross-sectional dependence as we can see on the Breusch-Pagan and Pesaran tests below.
+A final issue was the presence of cross-sectional dependance as we can see on the Breusch-Pagan and Pesaran tests below.
 
 ```{r Test_for_cross_sectional_dependence}
 #Breusch-Pagan LM test for cross-sectional dependence
-pcdtest(f_eff_2ways, test = c("lm"))
+pcdtest(f_eff_2, test = c("lm"))
 
 #Pesaran test for cross-sectional dependence
-pcdtest(f_eff_2ways, test = c("cd"))
+pcdtest(f_eff_2, test = c("cd"))
 ```
 
-Altaf proposes the utilization of the Beck and Katz method as a solution to tackle this issue. To implement this method, we will forgo the utilization of the **vcovHC** argument and instead use the **vcovSC** one, which performs the same correction and also enables the correction of cross-sectional dependence.
+The utilization of Beck and Katz method is proposed by Altaf as a solution to tackle this issue. To use this method, we will forego the utilization of the **vcovHC** function but do a similar work with the **vcovBK** one, which also enable to correct cross-sectional dependence.
 
-<br>
+### Discussion
 
-#### Temporal division
+```{r Results_before_correction}
+summary(f_eff_2ways_2)
+```
 
-One of our concerns was how the model would react to the shift in attendance trend. As we saw, the decades preceding 1993 are a period of sharp decline, but the opposite is true after this threshold. Unfortunately, we currently lack the techniques to resolve this issue. However, we tried to have an alternative solution to take into account this issue. Our approach was to add in our analysis two models similar to the main one : - One specifically dedicated to the year before 1990 (included), corresponding to the year of the census closest to 1993, - one for the period strictly after.
-
-```{r Addition_of_the_Model_before_and_after_1990}
-#Before 1990
-Econ_data_v2_1<- Econ_data_v2 %>% filter(year <= 1990)
-
-f_eff_2ways_b90 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within",effect = "twoways")
-
-#After 1990 (not included)
-Econ_data_v2_2<- Econ_data_v2 %>% filter(year > 1990)
-
-f_eff_2ways_a90 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within",effect = "twoways")
-
+```{r Coefficient_with_correction_of_the_different_issues}
+coeftest(f_eff_2ways_2, vcov = vcovBK(f_eff_2ways_2, method = "arellano", cluster = "group"))
 ```
 
 <br>
 
-#### Additional test : Bayesan Information Criterion
+#### Multicolinearity analysis
 
-During our research phase, another test plays a crucial role: the Bayesian Information Criterion. It holds significant importance in the selection of the final model among the various draft models that were not retained in the analysis. We utilized the formula presented in Yum's paper (2021) on information criterion analysis for model selection in panel data models with fixed effects.
+```{r}
+# Modèle économétrique avec juste les tranches d'âge
+mvif_1 <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more, data=Econ_data_v2, index=c("departement_code", "year"), model="pooling")
 
-<br> $$
+vif(mvif_1)
+
+# Modèle économétrique avec uniquement CSP
+mvif_2 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="pooling")
+
+vif(mvif_2)
+
+# Modèle Econométrique avec Groupe d'Age et CSP mais sans retraité et en remplaçant la CSP sur les inactifs par Unemployed
+mvif_3 <-plm(entrées ~ a_less_than_6 + a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data=Econ_data_v3, index=c("departement_code", "year"), model="pooling")
+
+vif(mvif_3)
+
+# Modèle Econométrique avec Groupe d'Age et CSP mais sans retraité, sans enfant de moins de 6 ans et en remplaçant la CSP sur les inactifs par Unemployed
+mvif_4 <-plm(entrées ~ a_6_to_24 + a_25_to_42 + a_43_to_59 + a_60_and_more + Farm_wu + Craf_sh_head_wu + Ex_intel_wu + Int_prof_wu + Employees_wu + Workers_wu +  Unemployed, data=Econ_data_v3, index=c("departement_code", "year"), model="pooling")
+
+vif(mvif_4)
+
+# modele avec retraité, 60+ non retraité, etudiant/eleve, 6-24 non etudiant, chomeur et CSP 24-59 ans
+mvif_5 <-plm(X_Y, data=Econ_data_v4_1, index=c("departement_code", "year"), model="pooling")
+
+vif(mvif_5)
+
+# Age range and CSP
+
+model_for_AG_CSP_vif <- paste("entrées ~ ",X_for_AG_CSP)
+
+mvif_6 <- plm(model_for_AG_CSP_vif, data=Econ_data_AG_CSP, index=c("departement_code", "year"), model="pooling")
+
+vif(mvif_6)
+
+```
+
+<br>
+
+### Bayesan Information Criterion
+
+The selection of the final were performed using the Bayesian Information Criterion. We used the formula used in Yum's paper (2021) on his analysis of is an AIC for model selection for panel data models with fixed effect : $$
 BIC = N \times T \times \log(\sigma^2) + K \times \log(N \times T) 
-$$ <br>
-
-With : $\sigma = \frac{SSR}{N \times T}$
+$$ With \$ \sigma = \frac{SSR}{N \times T}\$
 
 <br>
+
+```{r}
+f_eff_2ways_2 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina + factor(year) + factor(departement_code), data=Econ_data_v2, index=c("departement_code", "year"), model="within")
+```
 
 ```{r BIC_Calculation}
 # SSR
@@ -1311,57 +1478,11 @@ bic_value <- n_obs * log(sigma_squared) + k_model * log(n_obs)
 print(bic_value)
 ```
 
-<br>
+### Limits
 
-#### Multicolinearity analysis
+Variable de controle : télévision
 
-To conclude, VIF test show that our model is marked by multicolinearity. Among the model that we tested during our draft work (models with age range, models with various combination of age range, type of activity and CSP), the model using solely CSP seems to be the one where this problem were the least acute. Using instrumental variable
-
-```{r VIF_test}
-mvif <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="pooling")
-
-vif(mvif)
-```
-
-<br>
-
-### Part 2 - Discussion The initial regression, performed before implementing the Beck and Katz correction method, provided the results below.
-
-```{r Outcome_before_correction}
-summary(f_eff_2ways)
-```
-
-In the table, a comparison of coefficients before and after the application of **vcovSCC** with ' **method = "Arellano"** ' is provided. We can remark that the correction of serial correlation, cross-sectional dependence, and heteroscedasticity did not change the coefficients. However, it did impact the standard error and the t-value.
-
-```{r Comparaison_of_standard_model_and_model_with_SCC}
-
-SCC <- coeftest(f_eff_2ways, vcov = vcovSCC(f_eff_2ways_2, method = "arellano"))
-
-screenreg(list("Basic Model" = f_eff_2ways, "Corrected Model" = SCC))
-```
-
-Because of multicollinearity, we preferred to ignore the raw interpretation of the estimate. However, their significance and signs can still give us insights into the potential relationship between CSP and the evolution of attendance. Over the overall 1968-2019 period, the population of employees, artisans, shopkeepers, and business owners seems to have a positive impact on attendance. It is also true for the number of inactive individuals but with a lower significance level. On the other hand, the number of farmers and workers had a negative impact on the evolution of attendance. Some of these outcomes can be interpreted as echoing results observed in other papers. CNC's reports based on its "Médiamétrie" surveys since 1993 (CNC, 2008, 2013, 2016, 2020) found that workers tend to go less often to movie theaters than other CSP. Quoting Bonnel, Thiolliere, and Ralite (2003), they also explained that workers were the movie theater's most loyal audience before the 60s but also the one where its consumption plummeted between the 60s and the 90s.
-
-While being the positive variable with the least significant level, the impact of the number of inactive individuals can also be linked to former CNC surveys’ outcomes. Pupils and students who belong to this CSP are the audience with the highest movie theater consumption.
-
-<br>
-
-The analysis takes a different turn when the model is split into the two aforementioned models. Several variables become insignificant. Conversely, the impact of inactive individuals becomes more significant, which can be linked with the elements that we previously discussed. The manual worker variable, while still significant before 1990, loses its significance afterward. These outcomes can be potentially easily explained. As we discussed, the 60s-90s period is a period of historically lower movie theater attendance by this CSP. However, the introduction of multiplexes, notably because they tend to be in popular areas, may have put the brakes on this decline. Another potential explanation could be that the reduction in their consumption was not continuous but, after a period of decline, a plateau was reached. What is more surprising is that the number of artisans, shopkeepers, and business owners had a negative impact before 1990 and had no impact after in the split models, while its impact is strictly positive in the model of the overall period.
-
-```{r Coefficient_with_correction_of_the_different_issues}
-SCC_b90 <- coeftest(f_eff_2ways_b90, vcov = vcovSCC(f_eff_2ways_2, method = "arellano"))
-
-SCC_a90 <- coeftest(f_eff_2ways_a90, vcov = vcovSCC(f_eff_2ways_2, method = "arellano"))
-
-screenreg(list("<= 1990" = SCC_b90, "> 1990" = SCC_a90))
-
-```
-
-<br>
-
-These outcomes advocate for the realization of complementary studies. Some of the observed phenomena may also be explained, in part, by limitations inherent with our model. Multicollinearity, as we saw, is one of these issues. However, two other issues deserve attention. One of them is the absence of key control variables. We were particularly eager to incorporate a control variable for television consumption, often cited as a factor in the attendance decline during the 20th century. Unfortunately, we were unable to find data at the departmental level. Furthermore, it is intriguing to explore whether the recent proliferation of streaming services with giants like Netflix, Prime Video, or Disney+ had an impact on cinema attendance. Another limitation of our model arises from the use of linear estimators. Non-linear relationships between our variables could potentially result in spurious coefficients. <br> In conclusion, given the limitations of our models, it is not feasible to draw definitive conclusions. Nevertheless, some of the model results align with elements observed in previous surveys and senatorial reports, notably regarding the impact of workers but also pupils and students population on cinema attendance. The idea that the diversity observed in the evolution of attendance in French departments is linked to the dynamics of these populations emerges as a strong hypothesis. Moreover, this work highlights the potential of the cinema market as an intriguing subject of analysis for econometricians, offering opportunities for further explorations.
-
-<br>
+Non linéarité
 
 # Map for comparaison
 
@@ -1391,199 +1512,7 @@ chosen_breaks <- c(-Inf, -50, -25, 0, 25, 50, Inf)
   tmaptools::palette_explorer()
 ```
 
-# Annex
-
-## Annex 1 ...
-
-## Anex 2 - Test on the CSP models for the year before 1990
-
-<center>**\\1990 and before**</center>
-
-```{r Dataset_for_the_model_b90}
-Econ_data_v2_1<- Econ_data_v2 %>% filter(year <= 1990)
-```
-
-### Test between OLS and Fixed Effect model
-
-```{r Test_between_fixed_effect_and_OLS_b90}
-
-#OLS Model
-ols_b90 <- plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="pooling")
-
-#Fixed effect model
-f_eff_b90 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within")
-
-# F Test for Individual and/or Time Effects test
-pFtest(f_eff_b90, ols_b90)
-```
-
-### Test between Fixed and Random Model
-
-```{r Test_between_fixed_and_random_effect_b9}
-#Random effect model
-r_eff_b90 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="random") 
-
-
-#Haussman test to determine between fixed and random effect
-phtest(f_eff_b90, r_eff_b90)
-```
-
-<br>
-
-### Tests for time-fixed effect and individual effect
-
-```{r test_for_time_fixed_effect}
-#Model with time-fixed effects.
-f_eff_time_b90 <-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within", effect = "time")
-
-#PLM test
-plmtest(f_eff_time_b90, effect="time", type="bp")
-plmtest(f_eff_time_b90, effect="time", type="honda")
-```
-
-```{r}
-f_eff_2ways_b90 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within",effect = "twoways")
-```
-
-<br>
-
-### Test for unit roots
-
-```{r Test_for_unit_roots}
-Panel.set<- pdata.frame(Econ_data_v2_1, index = c("departement_code", "year")) 
-
-adf.test(Econ_data_v2_1$entrées, k=2)adf.test(Econ_data_v2_1$entrées, k=2)
-```
-
-<br>
-
-### Test for serial correlation
-
-```{r Test_for_serial_correlation}
-pbgtest(f_eff_2ways_b90)
-```
-
-<br>
-
-### Test of Heterosedasticity
-
-```{r #Test_for_heteroscedasticity}
-bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
-```
-
-<br>
-
-### Test for cross-sectional dependence
-
-```{r Test_for_cross_sectional_dependence}
-#Breusch-Pagan LM test for cross-sectional dependence
-pcdtest(f_eff_b90, test = c("lm"))
-
-#Pesaran test for cross-sectional dependence
-pcdtest(f_eff_b90, test = c("cd"))
-```
-
-<br>
-
-### Anex 3 - Test on the CSP models for the year after 1990
-
-<center> **Striclty after (1990)** </center>
-
-```{r Dataset_for_the_model_a80}
-Econ_data_v2_2<- Econ_data_v2 %>% filter(year > 1990)
-```
-
-### Test between OLS and Fixed Effect
-
-```{r Test_between_fixed_effect_and_OLS_a90}
-
-# OLS Model
-ols_a90 <- plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_2, index=c("departement_code", "year"), model="pooling")
-
-#Fixed effect model
-f_eff_a90 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within")
-
-# F Test for Individual and/or Time Effects test
-pFtest(f_eff_a90, ols_a90)
-```
-
-<br>
-
-### Test between Fixed and Random effect model
-
-```{r Test_between_fixed_and_random_effect_a90}
-#Random effect model
-r_eff_a90 <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_2, index=c("departement_code", "year"), model="random") 
-
-
-#Haussman test to determine between fixed and random effect
-phtest(f_eff_a90, r_eff_a90)
-```
-
-<br>
-
-### Test for time-fixed effect and individual effect
-
-```{r test_for_time_fixed_effect_a90}
-#Model with time-fixed effects.
-f_eff_time_a90 <-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within", effect = "time")
-
-#PLM test
-plmtest(f_eff_time_a90, effect="time", type="bp")
-plmtest(f_eff_time_a90, effect="time", type="honda")
-```
-
-```{r two_ways_model__specification_a90_annex}
-f_eff_2ways_a90 <- plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within",effect = "twoways")
-```
-
-<br>
-
-### Test for unit roots
-
-```{r Test_for_unit_roots_a90}
-Panel.set<- pdata.frame(Econ_data_v2_2, index = c("departement_code", "year")) 
-
-adf.test(Econ_data_v2_2$entrées, k=2)adf.test(Econ_data_v2_2$entrées, k=2)
-```
-
-<br>
-
-### Test for serial correlation
-
-```{r Test_for_serial_correlation_a90}
-pbgtest(f_eff_2ways_a90)
-```
-
-<br>
-
-### Test of Heterosedasticity
-
-```{r Test_for_heteroscedasticity_a90}
-bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2_2, studentize=F)
-```
-
-<br>
-
-### Test for cross-sectional dependence
-
-```{r Test_for_cross_sectional_dependence_a90}
-#Breusch-Pagan LM test for cross-sectional dependence
-pcdtest(f_eff_a90, test = c("lm"))
-
-#Pesaran test for cross-sectional dependence
-pcdtest(f_eff_a90, test = c("cd"))
-```
-
-<br>
-
 # References
-
-**ALTAF Ali, 2017.** *Panel Models*
-
-URL : <https://altaf-ali.github.io/panel_data_models/>
-
-<br>
 
 **BLANCHARD Jean-Philippe, 2014.** " Multiplexes, public de banlieue et création cinématographique française : caractère marchand de l'ethnicité sur grand écran ". *Migrations Société*, 151, 153-164.
 
@@ -1647,10 +1576,6 @@ URL : <https://www.econometrics-with-r.org/index.html>
 
 <br>
 
-**Insee, 2023.** *Consulter la PCS 2003 - Professions et catégories socioprofessionnelles - Catégorie socioprofessionnelle agrégée 4 : Professions Intermédiaires*
-
-<br>
-
 **MUHLBERGER David 2013.** *Cinema attendance during crises is there a relationship between cinema attendance and the state of the economy in France in the period 1992-2012?*
 
 <br>
@@ -1697,4 +1622,4 @@ URL : [https://medium.com/\@manilwagle/how-to-deal-with-panel-data-practical-app
 
 **YUM** **Minchul , 2022.** Model selection for panel data models with fixed effects: a simulation study, *Applied Economics Letters*, 29:19, p. 1776-1783
 
-DOI: [10.1080/13504851.2021.1962505](https://doi.org/10.1080/13504851.2021.1962505)
+DOI: [10.1080/13504851.2021.1962505](https://doi.org/10.1080/13504851.2021.1962505)
