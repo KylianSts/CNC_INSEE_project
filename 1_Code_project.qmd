@@ -103,7 +103,7 @@ Two complementary dataset play a supporting role in our work :
 
 -   "**Admin Express**" from IGN : a shapefile containing polygons forming a map of the French department. URL : <https://geoservices.ign.fr/adminexpress>
 
--    and the a dataset named "**Transformation coefficient from one year's Euro or French Franc to another year's Euro or French Franc – Base 2015**" of Insee : we will use it to adjust past monetary values for inflation.
+-   and the a dataset named "**Transformation coefficient from one year's Euro or French Franc to another year's Euro or French Franc – Base 2015**" of Insee : we will use it to adjust past monetary values for inflation. URL : <https://www.insee.fr/fr/statistiques/serie/010605954#Telechargement>
 
 ## Modification of the original databases
 
@@ -1281,7 +1281,7 @@ One of our concerns was how the model would react to the shift in attendance tre
 
 -   One specifically dedicated to the year before 1990 - included, corresponding to the year of the census closest to 1993,
 
--    One for the period strictly after.
+-   One for the period strictly after.
 
 *All the statistics test on these models are included in annex 2 and 3*
 
@@ -1314,7 +1314,7 @@ With : $\sigma = \frac{SSR}{N \times T}$
 
 ```{r BIC_Calculation}
 # SSR
-SSR <- sum(residuals(f_eff_2ways_2)^2)
+SSR <- sum(residuals(f_eff_2ways)^2)
 
 #N
 N_model <- 96
@@ -1330,7 +1330,7 @@ sigma_squared <- SSR / (N_model * T_model)
 # Compute BIC manually
 
 k_model <- length(coef(f_eff_2ways))
-bic_value <- n_obs * log(sigma_squared) + k_model * log(n_obs)
+bic_value <- N_model * T_model * log(sigma_squared) + k_model * log(N_model * T_model)
 
 # Print the BIC value
 print(bic_value)
@@ -1343,7 +1343,7 @@ print(bic_value)
 To conclude, VIF test show that our model is marked by multicolinearity. Among the model that we tested during our draft work (models with age range, models with various combination of age range, type of activity and CSP), the model using solely CSP seems to be the one where this problem were the least acute. Using instrumental variable
 
 ```{r VIF_test}
-mvif <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="pooling")
+mvif <-plm(entrées ~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2, index=c("departement_code", "year"), model="pooling")
 
 vif(mvif)
 ```
@@ -1360,7 +1360,7 @@ In the table, a comparison of coefficients before and after the application of *
 
 ```{r Comparaison_of_standard_model_and_model_with_SCC}
 
-SCC <- coeftest(f_eff_2ways, vcov = vcovSCC(f_eff_2ways_2, method = "arellano"))
+SCC <- coeftest(f_eff_2ways, vcov = vcovSCC(f_eff_2ways, method = "arellano"))
 
 screenreg(list("Basic Model" = f_eff_2ways, "Corrected Model" = SCC))
 ```
@@ -1374,9 +1374,9 @@ While being the positive variable with the least significant level, the impact o
 The analysis takes a different turn when the model is split into the two aforementioned models. Several variables become insignificant. Conversely, the impact of inactive individuals becomes more significant, which can be linked with the elements that we previously discussed. The manual worker variable, while still significant before 1990, loses its significance afterward. These outcomes can be potentially easily explained. As we discussed, the 60s-90s period is a period of historically lower movie theater attendance by this CSP. However, the introduction of multiplexes, notably because they tend to be in popular areas, may have put the brakes on this decline. Another potential explanation could be that the reduction in their consumption was not continuous but, after a period of decline, a plateau was reached. What is more surprising is that the number of artisans, shopkeepers, and business owners had a negative impact before 1990 and had no impact after in the split models, while its impact is strictly positive in the model of the overall period.
 
 ```{r Coefficient_with_correction_of_the_different_issues}
-SCC_b90 <- coeftest(f_eff_2ways_b90, vcov = vcovSCC(f_eff_2ways_2, method = "arellano"))
+SCC_b90 <- coeftest(f_eff_2ways_b90, vcov = vcovSCC(f_eff_2ways_b90, method = "arellano"))
 
-SCC_a90 <- coeftest(f_eff_2ways_a90, vcov = vcovSCC(f_eff_2ways_2, method = "arellano"))
+SCC_a90 <- coeftest(f_eff_2ways_a90, vcov = vcovSCC(f_eff_2ways_a90, method = "arellano"))
 
 screenreg(list("<= 1990" = SCC_b90, "> 1990" = SCC_a90))
 
@@ -1469,7 +1469,7 @@ pbgtest(f_eff_2ways_b90)
 ### Test of Heterosedasticity
 
 ```{r #Test_for_heteroscedasticitys_b90}
-bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2, studentize=F)
+bptest(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data = Econ_data_v2_1, studentize=F)
 ```
 
 <br>
@@ -1527,7 +1527,7 @@ phtest(f_eff_a90, r_eff_a90)
 
 ```{r test_for_time_fixed_effect_a90}
 #Model with time-fixed effects.
-f_eff_time_a90 <-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within", effect = "time")
+f_eff_time_a90 <-plm(entrées~ Farm + Craf_sh_head + Ex_intel + Int_prof + Employees + Workers + Retirees + Ina, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within", effect = "time")
 
 #PLM test
 plmtest(f_eff_time_a90, effect="time", type="bp")
