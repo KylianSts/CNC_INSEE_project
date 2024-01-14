@@ -65,7 +65,7 @@ This project is mainly powered by two databases :
 
 The first database was created by the French National Center for Cinema and the Moving Image, most commonly known as CNC. The CNC is an agency of the French Ministry of Culture. Its role is to implement the state's policy on the question of cinema, audiovisual and multimedia. It is notably in charge of the regulation, promotion and distribution of French movies.
 
-In the execution of its mission, the French agency also collects data regarding its purview and proposes part of them in open access. The database "Exploitation - data by department" is one of the aforementioned open data. It is a statistical monitoring of the evolution of French movie theaters and their attendance between 1966 and 2022. Notably, it contains data on the number of venues, their characteristics - e.g. number of screens, seating capacity, ...; but also on the number of sold tickets and gained revenues. As its name indicates, French departments - according to their 2021 administrative division - are the statistical unit of the data. The CNC's data is constructed by using two primary sources :
+In the execution of its mission, the French agency also collects data regarding its purview and proposes part of them in open access. The database "Exploitation - data by department" is one of the aforementioned open data. It is a statistical monitoring of the evolution of French cinema theaters and their attendance between 1966 and 2022. Notably, it contains data on the number of venues, their characteristics (e.g. number of screens, seating capacity, ...); but also on the number of sold tickets and gained revenues. As its name indicates, French departments (according to their 2021 administrative division) are the statistical unit of the data. The CNC's data is constructed by using two primary sources :
 
 -   the **list of movie theaters** authorized by the agency
 
@@ -335,7 +335,7 @@ The cinema market experienced fast growth. According to Muhlberger (2013), in 19
 
 <br>
 
-The significance of cinema during this era may be underestimated by contemporary standards. However, the two senatorial rapporteurs explain that:
+The importance of cinema during this period maybe underestimated by our contemporary eyes. However, the two senatorial rapporteur explain that :
 
 "Until the advent of the 'petite lucarne' - i.e. television - in households, movie theater had a monopoly on the broadcasting of images. People frequented the theater, not to see a film, but rather to watch a program consisting of one or more short films, news, the trailer for the next film and, after the intermission and advertising, of the 'feature film'."
 
@@ -400,7 +400,7 @@ Av_Growth_rate_1966_1992 <- Attendance_nat %>%
   round(., digits=1)
 ```
 
-Our analytic journey starts in 1966, which is the first availabe year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992` % during the period). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance droped by `r abs(Growth_rate_1966_1969)` %. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)` % decrease.
+Our analytic journey starts in 1966, which is the first available year in our used database. The CNC's data shows that trend that was observed between 1957 and 1966 continued over the next 26 years. Indeed, between 1966 and 1992, attendance was halved (`r Growth_rate_1966_1992` % with an average growth rate of `r Av_Growth_rate_1966_1992`% during the period). The movie theater market experienced especially two periods of sharp decline. Firstly, from1966 to 1969 attendance dropped by `r abs(Growth_rate_1966_1969)`%. During this period, movie theaters witnessed 234 millions of entries in 1966 but only 183 millions in 1969. Similarly, in the decade spanning from1982 and 1992, attendance fell from 201 million to 115 million felt, representing a `r abs(Growth_rate_1982_1992)`% decrease.
 
 ```{r}
 #Graphic of the evolution of attendance in time
@@ -512,7 +512,7 @@ recette_nat_without_inf <-recettes_without_inflation %>%
 )
 ```
 
-Intriguingly, despite the observed drop in attendance, the movie of the movie theater industry increases from 1966 to 1982.
+Intriguingly, despite the observed drop in attendance, the revenue of the movie theater industry increases from 1966 to 1982.
 
 ```{r}
 Re_graph1 <- recette_nat %>% 
@@ -615,7 +615,6 @@ ggplotly(Se_Sc_graph1, dynamicTicks = TRUE) %>%
 
 <br>
 
-
 The contradictory trends in the number of seats and screens can be comprehended through a structural change in the movie theater market, as explained by Thiolliere and Ralite (2003). Before the late '60s, a significant portion of the movie theater market was dominated by single-screen theaters with a substantial number of seats. However, this changed in the second half of the 20th century. There was a transition from one-room movie theaters to halls with fewer seats but a plural number of screens.
 
 According to Thiolliere and Ralite, this structural shift was driven by the conversion of former one-room theaters into multi-screen setups, and newly constructed theaters adopted this multiroom model. The emergence of multi-screen theaters allowed the industry to enhance its exploitation capabilities, providing more choices for consumers. These new theaters outperformed their one-room predecessors, leading to the gradual disappearance of the latter.
@@ -661,7 +660,9 @@ Av_Growth_rate_1993_2019 <- Attendance_nat %>%
 
 In many movies, the hero often experiences a dramatic downfall, only to make a triumphant comeback. This classic storyline not only captivates audiences on the big screen but also mirrors the history of the movie theater industry. The 25-year period between 1993 and 2019 marks a notable resurgence for the market.
 
-Attendance surged from 130 million to surpass the symbolic milestone of 200 million. While this level remains lower than the peak observed during the "golden age," the upturn is significant. There was a growth of `r Growth_rate_1993_2019`% over the entire period, with an average annual growth rate of `r Growth_rate_1993_2019` % during the period and an average growth of `r Av_Growth_rate_1993_2019` %.
+Attendance surged from 130 million to surpass the symbolic milestone of 200 million. While this level remains lower than the peak observed during the "golden age," the upturn is significant. There was a growth of `r Growth_rate_1993_2019`% over the entire period, with an average annual growth rate of `r Growth_rate_1993_2019`% during the period and an average growth of `r Av_Growth_rate_1993_2019`%.
+
+However, it's crucial to acknowledge the impact of the COVID-19 crisis, which dealt a substantial blow to the industry. The aftermath of this crisis has left a lasting effect, and the industry is still on the path to recovery. Our analysis will not primarily focus on these years.
 
 ```{r}
 Att_graph3 <- Attendance_nat %>% 
@@ -720,7 +721,7 @@ tm_title_out(text ="Evolution of attendance by departement from 1993 to 2019 com
 tm_style("white")
 ```
 
-Numerous scientific papers and institutional reports agree that this revival is due to the development of multiplexes (Blanchard, 2014 ; CNC, 2013; Muhlberger, 2013; Thiolliere and Ralite, 2003). Theses structures would have reignited consumer interest in movie theaters. 
+Numerous scientific papers and institutional reports agree that this revival is due to the development of multiplexes (Blanchard, 2014 ; CNC, 2013; Muhlberger, 2013; Thiolliere and Ralite, 2003). Theses structures would have reignited consumer interest in movie theaters.
 
 <br>
 
@@ -835,7 +836,7 @@ Se_Growth_rate_1993_2022 <- Equip_nat %>%
   round(.,digits = 0)
 ```
 
-The number of seats has also experienced a resurgence. While this growth doesn't fully offset the historic decline witnessed in the second half of the 20th century, the increase is substantial compared to the levels observed in 1993. In total, the number of seats has grown by `r Se_diff_rate_1993_2022`  seats, reflecting a growth rate of `r Se_Growth_rate_1993_2022` %.
+The number of seats has also experienced a resurgence. While this growth doesn't fully offset the historic decline witnessed in the second half of the 20th century, the increase is substantial compared to the levels observed in 1993. In total, the number of seats has grown by `r Se_diff_rate_1993_2022` seats, reflecting a growth rate of `r Se_Growth_rate_1993_2022` %.
 
 ```{r}
 #Evolution of the number of Seats
@@ -862,6 +863,7 @@ ggplotly(Se_graph3, dynamicTicks = TRUE)
 
 <br>
 
+
 ```{r}
 seance_nat <- cnc_data_clean %>%
   group_by(year) %>%
@@ -884,7 +886,90 @@ Se_Sc_graph2 <- Equip_nat %>%
 ggplotly(Se_Sc_graph2, dynamicTicks = TRUE)
 ```
 
-Simultaneously, the number of screenings per movie theater more than doubled.
+An interesting observation is that the be diversity in the departmental trajectories exist also in the evolution of the number of seats. The plot below contains an index representing each department's evolution in the total national number of seats. Precisely, each year indicates the growth rate of their share in the total national level aggregate relatively to the observed level in 1966. In other words, it can be understood as a dynamic index of concentration. The graph indicates that France's north-east has seen a decline of its share over the last 60 years. On the other side, some departments in Ile-de-France and the south-east experienced a positive trend. It is also true, but to a lesser extent, for the west of the Hexagon.
+
+```{r}
+seats_dep <- cnc_data_clean %>%
+  group_by(departement_code, year) %>%
+  summarise(capacité_dep = sum(fauteuils))
+
+seats_fr <- Equip_nat %>%
+  select(year, Seats)
+
+seats_dep <- left_join(seats_dep, seats_fr, by= 'year') %>%
+  filter(year == 1968 | year == 1975 | year == 1982 | year == 1990 | year == 1999 | year == 2008 | year == 2013  | year == 2019) %>%
+  mutate(per_seats_dep = capacité_dep/Seats * 100)
+  
+base_year <- seats_dep %>%
+  group_by(departement_code) %>%
+  filter(year == 1968) %>%
+  select(per_seats_dep, departement_code) %>%
+  rename(base=per_seats_dep)
+
+seats_dep <- left_join(seats_dep, base_year, by = "departement_code") %>%
+  mutate(per_seats_dep_change = (per_seats_dep / base -1)*100)
+```
+
+```{r fig.width=10, fig.height=12}
+#we look at the temporal evolution of the share of the department's capacity compared to the national capacity to see where the "supply" is concentrated over time.
+map_data3 <- merge(france_shape, seats_dep, by = "departement_code")
+
+ggplot(map_data3, aes(fill = per_seats_dep_change)) +
+  geom_sf() +
+  scale_fill_viridis_c(option = "C") + 
+  labs(title = "Evolution of the relative concentration of the offer of seats by department in France", fill = "Growth rate") +
+  theme_classic() +
+  annotation_scale()+
+  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
+  facet_wrap(~year, ncol = 3)+
+  theme(legend.position = "bottom",
+        legend.title = element_text(hjust = 0.5))
+
+```
+<br>
+This heterogeneity seems partly linked to the evolution of population. comparable index, focusing on the population share, underscores a similar concentration for departments around Paris and in the southeast of France. Nevertheless, the decrease in the share of the North-East is more important in the seat index than to the population one.
+```{r}
+pop_dep <- insee_data_clean %>%
+  group_by(departement_code, year) %>%
+  summarise(population_dep = sum(POND2))
+
+pop_fr <- insee_data_clean %>%
+  group_by(year) %>%
+  summarise(population_fr = sum(POND2))
+
+pop_dep <- left_join(pop_dep,pop_fr, by= 'year') %>%
+  mutate(per_pop_dep = population_dep/population_fr * 100)
+
+base_year <- pop_dep %>%
+  group_by(departement_code) %>%
+  filter(year == 1968) %>%
+  select(per_pop_dep, departement_code) %>%
+  rename(base=per_pop_dep)
+
+pop_dep <- left_join(pop_dep, base_year, by = "departement_code") %>%
+  mutate(per_pop_dep_change = (per_pop_dep / base -1)*100)
+```
+
+```{r fig.width=10, fig.height=12}
+#We loot at the temporal evolution of each department's share in the population to identify where the population is concentrated over time.
+
+map_data4 <- merge(france_shape, pop_dep, by = "departement_code")
+
+ggplot(map_data4, aes(fill = per_pop_dep_change)) +
+  geom_sf() +
+  scale_fill_viridis_c(option = "C") + 
+  labs(title = "Evolution of the relative concentration of the population by department in France ", fill = "Growth rate") +
+  theme_classic() +
+  annotation_scale()+
+  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
+  facet_wrap(~year, ncol = 3)+
+  theme(legend.position = "bottom",
+        legend.title = element_text(hjust = 0.5))
+```
+
+
+<br>
+The number of screenings per movie theater more than doubled since 1992.
 
 ```{r}
 Seances_graph <- seance_nat %>%
@@ -962,6 +1047,7 @@ AE_graph2 <-Attendance_AE_nat %>%
 
 ggplotly(AE_graph2)
 ```
+
 ```{r}
 growth_revenue_2002_2019 <- calculate_growth_rate(recette_nat, 2002, 2019)
 
@@ -991,7 +1077,6 @@ Etablissement_AE <- cnc_data_clean %>%
             part_AE = nb_etablissement_AE/nb_etablissement*100)
 ```
 
-
 In 2021, arthouse cinema claimed a remarkable 63% of the French film market, showcasing a significant shift in audience preferences and the enduring popularity of these films. This success not only reinforces the cultural and artistic significance of arthouse productions but also positions them as dominant players in the French cinematic landscape.
 
 ```{r}
@@ -1005,89 +1090,8 @@ AE_graph4 <-  Etablissement_AE %>%
 ggplotly(AE_graph4)
 ```
 
-# Evolution of population in France and their impact on cinema industry
 
-## How population and offer of seats by department had evolved
-
-```{r}
-pop_dep <- insee_data_clean %>%
-  group_by(departement_code, year) %>%
-  summarise(population_dep = sum(POND2))
-
-pop_fr <- insee_data_clean %>%
-  group_by(year) %>%
-  summarise(population_fr = sum(POND2))
-
-pop_dep <- left_join(pop_dep,pop_fr, by= 'year') %>%
-  mutate(per_pop_dep = population_dep/population_fr * 100)
-
-base_year <- pop_dep %>%
-  group_by(departement_code) %>%
-  filter(year == 1968) %>%
-  select(per_pop_dep, departement_code) %>%
-  rename(base=per_pop_dep)
-
-pop_dep <- left_join(pop_dep, base_year, by = "departement_code") %>%
-  mutate(per_pop_dep_change = (per_pop_dep / base -1)*100)
-```
-
-```{r fig.width=10, fig.height=12}
-#We loot at the temporal evolution of each department's share in the population to identify where the population is concentrated over time.
-
-map_data3 <- merge(france_shape, pop_dep, by = "departement_code")
-
-ggplot(map_data3, aes(fill = per_pop_dep_change)) +
-  geom_sf() +
-  scale_fill_viridis_c(option = "C") + 
-  labs(title = "Evolution of the relative concentration of the population by department in France ", fill = "Evolution of the relative concentration of the population by department") +
-  theme_classic() +
-  annotation_scale()+
-  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  facet_wrap(~year, ncol = 3)+
-  theme(legend.position = "bottom",
-        legend.title = element_text(hjust = 0.5))
-```
-
-```{r}
-seats_dep <- cnc_data_clean %>%
-  group_by(departement_code, year) %>%
-  summarise(capacité_dep = sum(fauteuils))
-
-seats_fr <- Equip_nat %>%
-  select(year, Seats)
-
-seats_dep <- left_join(seats_dep, seats_fr, by= 'year') %>%
-  filter(year == 1968 | year == 1975 | year == 1982 | year == 1990 | year == 1999 | year == 2008 | year == 2013  | year == 2019) %>%
-  mutate(per_seats_dep = capacité_dep/Seats * 100)
-  
-base_year <- seats_dep %>%
-  group_by(departement_code) %>%
-  filter(year == 1968) %>%
-  select(per_seats_dep, departement_code) %>%
-  rename(base=per_seats_dep)
-
-seats_dep <- left_join(seats_dep, base_year, by = "departement_code") %>%
-  mutate(per_seats_dep_change = (per_seats_dep / base -1)*100)
-```
-
-```{r fig.width=10, fig.height=12}
-#we look at the temporal evolution of the share of the department's capacity compared to the national capacity to see where the "supply" is concentrated over time.
-map_data4 <- merge(france_shape, seats_dep, by = "departement_code")
-
-ggplot(map_data4, aes(fill = per_seats_dep_change)) +
-  geom_sf() +
-  scale_fill_viridis_c(option = "C") + 
-  labs(title = "Evolution of the relative concentration of the offer of seats by department in France", fill = "Evolution of the relative concentration of the offer of seats by department") +
-  theme_classic() +
-  annotation_scale()+
-  annotation_north_arrow(style = north_arrow_nautical, location = "tr", which_north = "true")+
-  facet_wrap(~year, ncol = 3)+
-  theme(legend.position = "bottom",
-        legend.title = element_text(hjust = 0.5))
-
-```
-
-## Explaining the diversity in the temporal evolution of attendance by department : an econometric analysis
+# Explaining the diversity in the temporal evolution of attendance by department : an econometric analysis
 
 In the preceding section, we explored the narrative shaped by the history of movie theaters. A pivotal aspect of this tale was the presence of heterogeneity in the trajectory that each departmental attendance followed. This final section aims is to study whether we can link this heterogeneity with the demographic features of the department and its evolution. Specifically, we will attempt to understand which sociodemographic characteristics had a positive or negative influence on the evolution of attendance over time.
 
@@ -1111,7 +1115,7 @@ This section is divided into two parts:
 
 2.  The second part discusses the obtained outcomes and emphasizes some limitations that our approach encounters.
 
-### Part 1 : Model and test
+## Part 1 : Model and test
 
 ```{r Creation_of_the_specific_database_for_the_econometrics_model}
 
@@ -1180,7 +1184,7 @@ The main part of our econometrics treatment were performed with the **plm** pack
 
 <br>
 
-#### Choice of the type of model
+### Choice of the type of model
 
 An early step consists to determine which kind of models suits the dataset. Three standards models are often used for panel data :
 
@@ -1220,7 +1224,7 @@ phtest(f_eff, r_eff)
 
 <br>
 
-#### Test for time-fixed effect
+### Test for time-fixed effect
 
 Having selected the fixed effect model, the next step was to identify whether the addition of time-fixed effects contribute to the improvement the model's quality.
 
@@ -1247,7 +1251,7 @@ f_eff_2ways <- plm(X_Y, data=Econ_data_v2, index=c("departement_code", "year"), 
 
 <br>
 
-#### Test for unit roots
+### Test for unit roots
 
 The augmented Dickey-Fuller test enables us to check for unit roots. Its results suggest the presence of stationarity in our data.
 
@@ -1259,7 +1263,7 @@ adf.test(Econ_data_v2$entrées, k=2)
 
 <br>
 
-#### Test for serial correlation
+### Test for serial correlation
 
 Our panel data faces several issues. Firstly, our model suffers from serial correlation. The Breusch-Godfrey/Wooldridge test indicates a p-value below the significance level of 0.05. To address this issue, both Altaf and Torres-Reyna recommend the utilization of Arellano's technique.
 
@@ -1269,7 +1273,7 @@ pbgtest(f_eff_2ways)
 
 <br>
 
-#### Test of Heterosedasticity
+### Test of Heterosedasticity
 
 The second challenge in our econometrics analysis was the presence of heteroscedasticity in the model.
 
@@ -1281,7 +1285,7 @@ bptest(as.formula(X_Y), data = Econ_data_v2, studentize=F)
 
 <br>
 
-#### Test for cross-sectional dependence
+### Test for cross-sectional dependence
 
 A final issue was the presence of cross-sectional dependence as we can see on the Breusch-Pagan and Pesaran tests below.
 
@@ -1297,7 +1301,7 @@ Altaf proposes the utilization of the Beck and Katz method as a solution to tack
 
 <br>
 
-#### Temporal division
+### Temporal division
 
 One of our concerns was how the model would react to the shift in attendance trend. As we saw, the decades preceding 1993 are a period of sharp decline, but the opposite is true after this threshold. Unfortunately, we currently lack the techniques to resolve this issue. However, we tried to have an alternative solution to take into account this issue. Our approach was to add in our analysis two models similar to the main one :
 
@@ -1321,7 +1325,7 @@ f_eff_2ways_a90 <- plm(X_Y, data=Econ_data_v2_2, index=c("departement_code", "ye
 
 <br>
 
-#### Additional test : Bayesan Information Criterion
+### Additional test : Bayesan Information Criterion
 
 During our research phase, another test plays a crucial role: the Bayesian Information Criterion. It holds significant importance in the selection of the final model among the various draft models that were not retained in the analysis. We utilized the formula presented in Yum's paper (2021) on information criterion analysis for model selection in panel data models with fixed effects.
 
@@ -1365,7 +1369,7 @@ print(bic_value)
 
 <br>
 
-#### Multicolinearity analysis
+### Multicolinearity analysis
 
 To conclude, VIF test show that our model is marked by multicolinearity. Among the model that we tested during our draft work (models with age range, models with various combination of age range, type of activity and CSP), the model using solely CSP seems to be the one where this problem were the least acute. Using instrumental variable
 
@@ -1377,7 +1381,7 @@ vif(mvif)
 
 <br>
 
-### Part 2 - Discussion The initial regression, performed before implementing the Beck and Katz correction method, provided the results below.
+## Part 2 - Discussion The initial regression, performed before implementing the Beck and Katz correction method, provided the results below.
 
 ```{r Outcome_before_correction}
 summary(f_eff_2ways)
@@ -1417,190 +1421,6 @@ These outcomes advocate for the realization of complementary studies. Some of th
 In conclusion, given the limitations of our models, it is not feasible to draw definitive conclusions. Nevertheless, some of the model results align with elements observed in previous surveys and senatorial reports, notably regarding the impact of workers but also pupils and students population on cinema attendance. The idea that the diversity observed in the evolution of attendance in French departments is linked to the dynamics of these populations emerges as a strong hypothesis. Moreover, this work highlights the potential of the cinema market as an intriguing subject of analysis for econometricians, offering opportunities for further explorations.
 
 <br>
-
-# Annex
-
-## Annex 1 ...
-
-## Annex 2 - Test on the CSP models for the year before 1990
-
-<center>**\\1990 and before**</center>
-
-```{r Dataset_for_the_model_b90}
-Econ_data_v2_1<- Econ_data_v2 %>% filter(year <= 1990)
-```
-
-### Test between OLS and Fixed Effect model
-
-```{r Test_between_fixed_effect_and_OLS_b90}
-
-#OLS Model
-ols_b90 <- plm(X_Y, data=Econ_data_v2_1, index=c("departement_code", "year"), model="pooling")
-
-#Fixed effect model
-f_eff_b90 <-plm(X_Y, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within")
-
-# F Test for Individual and/or Time Effects test
-pFtest(f_eff_b90, ols_b90)
-```
-
-### Test between Fixed and Random Model
-
-```{r Test_between_fixed_and_random_effect_b90}
-#Random effect model
-r_eff_b90 <-plm(X_Y, data=Econ_data_v2_1, index=c("departement_code", "year"), model="random") 
-
-
-#Haussman test to determine between fixed and random effect
-phtest(f_eff_b90, r_eff_b90)
-```
-
-<br>
-
-### Tests for time-fixed effect
-
-```{r test_for_time_fixed_effect_b90}
-#Model with time-fixed effects.
-f_eff_time_b90 <-plm(X_Y, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within", effect = "time")
-
-#PLM test
-plmtest(f_eff_time_b90, effect="time", type="bp")
-plmtest(f_eff_time_b90, effect="time", type="honda")
-```
-
-```{r}
-f_eff_2ways_b90 <- plm(X_Y, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within",effect = "twoways")
-```
-
-<br>
-
-### Test for unit roots
-
-```{r Test_for_unit_roots_b90}
-Panel.set<- pdata.frame(Econ_data_v2_1, index = c("departement_code", "year")) 
-
-adf.test(Econ_data_v2_1$entrées, k=2)
-```
-
-<br>
-
-### Test for serial correlation
-
-```{r Test_for_serial_correlations_b90}
-pbgtest(f_eff_2ways_b90)
-```
-
-<br>
-
-### Test of Heterosedasticity
-
-```{r #Test_for_heteroscedasticitys_b90}
-bptest(as.formula(X_Y), data = Econ_data_v2_1, studentize=F)
-```
-
-<br>
-
-### Test for cross-sectional dependence
-
-```{r Test_for_cross_sectional_dependences_b90}
-#Breusch-Pagan LM test for cross-sectional dependence
-pcdtest(f_eff_b90, test = c("lm"))
-
-#Pesaran test for cross-sectional dependence
-pcdtest(f_eff_b90, test = c("cd"))
-```
-
-<br>
-
-### Annex 3 - Test on the CSP models for the year after 1990
-
-<center>**Striclty after (1990)**</center>
-
-```{r Dataset_for_the_model_a80}
-Econ_data_v2_2<- Econ_data_v2 %>% filter(year > 1990)
-```
-
-### Test between OLS and Fixed Effect
-
-```{r Test_between_fixed_effect_and_OLS_a90}
-
-# OLS Model
-ols_a90 <- plm(X_Y, data=Econ_data_v2_2, index=c("departement_code", "year"), model="pooling")
-
-#Fixed effect model
-f_eff_a90 <-plm(X_Y, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within")
-
-# F Test for Individual and/or Time Effects test
-pFtest(f_eff_a90, ols_a90)
-```
-
-<br>
-
-### Test between Fixed and Random effect model
-
-```{r Test_between_fixed_and_random_effect_a90}
-#Random effect model
-r_eff_a90 <-plm(X_Y, data=Econ_data_v2_2, index=c("departement_code", "year"), model="random") 
-
-
-#Haussman test to determine between fixed and random effect
-phtest(f_eff_a90, r_eff_a90)
-```
-
-<br>
-
-### Test for time-fixed effect
-
-```{r test_for_time_fixed_effect_a90}
-#Model with time-fixed effects.
-f_eff_time_a90 <-plm(X_Y, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within", effect = "time")
-
-#PLM test
-plmtest(f_eff_time_a90, effect="time", type="bp")
-plmtest(f_eff_time_a90, effect="time", type="honda")
-```
-
-```{r two_ways_model__specification_a90_annex}
-f_eff_2ways_a90 <- plm(X_Y, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within",effect = "twoways")
-```
-
-<br>
-
-### Test for unit roots
-
-```{r Test_for_unit_roots_a90}
-Panel.set<- pdata.frame(Econ_data_v2_2, index = c("departement_code", "year")) 
-
-adf.test(Econ_data_v2_2$entrées, k=2)
-```
-
-<br>
-
-### Test for serial correlation
-
-```{r Test_for_serial_correlation_a90}
-pbgtest(f_eff_2ways_a90)
-```
-
-<br>
-
-### Test of Heterosedasticity
-
-```{r Test_for_heteroscedasticity_a90}
-bptest(as.formula(X_Y), data = Econ_data_v2_2, studentize=F)
-```
-
-<br>
-
-### Test for cross-sectional dependence
-
-```{r Test_for_cross_sectional_dependence_a90}
-#Breusch-Pagan LM test for cross-sectional dependence
-pcdtest(f_eff_a90, test = c("lm"))
-
-#Pesaran test for cross-sectional dependence
-pcdtest(f_eff_a90, test = c("cd"))
-```
 
 <br>
 
@@ -1725,3 +1545,189 @@ URL : [https://medium.com/\@manilwagle/how-to-deal-with-panel-data-practical-app
 **YUM** **Minchul , 2022.** Model selection for panel data models with fixed effects: a simulation study, *Applied Economics Letters*, 29:19, p. 1776-1783
 
 DOI: [10.1080/13504851.2021.1962505](https://doi.org/10.1080/13504851.2021.1962505)
+
+<br>
+
+<br>
+
+# Annex
+
+## Annex -1 Test on the CSP models for the year before 1990
+
+<center>**\\1990 and before**</center>
+
+```{r Dataset_for_the_model_b90}
+Econ_data_v2_1<- Econ_data_v2 %>% filter(year <= 1990)
+```
+
+### Test between OLS and Fixed Effect model
+
+```{r Test_between_fixed_effect_and_OLS_b90}
+
+#OLS Model
+ols_b90 <- plm(X_Y, data=Econ_data_v2_1, index=c("departement_code", "year"), model="pooling")
+
+#Fixed effect model
+f_eff_b90 <-plm(X_Y, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within")
+
+# F Test for Individual and/or Time Effects test
+pFtest(f_eff_b90, ols_b90)
+```
+
+### Test between Fixed and Random Model
+
+```{r Test_between_fixed_and_random_effect_b90}
+#Random effect model
+r_eff_b90 <-plm(X_Y, data=Econ_data_v2_1, index=c("departement_code", "year"), model="random") 
+
+
+#Haussman test to determine between fixed and random effect
+phtest(f_eff_b90, r_eff_b90)
+```
+
+<br>
+
+### Tests for time-fixed effect
+
+```{r test_for_time_fixed_effect_b90}
+#Model with time-fixed effects.
+f_eff_time_b90 <-plm(X_Y, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within", effect = "time")
+
+#PLM test
+plmtest(f_eff_time_b90, effect="time", type="bp")
+plmtest(f_eff_time_b90, effect="time", type="honda")
+```
+
+```{r}
+f_eff_2ways_b90 <- plm(X_Y, data=Econ_data_v2_1, index=c("departement_code", "year"), model="within",effect = "twoways")
+```
+
+<br>
+
+### Test for unit roots
+
+```{r Test_for_unit_roots_b90}
+Panel.set<- pdata.frame(Econ_data_v2_1, index = c("departement_code", "year")) 
+
+adf.test(Econ_data_v2_1$entrées, k=2)
+```
+
+<br>
+
+### Test for serial correlation
+
+```{r Test_for_serial_correlations_b90}
+pbgtest(f_eff_2ways_b90)
+```
+
+<br>
+
+### Test of Heterosedasticity
+
+```{r #Test_for_heteroscedasticitys_b90}
+bptest(as.formula(X_Y), data = Econ_data_v2_1, studentize=F)
+```
+
+<br>
+
+### Test for cross-sectional dependence
+
+```{r Test_for_cross_sectional_dependences_b90}
+#Breusch-Pagan LM test for cross-sectional dependence
+pcdtest(f_eff_b90, test = c("lm"))
+
+#Pesaran test for cross-sectional dependence
+pcdtest(f_eff_b90, test = c("cd"))
+```
+
+<br>
+
+### Annex 2 - Test on the CSP models for the year after 1990
+
+<center>**Striclty after (1990)**</center>
+
+```{r Dataset_for_the_model_a80}
+Econ_data_v2_2<- Econ_data_v2 %>% filter(year > 1990)
+```
+
+### Test between OLS and Fixed Effect
+
+```{r Test_between_fixed_effect_and_OLS_a90}
+
+# OLS Model
+ols_a90 <- plm(X_Y, data=Econ_data_v2_2, index=c("departement_code", "year"), model="pooling")
+
+#Fixed effect model
+f_eff_a90 <-plm(X_Y, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within")
+
+# F Test for Individual and/or Time Effects test
+pFtest(f_eff_a90, ols_a90)
+```
+
+<br>
+
+### Test between Fixed and Random effect model
+
+```{r Test_between_fixed_and_random_effect_a90}
+#Random effect model
+r_eff_a90 <-plm(X_Y, data=Econ_data_v2_2, index=c("departement_code", "year"), model="random") 
+
+
+#Haussman test to determine between fixed and random effect
+phtest(f_eff_a90, r_eff_a90)
+```
+
+<br>
+
+### Test for time-fixed effect
+
+```{r test_for_time_fixed_effect_a90}
+#Model with time-fixed effects.
+f_eff_time_a90 <-plm(X_Y, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within", effect = "time")
+
+#PLM test
+plmtest(f_eff_time_a90, effect="time", type="bp")
+plmtest(f_eff_time_a90, effect="time", type="honda")
+```
+
+```{r two_ways_model__specification_a90_annex}
+f_eff_2ways_a90 <- plm(X_Y, data=Econ_data_v2_2, index=c("departement_code", "year"), model="within",effect = "twoways")
+```
+
+<br>
+
+### Test for unit roots
+
+```{r Test_for_unit_roots_a90}
+Panel.set<- pdata.frame(Econ_data_v2_2, index = c("departement_code", "year")) 
+
+adf.test(Econ_data_v2_2$entrées, k=2)
+```
+
+<br>
+
+### Test for serial correlation
+
+```{r Test_for_serial_correlation_a90}
+pbgtest(f_eff_2ways_a90)
+```
+
+<br>
+
+### Test of Heterosedasticity
+
+```{r Test_for_heteroscedasticity_a90}
+bptest(as.formula(X_Y), data = Econ_data_v2_2, studentize=F)
+```
+
+<br>
+
+### Test for cross-sectional dependence
+
+```{r Test_for_cross_sectional_dependence_a90}
+#Breusch-Pagan LM test for cross-sectional dependence
+pcdtest(f_eff_a90, test = c("lm"))
+
+#Pesaran test for cross-sectional dependence
+pcdtest(f_eff_a90, test = c("cd"))
+```
